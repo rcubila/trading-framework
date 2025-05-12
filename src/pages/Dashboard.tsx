@@ -163,6 +163,8 @@ const metrics = [
       'Winning Trades': '81',
       'Losing Trades': '44',
       'Break Even': '0',
+      'Win Streak': '7 trades',
+      'Longest Win Streak': '12 trades'
     }
   },
   {
@@ -177,6 +179,8 @@ const metrics = [
       'Gross Loss': '$5,950',
       'Average RRR': '1.8',
       'Best Trade': '$1,200',
+      'Expected Value': '$145/trade',
+      'Risk-Adjusted Return': '18.5%'
     }
   },
   {
@@ -191,6 +195,8 @@ const metrics = [
       'Average Win': '$450',
       'Win Consistency': '72%',
       'Best Day': '$2,100',
+      'Profit Distribution': 'Normal',
+      'Standard Deviation': '$180'
     }
   },
   {
@@ -205,8 +211,74 @@ const metrics = [
       'Average Loss': '-$200',
       'Loss Recovery': '85%',
       'Worst Day': '-$1,500',
+      'Max Drawdown': '-12%',
+      'Recovery Factor': '2.3'
     }
   },
+  {
+    name: 'Sharpe Ratio',
+    value: '1.8',
+    change: '+0.2',
+    isPositive: true,
+    icon: RiLineChartLine,
+    description: 'Risk-adjusted return',
+    details: {
+      'Risk-free Rate': '4.5%',
+      'Portfolio Return': '22%',
+      'Volatility': '15%',
+      'Information Ratio': '1.2',
+      'Sortino Ratio': '2.1',
+      'Beta': '0.85'
+    }
+  },
+  {
+    name: 'Max Drawdown',
+    value: '-12%',
+    change: '+3%',
+    isPositive: true,
+    icon: RiArrowDownLine,
+    description: 'Peak to trough',
+    details: {
+      'Duration': '15 days',
+      'Recovery Time': '28 days',
+      'Peak Value': '$18,500',
+      'Trough Value': '$16,280',
+      'Recovery High': '$19,200',
+      'Drawdown Frequency': '3/month'
+    }
+  },
+  {
+    name: 'Trading Volume',
+    value: '$125K',
+    change: '+15K',
+    isPositive: true,
+    icon: RiBarChartLine,
+    description: 'Monthly volume',
+    details: {
+      'Average Position': '$2,500',
+      'Largest Position': '$5,000',
+      'Total Trades Value': '$125,000',
+      'Average Daily Volume': '$4,167',
+      'Volume Trend': 'Increasing',
+      'Risk per Trade': '1.5%'
+    }
+  },
+  {
+    name: 'Time Analysis',
+    value: '68%',
+    change: '+8%',
+    isPositive: true,
+    icon: RiTimeLine,
+    description: 'Time in market',
+    details: {
+      'Average Hold Time': '2.5 days',
+      'Best Trading Hour': '10:00 AM',
+      'Market Correlation': '0.65',
+      'Time Efficiency': '72%',
+      'Overnight Holds': '35%',
+      'Weekend Exposure': '15%'
+    }
+  }
 ];
 
 const recentTrades = [
@@ -333,8 +405,8 @@ export const Dashboard = () => {
       {/* Metrics Grid */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-        gap: '16px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+        gap: '20px',
         marginBottom: '24px' 
       }}>
         {metrics.map((metric) => (
