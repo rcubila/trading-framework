@@ -13,6 +13,7 @@ import {
   RiHistoryLine,
   RiAlertLine,
 } from 'react-icons/ri';
+import { StrategyModal } from '../components/StrategyModal';
 
 interface Strategy {
   id: string;
@@ -116,6 +117,53 @@ export const Strategy = () => {
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
   const [showStrategyModal, setShowStrategyModal] = useState(false);
 
+  const handleSaveStrategy = (strategyData: Partial<Strategy>) => {
+    if (selectedStrategy) {
+      // Edit existing strategy
+      setStrategies(prev => prev.map(strategy => 
+        strategy.id === selectedStrategy.id 
+          ? { ...strategy, ...strategyData }
+          : strategy
+      ));
+    } else {
+      // Create new strategy
+      const newStrategy: Strategy = {
+        ...strategyData,
+        id: Date.now().toString(),
+        performance: {
+          winRate: '0%',
+          profitFactor: '0',
+          sharpeRatio: '0',
+          maxDrawdown: '0%',
+        },
+      } as Strategy;
+      setStrategies(prev => [...prev, newStrategy]);
+    }
+    setShowStrategyModal(false);
+    setSelectedStrategy(null);
+  };
+
+  const handleEditStrategy = (strategy: Strategy) => {
+    setSelectedStrategy(strategy);
+    setShowStrategyModal(true);
+  };
+
+  const handleDeleteStrategy = (strategyId: string) => {
+    setStrategies(prev => prev.filter(strategy => strategy.id !== strategyId));
+  };
+
+  const handleToggleStatus = (strategy: Strategy) => {
+    setStrategies(prev => prev.map(s => {
+      if (s.id === strategy.id) {
+        return {
+          ...s,
+          status: s.status === 'active' ? 'paused' : 'active',
+        };
+      }
+      return s;
+    }));
+  };
+
   return (
     <div style={{ padding: '24px', color: 'white' }}>
       {/* Header */}
@@ -133,7 +181,10 @@ export const Strategy = () => {
           </p>
         </div>
         <button
-          onClick={() => setShowStrategyModal(true)}
+          onClick={() => {
+            setSelectedStrategy(null);
+            setShowStrategyModal(true);
+          }}
           style={{ 
             backgroundColor: '#2563eb',
             color: 'white',
@@ -170,7 +221,6 @@ export const Strategy = () => {
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
-            onClick={() => setSelectedStrategy(strategy)}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div>
@@ -241,40 +291,49 @@ export const Strategy = () => {
             </div>
 
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <button style={{
-                padding: '8px',
-                borderRadius: '6px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: 'none',
-                color: '#94a3b8',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-              }}>
+              <button 
+                onClick={() => handleEditStrategy(strategy)}
+                style={{
+                  padding: '8px',
+                  borderRadius: '6px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
                 <RiEditLine />
               </button>
-              <button style={{
-                padding: '8px',
-                borderRadius: '6px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: 'none',
-                color: '#94a3b8',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-              }}>
+              <button 
+                onClick={() => handleToggleStatus(strategy)}
+                style={{
+                  padding: '8px',
+                  borderRadius: '6px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
                 {strategy.status === 'active' ? <RiPauseLine /> : <RiPlayLine />}
               </button>
-              <button style={{
-                padding: '8px',
-                borderRadius: '6px',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                border: 'none',
-                color: '#ef4444',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-              }}>
+              <button 
+                onClick={() => handleDeleteStrategy(strategy.id)}
+                style={{
+                  padding: '8px',
+                  borderRadius: '6px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  border: 'none',
+                  color: '#ef4444',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
                 <RiDeleteBinLine />
               </button>
             </div>
@@ -315,6 +374,17 @@ export const Strategy = () => {
           </button>
         ))}
       </div>
+
+      {/* Strategy Modal */}
+      <StrategyModal
+        isOpen={showStrategyModal}
+        onClose={() => {
+          setShowStrategyModal(false);
+          setSelectedStrategy(null);
+        }}
+        onSave={handleSaveStrategy}
+        strategy={selectedStrategy || undefined}
+      />
     </div>
   );
 }; 
