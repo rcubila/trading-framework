@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Strategy } from './pages/Strategy';
+import Login from './pages/Login';
 
 // Placeholder components for other routes
 const Trades = () => <div style={{ color: 'white' }}>Trades Page</div>;
@@ -11,17 +12,18 @@ const ImportTrades = () => <div style={{ color: 'white' }}>Import Trades Page</d
 
 function App() {
   return (
-    <Router>
-      <MainLayout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/trades" element={<Trades />} />
-          <Route path="/journal" element={<Journal />} />
-          <Route path="/strategy" element={<Strategy />} />
-          <Route path="/discipline" element={<DisciplineTracker />} />
-          <Route path="/import" element={<ImportTrades />} />
-        </Routes>
-      </MainLayout>
+    <Router basename="/trading-framework">
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="strategy" element={<Strategy />} />
+          <Route path="trades" element={<Trades />} />
+          <Route path="journal" element={<Journal />} />
+          <Route path="discipline" element={<DisciplineTracker />} />
+          <Route path="import" element={<ImportTrades />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }

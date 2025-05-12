@@ -1,5 +1,4 @@
-import type { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 import { 
   RiDashboardLine, 
   RiExchangeLine, 
@@ -18,7 +17,7 @@ const navigation = [
   { name: 'Import Trades', icon: RiDownloadLine, path: '/import' },
 ];
 
-export const MainLayout = ({ children }: { children: ReactNode }) => {
+export const MainLayout = () => {
   const location = useLocation();
   
   return (
@@ -62,7 +61,7 @@ export const MainLayout = ({ children }: { children: ReactNode }) => {
         </nav>
       </aside>
       <main style={{ flex: 1, backgroundColor: '#111', padding: '20px' }}>
-        {children}
+        <Outlet />
       </main>
     </div>
   );
