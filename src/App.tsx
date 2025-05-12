@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
+import { Strategy } from './pages/Strategy';
 
 // Placeholder components for other routes
 const Trades = () => <div style={{ color: 'white' }}>Trades Page</div>;
 const Journal = () => <div style={{ color: 'white' }}>Journal Page</div>;
-const Strategy = () => <div style={{ color: 'white' }}>Strategy Page</div>;
 const DisciplineTracker = () => <div style={{ color: 'white' }}>Discipline Tracker Page</div>;
 const ImportTrades = () => <div style={{ color: 'white' }}>Import Trades Page</div>;
 
