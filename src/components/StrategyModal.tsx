@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { RiCloseLine, RiAddLine, RiDeleteBinLine } from 'react-icons/ri';
+import type { KeyboardEvent } from 'react';
+import { RiCloseLine, RiAddLine, RiDeleteBinLine, RiCloseFill } from 'react-icons/ri';
 
 interface StrategyModalProps {
   isOpen: boolean;
@@ -33,13 +34,19 @@ interface Strategy {
 }
 
 const timeframeOptions = ['1m', '5m', '15m', '30m', '1H', '4H', '1D', '1W'];
-const instrumentOptions = ['EURUSD', 'GBPUSD', 'USDJPY', 'BTCUSDT', 'ETHUSDT', 'AAPL', 'MSFT', 'TSLA'];
 
 export const StrategyModal = ({ isOpen, onClose, onSave, strategy }: StrategyModalProps) => {
-  const [formData, setFormData] = useState<Partial<Strategy>>({
+  const [formData, setFormData] = useState<Strategy>({
+    id: '',
     name: '',
     type: 'hybrid',
     status: 'testing',
+    performance: {
+      winRate: '0%',
+      profitFactor: '0',
+      sharpeRatio: '0',
+      maxDrawdown: '0%',
+    },
     settings: {
       timeframe: '1H',
       instruments: [],
@@ -52,6 +59,7 @@ export const StrategyModal = ({ isOpen, onClose, onSave, strategy }: StrategyMod
       riskManagement: [''],
     },
   });
+  const [newInstrument, setNewInstrument] = useState('');
 
   useEffect(() => {
     if (strategy) {
@@ -104,6 +112,23 @@ export const StrategyModal = ({ isOpen, onClose, onSave, strategy }: StrategyMod
         [type]: prev.conditions?.[type].filter((_, i) => i !== index),
       },
     }));
+  };
+
+  const handleAddInstrument = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && newInstrument.trim()) {
+      const instrument = newInstrument.trim().toUpperCase();
+      if (!formData.settings?.instruments.includes(instrument)) {
+        handleSettingsChange('instruments', [...(formData.settings?.instruments || []), instrument]);
+      }
+      setNewInstrument('');
+    }
+  };
+
+  const handleRemoveInstrument = (instrumentToRemove: string) => {
+    handleSettingsChange(
+      'instruments',
+      formData.settings?.instruments.filter(instrument => instrument !== instrumentToRemove)
+    );
   };
 
   if (!isOpen) return null;
@@ -258,26 +283,102 @@ export const StrategyModal = ({ isOpen, onClose, onSave, strategy }: StrategyMod
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '4px', color: '#94a3b8' }}>Instruments</label>
-                <select
-                  multiple
-                  value={formData.settings?.instruments}
-                  onChange={(e) => handleSettingsChange('instruments', 
-                    Array.from(e.target.selectedOptions, option => option.value)
-                  )}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    backgroundColor: '#0f172a',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '6px',
-                    color: 'white',
-                    height: '100px',
-                  }}
-                >
-                  {instrumentOptions.map((instrument) => (
-                    <option key={instrument} value={instrument}>{instrument}</option>
-                  ))}
-                </select>
+                <div style={{ 
+                  backgroundColor: '#0f172a',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '6px',
+                  padding: '8px',
+                  minHeight: '100px',
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    flexWrap: 'wrap', 
+                    gap: '8px',
+                    marginBottom: '8px'
+                  }}>
+                    {formData.settings?.instruments.map((instrument) => (
+                      <div
+                        key={instrument}
+                        style={{
+                          backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                          border: '1px solid rgba(37, 99, 235, 0.2)',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <span>{instrument}</span>
+                        <button
+                          onClick={() => handleRemoveInstrument(instrument)}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            padding: '0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <RiCloseFill size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    value={newInstrument}
+                    onChange={(e) => setNewInstrument(e.target.value)}
+                    onKeyDown={handleAddInstrument}
+                    placeholder="Type asset name and press Enter (e.g., DAX40, XAUUSD, SPX500)"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      color: 'white',
+                      outline: 'none',
+                    }}
+                  />
+                  <div style={{ 
+                    marginTop: '8px',
+                    fontSize: '12px',
+                    color: '#64748b',
+                  }}>
+                    Popular: 
+                    {['DAX40', 'XAUUSD', 'SPX500', 'NAS100', 'DJI30'].map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        onClick={() => {
+                          if (!formData.settings?.instruments.includes(suggestion)) {
+                            handleSettingsChange('instruments', [...(formData.settings?.instruments || []), suggestion]);
+                          }
+                        }}
+                        style={{
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: '#2563eb',
+                          cursor: 'pointer',
+                          padding: '2px 4px',
+                          marginLeft: '4px',
+                          fontSize: '12px',
+                        }}
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <p style={{ 
+                  fontSize: '12px', 
+                  color: '#64748b',
+                  marginTop: '4px' 
+                }}>
+                  Press Enter to add an instrument. You can add any trading instrument you want.
+                </p>
               </div>
             </div>
           </div>
