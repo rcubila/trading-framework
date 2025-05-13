@@ -1,16 +1,40 @@
 import { useState } from 'react';
-import { FiMail, FiLock, FiGithub, FiArrowRight } from 'react-icons/fi';
+import { FiMail, FiLock, FiGithub } from 'react-icons/fi';
 import { SiBlockchaindotcom } from 'react-icons/si';
+import { FcGoogle } from 'react-icons/fc';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const { signInWithGoogle, error, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempt:', { email, password });
+    try {
+      await login(email, password);
+      // Get the redirect path from location state or default to '/'
+      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
+      navigate(from);
+    } catch (err) {
+      // Error is handled by the auth context
+      console.error('Login failed:', err);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      console.log('Starting Google login...');
+      await signInWithGoogle();
+      console.log('Google login initiated successfully');
+    } catch (err) {
+      console.error('Google login failed:', err);
+    }
   };
 
   return (
@@ -35,6 +59,12 @@ const Login = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="bg-gray-800 rounded-xl shadow-2xl p-8"
         >
+          {error && (
+            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Input */}
             <div>
@@ -50,6 +80,7 @@ const Login = () => {
                   className="w-full bg-gray-700 text-white rounded-lg pl-10 pr-4 py-3 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                   placeholder="Enter your email"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -68,6 +99,7 @@ const Login = () => {
                   className="w-full bg-gray-700 text-white rounded-lg pl-10 pr-4 py-3 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                   placeholder="Enter your password"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -75,7 +107,13 @@ const Login = () => {
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center text-gray-400">
-                <input type="checkbox" className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500 mr-2" />
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500 mr-2"
+                  disabled={loading}
+                />
                 Remember me
               </label>
               <a href="#" className="text-blue-500 hover:text-blue-400 transition-colors">
@@ -86,10 +124,16 @@ const Login = () => {
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-3 flex items-center justify-center space-x-2 transition-colors"
+              disabled={loading}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-3 flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>Sign In</span>
-              <FiArrowRight />
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                </>
+              )}
             </button>
 
             {/* Divider */}
@@ -102,13 +146,24 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Social Login */}
+            {/* Google Login Button */}
+            <button
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              className="w-full bg-white hover:bg-gray-100 text-gray-800 rounded-lg py-3 flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FcGoogle className="w-5 h-5" />
+              <span>Continue with Google</span>
+            </button>
+
+            {/* GitHub Login Button */}
             <button
               type="button"
-              className="w-full bg-gray-700 hover:bg-gray-600 text-white rounded-lg py-3 flex items-center justify-center space-x-2 transition-colors"
+              disabled={loading}
+              className="w-full bg-gray-700 hover:bg-gray-600 text-white rounded-lg py-3 flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FiGithub className="w-5 h-5" />
-              <span>GitHub</span>
+              <span>Continue with GitHub</span>
             </button>
           </form>
 
