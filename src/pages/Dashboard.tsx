@@ -31,6 +31,8 @@ import {
   RiDownload2Line,
   RiRefreshLine
 } from 'react-icons/ri';
+import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
 
 ChartJS.register(
   CategoryScale,
@@ -59,10 +61,17 @@ const performanceData = {
     {
       label: 'Account Balance',
       data: [10000, 12000, 11500, 13000, 14500, 16000],
-      borderColor: '#2563eb',
-      backgroundColor: 'rgba(37, 99, 235, 0.1)',
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59, 130, 246, 0.1)',
       fill: true,
       tension: 0.4,
+      borderWidth: 2,
+      pointBackgroundColor: '#3b82f6',
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: '#3b82f6',
+      pointRadius: 4,
+      pointHoverRadius: 6,
     },
   ],
 };
@@ -71,8 +80,10 @@ const profitDistributionData = {
   labels: ['Wins', 'Losses'],
   datasets: [{
     data: [65, 35],
-    backgroundColor: ['#22c55e', '#ef4444'],
-    borderWidth: 0,
+    backgroundColor: ['rgba(34, 197, 94, 0.8)', 'rgba(239, 68, 68, 0.8)'],
+    borderColor: ['#22c55e', '#ef4444'],
+    borderWidth: 2,
+    hoverOffset: 4,
   }]
 };
 
@@ -84,6 +95,7 @@ const tradeTypeData = {
     backgroundColor: ['rgba(34, 197, 94, 0.2)', 'rgba(239, 68, 68, 0.2)'],
     borderColor: ['#22c55e', '#ef4444'],
     borderWidth: 2,
+    hoverOffset: 4,
   }]
 };
 
@@ -99,13 +111,14 @@ const chartOptions = {
       display: false,
     },
     tooltip: {
-      backgroundColor: 'rgba(17, 24, 39, 0.9)',
+      backgroundColor: 'rgba(15, 23, 42, 0.95)',
       titleColor: '#fff',
       bodyColor: '#fff',
       padding: 12,
       borderColor: 'rgba(255, 255, 255, 0.1)',
       borderWidth: 1,
       displayColors: false,
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
       callbacks: {
         label: (context: any) => `$${context.parsed.y.toLocaleString()}`,
       },
@@ -115,17 +128,33 @@ const chartOptions = {
     y: {
       grid: {
         color: 'rgba(255, 255, 255, 0.05)',
+        drawBorder: false,
       },
       ticks: {
-        color: '#94a3b8',
+        color: 'rgba(255, 255, 255, 0.6)',
+        font: {
+          size: 12,
+        },
+        padding: 8,
+      },
+      border: {
+        display: false,
       },
     },
     x: {
       grid: {
         color: 'rgba(255, 255, 255, 0.05)',
+        drawBorder: false,
       },
       ticks: {
-        color: '#94a3b8',
+        color: 'rgba(255, 255, 255, 0.6)',
+        font: {
+          size: 12,
+        },
+        padding: 8,
+      },
+      border: {
+        display: false,
       },
     },
   },
@@ -139,33 +168,45 @@ const doughnutOptions = {
       display: true,
       position: 'bottom' as const,
       labels: {
-        color: '#94a3b8',
+        color: 'rgba(255, 255, 255, 0.6)',
         padding: 20,
         font: {
           size: 12,
         },
+        boxWidth: 12,
+        boxHeight: 12,
       },
     },
+    tooltip: {
+      backgroundColor: 'rgba(15, 23, 42, 0.95)',
+      titleColor: '#fff',
+      bodyColor: '#fff',
+      padding: 12,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderWidth: 1,
+      displayColors: true,
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    },
   },
-  cutout: '70%',
+  cutout: '75%',
 };
 
-const metrics = [
+const keyMetrics = [
+  {
+    name: 'Total P&L',
+    value: '+$6,450',
+    change: '+12.5%',
+    isPositive: true,
+    icon: RiExchangeDollarLine,
+    color: '#22c55e'
+  },
   {
     name: 'Win Rate',
     value: '65%',
     change: '+5%',
     isPositive: true,
     icon: RiPieChartLine,
-    description: 'Last 30 days',
-    details: {
-      'Total Trades': '125',
-      'Winning Trades': '81',
-      'Losing Trades': '44',
-      'Break Even': '0',
-      'Win Streak': '7 trades',
-      'Longest Win Streak': '12 trades'
-    }
+    color: '#3b82f6'
   },
   {
     name: 'Profit Factor',
@@ -173,47 +214,7 @@ const metrics = [
     change: '+0.3',
     isPositive: true,
     icon: RiScales3Line,
-    description: 'Risk/Reward ratio',
-    details: {
-      'Gross Profit': '$12,500',
-      'Gross Loss': '$5,950',
-      'Average RRR': '1.8',
-      'Best Trade': '$1,200',
-      'Expected Value': '$145/trade',
-      'Risk-Adjusted Return': '18.5%'
-    }
-  },
-  {
-    name: 'Average Win',
-    value: '$450',
-    change: '-$50',
-    isPositive: false,
-    icon: RiBarChartGroupedLine,
-    description: 'Per trade',
-    details: {
-      'Largest Win': '$1,200',
-      'Average Win': '$450',
-      'Win Consistency': '72%',
-      'Best Day': '$2,100',
-      'Profit Distribution': 'Normal',
-      'Standard Deviation': '$180'
-    }
-  },
-  {
-    name: 'Average Loss',
-    value: '$200',
-    change: '-$25',
-    isPositive: true,
-    icon: RiExchangeDollarLine,
-    description: 'Per trade',
-    details: {
-      'Largest Loss': '-$800',
-      'Average Loss': '-$200',
-      'Loss Recovery': '85%',
-      'Worst Day': '-$1,500',
-      'Max Drawdown': '-12%',
-      'Recovery Factor': '2.3'
-    }
+    color: '#8b5cf6'
   },
   {
     name: 'Sharpe Ratio',
@@ -221,63 +222,7 @@ const metrics = [
     change: '+0.2',
     isPositive: true,
     icon: RiLineChartLine,
-    description: 'Risk-adjusted return',
-    details: {
-      'Risk-free Rate': '4.5%',
-      'Portfolio Return': '22%',
-      'Volatility': '15%',
-      'Information Ratio': '1.2',
-      'Sortino Ratio': '2.1',
-      'Beta': '0.85'
-    }
-  },
-  {
-    name: 'Max Drawdown',
-    value: '-12%',
-    change: '+3%',
-    isPositive: true,
-    icon: RiArrowDownLine,
-    description: 'Peak to trough',
-    details: {
-      'Duration': '15 days',
-      'Recovery Time': '28 days',
-      'Peak Value': '$18,500',
-      'Trough Value': '$16,280',
-      'Recovery High': '$19,200',
-      'Drawdown Frequency': '3/month'
-    }
-  },
-  {
-    name: 'Trading Volume',
-    value: '$125K',
-    change: '+15K',
-    isPositive: true,
-    icon: RiBarChartLine,
-    description: 'Monthly volume',
-    details: {
-      'Average Position': '$2,500',
-      'Largest Position': '$5,000',
-      'Total Trades Value': '$125,000',
-      'Average Daily Volume': '$4,167',
-      'Volume Trend': 'Increasing',
-      'Risk per Trade': '1.5%'
-    }
-  },
-  {
-    name: 'Time Analysis',
-    value: '68%',
-    change: '+8%',
-    isPositive: true,
-    icon: RiTimeLine,
-    description: 'Time in market',
-    details: {
-      'Average Hold Time': '2.5 days',
-      'Best Trading Hour': '10:00 AM',
-      'Market Correlation': '0.65',
-      'Time Efficiency': '72%',
-      'Overnight Holds': '35%',
-      'Weekend Exposure': '15%'
-    }
+    color: '#f59e0b'
   }
 ];
 
@@ -287,6 +232,69 @@ const recentTrades = [
   { symbol: 'MSFT', type: 'Long', result: 'Win', profit: '+$275', date: '2024-02-10', volume: '75', entry: '$402.50', exit: '$406.15' },
   { symbol: 'AMZN', type: 'Long', result: 'Win', profit: '+$420', date: '2024-02-09', volume: '60', entry: '$168.75', exit: '$175.75' },
 ];
+
+interface CircularProgressProps {
+  value: number;
+  max: number;
+  color: string;
+  size?: number;
+  strokeWidth?: number;
+  children?: ReactNode;
+}
+
+const CircularProgress = ({ 
+  value, 
+  max, 
+  color, 
+  size = 120, 
+  strokeWidth = 8,
+  children 
+}: CircularProgressProps) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const progress = (value / max) * circumference;
+
+  return (
+    <div style={{ position: 'relative', width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        {/* Background circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="rgba(255, 255, 255, 0.1)"
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        {/* Progress circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference - progress}
+          fill="none"
+          style={{
+            transition: 'stroke-dashoffset 0.5s ease',
+          }}
+        />
+      </svg>
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          textAlign: 'center',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
 
 export const Dashboard = () => {
   const [selectedRange, setSelectedRange] = useState('1M');
@@ -328,17 +336,42 @@ export const Dashboard = () => {
   };
 
   return (
-    <div style={{ padding: '24px', color: 'white' }}>
+    <div style={{ 
+      padding: '24px', 
+      color: 'white',
+      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
+      minHeight: '100vh',
+      backdropFilter: 'blur(10px)'
+    }}>
       {/* Header */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        marginBottom: '24px' 
+        marginBottom: '24px',
+        background: 'rgba(15, 23, 42, 0.4)',
+        padding: '20px',
+        borderRadius: '16px',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px' }}>Trading Dashboard</h1>
-          <p style={{ color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <h1 style={{ 
+            fontSize: '28px', 
+            fontWeight: 'bold', 
+            marginBottom: '4px',
+            background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Trading Dashboard
+          </h1>
+          <p style={{ 
+            color: 'rgba(255, 255, 255, 0.6)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '6px' 
+          }}>
             <RiCalendarCheckLine />
             <span>February 12, 2024</span>
           </p>
@@ -348,9 +381,9 @@ export const Dashboard = () => {
             onClick={handleRefresh}
             style={{ 
               padding: '10px',
-              borderRadius: '8px',
+              borderRadius: '12px',
               border: '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: 'transparent',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
               color: '#94a3b8',
               cursor: 'pointer',
               display: 'flex',
@@ -358,43 +391,60 @@ export const Dashboard = () => {
               transition: 'all 0.2s ease',
               transform: isRefreshing ? 'rotate(180deg)' : 'rotate(0)',
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
           >
             <RiRefreshLine />
           </button>
           <button
             style={{ 
               padding: '10px',
-              borderRadius: '8px',
+              borderRadius: '12px',
               border: '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: 'transparent',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
               color: '#94a3b8',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
             <RiDownload2Line />
           </button>
           <button style={{ 
-            backgroundColor: '#2563eb',
+            background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
             color: 'white',
             padding: '10px 20px',
-            borderRadius: '8px',
+            borderRadius: '12px',
             border: 'none',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
-            boxShadow: '0 2px 4px rgba(37, 99, 235, 0.1)',
+            boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.2)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 6px 8px rgba(37, 99, 235, 0.3)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 2px 4px rgba(37, 99, 235, 0.1)';
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.2)';
           }}>
             <RiTimeLine />
             New Trade
@@ -402,259 +452,274 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-        gap: '20px',
-        marginBottom: '24px' 
-      }}>
-        {metrics.map((metric) => (
-          <div
-            key={metric.name}
-            style={{
-              backgroundColor: '#1e293b',
-              borderRadius: '12px',
-              padding: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              transition: 'all 0.2s ease',
-              cursor: 'pointer',
-              transform: hoveredMetric === metric.name ? 'translateY(-2px)' : 'translateY(0)',
-              boxShadow: hoveredMetric === metric.name 
-                ? '0 8px 16px rgba(0, 0, 0, 0.2)' 
-                : '0 2px 4px rgba(0, 0, 0, 0.1)',
-              position: 'relative',
-            }}
-            onClick={() => setShowMetricDetails(showMetricDetails === metric.name ? null : metric.name)}
-            onMouseEnter={() => setHoveredMetric(metric.name)}
-            onMouseLeave={() => setHoveredMetric(null)}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <metric.icon style={{ 
-                    width: '20px', 
-                    height: '20px', 
-                    color: hoveredMetric === metric.name ? '#2563eb' : '#64748b',
-                    transition: 'color 0.2s ease'
-                  }} />
-                  <span style={{ color: '#94a3b8' }}>{metric.name}</span>
-                </div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px' }}>
-                  {metric.value}
-                </div>
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '4px',
-                  color: metric.isPositive ? '#22c55e' : '#ef4444',
-                  fontSize: '14px'
-                }}>
-                  {metric.isPositive ? <RiArrowUpLine /> : <RiArrowDownLine />}
-                  {metric.change}
-                </div>
-              </div>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>{metric.description}</span>
-            </div>
-
-            {/* Metric Details Popup */}
-            {showMetricDetails === metric.name && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                left: '0',
-                right: '0',
-                backgroundColor: '#1e293b',
-                borderRadius: '12px',
-                padding: '16px',
-                marginTop: '8px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                zIndex: 10,
-              }}>
-                {Object.entries(metric.details).map(([key, value]) => (
-                  <div 
-                    key={key}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: '8px 0',
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                    }}
-                  >
-                    <span style={{ color: '#94a3b8' }}>{key}</span>
-                    <span style={{ color: '#fff', fontWeight: 'bold' }}>{value}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Charts Section */}
-      <div style={{ 
+      {/* Key Metrics Row */}
+      <div style={{
         display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
+        gridTemplateColumns: 'repeat(4, 1fr)',
         gap: '16px',
         marginBottom: '24px'
       }}>
-        {/* Balance Chart */}
-        <div style={{ 
-          backgroundColor: '#1e293b',
-          borderRadius: '12px',
-          padding: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
+        {keyMetrics.map((metric, index) => (
+          <motion.div
+            key={metric.name}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+            style={{
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '16px',
+              padding: '20px',
+              border: `1px solid ${metric.color}20`,
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '4px',
+              height: '100%',
+              background: metric.color,
+              opacity: 0.5
+            }} />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              marginBottom: '8px'
+            }}>
+              <metric.icon style={{ color: metric.color, width: '20px', height: '20px' }} />
+              <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>{metric.name}</span>
+            </div>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px' }}>
+              {metric.value}
+            </div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              gap: '4px',
+              color: metric.isPositive ? '#22c55e' : '#ef4444',
+              fontSize: '14px'
+            }}>
+              {metric.isPositive ? <RiArrowUpLine /> : <RiArrowDownLine />}
+              {metric.change}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Main Content Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr',
+        gap: '24px',
+        marginBottom: '24px'
+      }}>
+        {/* Left Column - Chart */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '24px'
         }}>
+          {/* Performance Chart */}
           <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: '16px' 
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+            borderRadius: '16px',
+            padding: '24px',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
           }}>
-            <h3 style={{ fontSize: '16px', color: '#94a3b8' }}>Account Balance</h3>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {chartTypes.map((type) => (
-                <button
-                  key={type.id}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    backgroundColor: selectedChartType === type.id ? '#2563eb' : 'transparent',
-                    color: selectedChartType === type.id ? 'white' : '#94a3b8',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}
-                  onClick={() => setSelectedChartType(type.id)}
-                >
-                  <type.icon />
-                  <span style={{ fontSize: '14px' }}>{type.label}</span>
-                </button>
-              ))}
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: '16px' 
+            }}>
+              <div>
+                <h3 style={{ 
+                  fontSize: '18px', 
+                  fontWeight: 'bold',
+                  marginBottom: '4px',
+                  background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>
+                  Performance Overview
+                </h3>
+                <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  Account growth over time
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {chartTypes.map((type) => (
+                  <button
+                    key={type.id}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      backgroundColor: selectedChartType === type.id ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+                      color: selectedChartType === type.id ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '14px'
+                    }}
+                    onClick={() => setSelectedChartType(type.id)}
+                  >
+                    <type.icon />
+                    {type.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ height: '400px' }}>
+              {renderChart()}
             </div>
           </div>
-          <div style={{ 
-            display: 'flex', 
-            gap: '8px', 
-            marginBottom: '16px',
-            justifyContent: 'center' 
+
+          {/* Trade Distribution */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '16px'
           }}>
-            {timeRanges.map((range) => (
-              <button
-                key={range}
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: selectedRange === range ? '#2563eb' : 'transparent',
-                  color: selectedRange === range ? 'white' : '#94a3b8',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  fontSize: '14px',
-                }}
-                onClick={() => setSelectedRange(range)}
-              >
-                {range}
-              </button>
-            ))}
-          </div>
-          <div style={{ height: '300px' }}>
-            {renderChart()}
+            <div style={{ 
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '16px',
+              padding: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.05)'
+            }}>
+              <h4 style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '16px' }}>
+                Win/Loss Distribution
+              </h4>
+              <div style={{ height: '200px' }}>
+                <Doughnut data={profitDistributionData} options={doughnutOptions} />
+              </div>
+            </div>
+            <div style={{ 
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '16px',
+              padding: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.05)'
+            }}>
+              <h4 style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '16px' }}>
+                Trade Types
+              </h4>
+              <div style={{ height: '200px' }}>
+                <Doughnut data={tradeTypeData} options={doughnutOptions} />
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Recent Trades */}
-        <div style={{ 
-          backgroundColor: '#1e293b',
-          borderRadius: '12px',
-          padding: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
+        {/* Right Column - Recent Trades & Quick Stats */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '24px'
         }}>
+          {/* Recent Trades */}
           <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: '16px' 
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+            borderRadius: '16px',
+            padding: '24px',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            flex: 1
           }}>
-            <h3 style={{ fontSize: '16px', color: '#94a3b8' }}>Recent Trades</h3>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: '20px' 
+            }}>
+              <div>
+                <h3 style={{ 
+                  fontSize: '18px', 
+                  fontWeight: 'bold',
+                  marginBottom: '4px',
+                  background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>
+                  Recent Trades
+                </h3>
+                <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  Last 24 hours
+                </p>
+              </div>
               <button style={{
-                padding: '6px',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                color: '#94a3b8',
+                padding: '8px',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'rgba(255, 255, 255, 0.6)',
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
                 transition: 'all 0.2s ease',
               }}>
                 <RiFilterLine />
               </button>
-              <button style={{
-                padding: '6px',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: 'transparent',
-                color: '#94a3b8',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                transition: 'all 0.2s ease',
-              }}>
-                <RiMoreLine />
-              </button>
             </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {recentTrades.map((trade, index) => (
-              <div
-                key={index}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px',
-                  backgroundColor: hoveredTrade === index 
-                    ? 'rgba(255, 255, 255, 0.05)' 
-                    : 'rgba(255, 255, 255, 0.03)',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  transform: hoveredTrade === index ? 'translateX(4px)' : 'translateX(0)',
-                }}
-                onMouseEnter={() => setHoveredTrade(index)}
-                onMouseLeave={() => setHoveredTrade(null)}
-              >
-                <div>
-                  <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{trade.symbol}</div>
-                  <div style={{ 
-                    fontSize: '12px', 
-                    color: '#94a3b8',
-                    backgroundColor: trade.type === 'Long' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    display: 'inline-block'
-                  }}>
-                    {trade.type}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {recentTrades.map((trade, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px',
+                    backgroundColor: hoveredTrade === index 
+                      ? 'rgba(255, 255, 255, 0.05)' 
+                      : 'rgba(255, 255, 255, 0.02)',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={() => setHoveredTrade(index)}
+                  onMouseLeave={() => setHoveredTrade(null)}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
+                      backgroundColor: trade.type === 'Long' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: trade.type === 'Long' ? '#22c55e' : '#ef4444'
+                    }}>
+                      {trade.type === 'Long' ? <RiArrowUpLine size={20} /> : <RiArrowDownLine size={20} />}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: '600', marginBottom: '2px' }}>{trade.symbol}</div>
+                      <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                        {trade.entry} → {trade.exit}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ 
-                    color: trade.result === 'Win' ? '#22c55e' : '#ef4444',
-                    marginBottom: '4px',
-                    fontWeight: 'bold'
-                  }}>
-                    {trade.profit}
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ 
+                      color: trade.result === 'Win' ? '#22c55e' : '#ef4444',
+                      fontWeight: '600',
+                      marginBottom: '2px'
+                    }}>
+                      {trade.profit}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                      {trade.volume} shares
+                    </div>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>{trade.date}</div>
-                </div>
-              </div>
-            ))}
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
