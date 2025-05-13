@@ -21,36 +21,8 @@ import {
   RiErrorWarningLine,
   RiInformationLine,
 } from 'react-icons/ri';
-
-interface Trade {
-  id: string;
-  market: string;
-  marketCategory: string;
-  symbol: string;
-  type: 'Long' | 'Short';
-  status: 'Open' | 'Closed';
-  entryPrice: number;
-  exitPrice?: number;
-  quantity: number;
-  entryDate: string;
-  exitDate?: string;
-  pnl?: number;
-  pnlPercentage?: number;
-  risk: number;
-  reward: number;
-  strategy: string;
-  tags: string[];
-  notes: string;
-  leverage?: number;
-  stopLoss?: number;
-  takeProfit?: number;
-  commission?: number;
-  fees?: number;
-  slippage?: number;
-  exchange?: string;
-  timeframe?: string;
-  setupType?: string;
-}
+import { TradesList } from '../components/TradesList';
+import type { Trade } from '../types/trade';
 
 interface MarketConfigType {
   symbolPattern: string;
@@ -124,56 +96,56 @@ const mockTrades: Trade[] = [
   {
     id: '1',
     market: 'Stocks',
-    marketCategory: 'Equities',
+    market_category: 'Equities',
     symbol: 'AAPL',
     type: 'Long',
     status: 'Closed',
-    entryPrice: 175.50,
-    exitPrice: 178.25,
+    entry_price: 175.50,
+    exit_price: 178.25,
     quantity: 100,
-    entryDate: '2024-02-15T10:30:00',
-    exitDate: '2024-02-15T14:45:00',
+    entry_date: '2024-02-15T10:30:00',
+    exit_date: '2024-02-15T14:45:00',
     pnl: 275,
-    pnlPercentage: 1.57,
+    pnl_percentage: 1.57,
     risk: 200,
     reward: 275,
     strategy: 'Breakout',
     tags: ['Tech', 'Momentum'],
     notes: 'Strong market momentum, clear breakout pattern.',
-    stopLoss: 173.50,
-    takeProfit: 180.00,
+    stop_loss: 173.50,
+    take_profit: 180.00,
     commission: 5.00,
     fees: 0.50,
     exchange: 'NASDAQ',
     timeframe: '1h',
-    setupType: 'Bull Flag'
+    setup_type: 'Bull Flag'
   },
   {
     id: '2',
     market: 'Stocks',
-    marketCategory: 'Equities',
+    market_category: 'Equities',
     symbol: 'TSLA',
     type: 'Short',
     status: 'Closed',
-    entryPrice: 193.25,
-    exitPrice: 190.50,
+    entry_price: 193.25,
+    exit_price: 190.50,
     quantity: 50,
-    entryDate: '2024-02-14T11:15:00',
-    exitDate: '2024-02-14T15:30:00',
+    entry_date: '2024-02-14T11:15:00',
+    exit_date: '2024-02-14T15:30:00',
     pnl: 137.50,
-    pnlPercentage: 1.42,
+    pnl_percentage: 1.42,
     risk: 150,
     reward: 137.50,
     strategy: 'Mean Reversion',
     tags: ['Tech', 'Overbought'],
     notes: 'RSI indicated overbought conditions.',
-    stopLoss: 191.50,
-    takeProfit: 195.00,
+    stop_loss: 191.50,
+    take_profit: 195.00,
     commission: 2.50,
     fees: 0.50,
     exchange: 'NASDAQ',
     timeframe: '1d',
-    setupType: 'Bearish Reversal'
+    setup_type: 'Bearish Reversal'
   },
   // Add more mock trades as needed
 ];
@@ -203,7 +175,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
   const [loading, setLoading] = useState(false);
   const [tradeData, setTradeData] = useState({
     market: '',
-    marketCategory: '',
+    market_category: '',
     symbol: '',
     type: 'Long',
     entryPrice: '',
@@ -374,7 +346,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
       const trade: Database['public']['Tables']['trades']['Insert'] = {
         user_id: user.id,
         market: tradeData.market,
-        market_category: tradeData.marketCategory as any,
+        market_category: tradeData.market_category as any,
         symbol: tradeData.symbol,
         type: tradeData.type as 'Long' | 'Short',
         status: 'Open',
@@ -401,7 +373,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
       onClose();
       setTradeData({
         market: '',
-        marketCategory: '',
+        market_category: '',
         symbol: '',
         type: 'Long',
         entryPrice: '',
@@ -523,7 +495,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                           const selected = e.target.value;
                           const category = Object.entries(marketConfig).find(([key]) => key === selected)?.[1]?.category || '';
                           handleInputChange('market', selected);
-                          handleInputChange('marketCategory', category);
+                          handleInputChange('market_category', category);
                         }}
                         style={{
                           width: '100%',
@@ -849,114 +821,52 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
   );
 };
 
+const fetchTradesFromAPI = async (page: number, pageSize: number) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No user logged in');
+
+    // First, get the total count
+    const { count } = await supabase
+      .from('trades')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+
+    // Then get the page of trades
+    const { data: trades, error } = await supabase
+      .from('trades')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('entry_date', { ascending: false })
+      .range((page - 1) * pageSize, page * pageSize - 1);
+
+    if (error) throw error;
+    
+    return {
+      trades: trades || [],
+      totalCount: count || 0
+    };
+  } catch (error) {
+    console.error('Error fetching trades:', error);
+    throw error;
+  }
+};
+
 export const Trades = () => {
-  const [showAddTrade, setShowAddTrade] = useState(false);
-  const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
-  const [trades, setTrades] = useState<Trade[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'open' | 'closed'>('all');
-  const [importing, setImporting] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const fetchTrades = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('trades')
-        .select('*')
-        .order('entry_date', { ascending: false });
-
-      if (error) throw error;
-
-      setTrades(data.map(trade => ({
-        id: trade.id,
-        market: trade.market,
-        marketCategory: trade.market_category,
-        symbol: trade.symbol,
-        type: trade.type,
-        status: trade.status,
-        entryPrice: trade.entry_price,
-        exitPrice: trade.exit_price,
-        quantity: trade.quantity,
-        entryDate: trade.entry_date,
-        exitDate: trade.exit_date,
-        pnl: trade.pnl,
-        pnlPercentage: trade.pnl_percentage,
-        risk: trade.risk,
-        reward: trade.reward,
-        strategy: trade.strategy,
-        tags: trade.tags,
-        notes: trade.notes,
-        leverage: trade.leverage,
-        stopLoss: trade.stop_loss,
-        takeProfit: trade.take_profit,
-        commission: trade.commission,
-        fees: trade.fees,
-        slippage: trade.slippage,
-        exchange: trade.exchange,
-        timeframe: trade.timeframe,
-        setupType: trade.setup_type
-      })));
-    } catch (error) {
-      console.error('Error fetching trades:', error);
-      alert('Failed to fetch trades');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTrades();
-  }, []);
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setImporting(true);
-    try {
-      const result = await importTradesFromCSV(file);
-      alert(result.message);
-      if (result.success) {
-        await fetchTrades(); // Refresh trades list after successful import
-      }
-    } catch (error: any) {
-      alert('Error importing trades: ' + error.message);
-    } finally {
-      setImporting(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
+  const fetchTrades = async (page: number, pageSize: number) => {
+    const { trades } = await fetchTradesFromAPI(page, pageSize);
+    return trades;
   };
 
   return (
     <div style={{ 
-      padding: '24px', 
+      padding: '24px',
       color: 'white',
       background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
       minHeight: '100vh',
       backdropFilter: 'blur(10px)'
     }}>
-      <input
-        type="file"
-        ref={fileInputRef}
-        accept=".csv"
-        style={{ display: 'none' }}
-        onChange={handleFileImport}
-      />
-      <AddTradeModal isOpen={showAddTrade} onClose={() => setShowAddTrade(false)} />
-      
-      {/* Header */}
       <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
         marginBottom: '24px',
         background: 'rgba(15, 23, 42, 0.4)',
         padding: '20px',
@@ -964,335 +874,21 @@ export const Trades = () => {
         border: '1px solid rgba(255, 255, 255, 0.05)',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       }}>
-        <div>
-          <h1 style={{ 
-            fontSize: '28px', 
-            fontWeight: 'bold', 
-            marginBottom: '4px',
-            background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Trade Management
-          </h1>
-          <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-            Track and analyze your trading activity
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            onClick={handleImportClick}
-            disabled={importing}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '12px',
-              backgroundColor: importing ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: importing ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.6)',
-              cursor: importing ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              if (!importing) {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!importing) {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }
-            }}
-          >
-            <RiUploadLine />
-            Import CSV
-          </button>
-          <button
-            onClick={() => {
-              // Create a sample CSV content
-              const csvContent = 'Open,Symbol,Open Price,Volume,Action,Close,Close Price,Win/Loss,Profit,Tags,Notes\n' +
-                '2024-03-18 10:30:00,AAPL,175.50,100,BUY,2024-03-18 14:45:00,178.25,Win,275,Tech;Momentum,Strong breakout pattern';
-              
-              // Create and download the sample file
-              const blob = new Blob([csvContent], { type: 'text/csv' });
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'sample_trades.csv';
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              window.URL.revokeObjectURL(url);
-            }}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'rgba(255, 255, 255, 0.6)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            <RiDownloadLine />
-            Download Sample
-          </button>
-          <button
-            onClick={() => setShowAddTrade(true)}
-            style={{ 
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-              color: 'white',
-              padding: '10px 20px',
-              borderRadius: '12px',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 8px rgba(37, 99, 235, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.2)';
-            }}
-          >
-            <RiAddLine />
-            Add Trade
-          </button>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div style={{
-        display: 'flex',
-        gap: '16px',
-        marginBottom: '24px'
-      }}>
-        <div style={{
-          flex: 1,
-          position: 'relative'
+        <h1 style={{ 
+          fontSize: '28px', 
+          fontWeight: 'bold',
+          background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent'
         }}>
-          <RiSearchLine style={{
-            position: 'absolute',
-            left: '16px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: 'rgba(255, 255, 255, 0.3)'
-          }} />
-          <input
-            type="text"
-            placeholder="Search trades..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 16px 12px 44px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              fontSize: '14px',
-              outline: 'none',
-              transition: 'all 0.2s ease',
-            }}
-          />
-        </div>
-        <button
-          style={{
-            padding: '12px 20px',
-            borderRadius: '12px',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            color: 'rgba(255, 255, 255, 0.6)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <RiFilterLine />
-          Filter
-        </button>
-        <button
-          style={{
-            padding: '12px 20px',
-            borderRadius: '12px',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            color: 'rgba(255, 255, 255, 0.6)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <RiCalendarLine />
-          Date Range
-        </button>
+          Trade History
+        </h1>
+        <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+          View and analyze your trading history
+        </p>
       </div>
 
-      {/* Trades List */}
-      <div style={{
-        background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-        borderRadius: '16px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        overflow: 'hidden'
-      }}>
-        {/* Table Header */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 80px',
-          padding: '16px 20px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          gap: '16px',
-          fontSize: '14px',
-          color: 'rgba(255, 255, 255, 0.6)',
-          fontWeight: '500'
-        }}>
-          <div>Market/Symbol</div>
-          <div>Type</div>
-          <div>Entry/Exit</div>
-          <div>Quantity</div>
-          <div>P&L</div>
-          <div>Status</div>
-          <div></div>
-        </div>
-
-        {loading ? (
-          <div style={{
-            padding: '32px',
-            textAlign: 'center',
-            color: 'rgba(255, 255, 255, 0.6)'
-          }}>
-            Loading trades...
-          </div>
-        ) : trades.length === 0 ? (
-          <div style={{
-            padding: '32px',
-            textAlign: 'center',
-            color: 'rgba(255, 255, 255, 0.6)'
-          }}>
-            No trades found. Import trades or add a new trade to get started.
-          </div>
-        ) : (
-          /* Trade Rows */
-          trades.map((trade) => (
-            <motion.div
-              key={trade.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 80px',
-                padding: '16px 20px',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                gap: '16px',
-                alignItems: 'center',
-                backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                transition: 'all 0.2s ease',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
-              }}
-              onClick={() => setSelectedTrade(trade)}
-            >
-              <div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '2px' }}>{trade.market}</div>
-                <div style={{ fontWeight: '600' }}>{trade.symbol}</div>
-              </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                color: trade.type === 'Long' ? '#22c55e' : '#ef4444'
-              }}>
-                {trade.type === 'Long' ? <RiArrowUpLine /> : <RiArrowDownLine />}
-                {trade.type}
-              </div>
-              <div>
-                <div style={{ marginBottom: '2px' }}>${trade.entryPrice}</div>
-                {trade.exitPrice && (
-                  <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)' }}>
-                    ${trade.exitPrice}
-                  </div>
-                )}
-              </div>
-              <div>{trade.quantity}</div>
-              <div style={{
-                color: (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
-                display: 'flex',
-                flexDirection: 'column'
-              }}>
-                <span>${Math.abs(trade.pnl || 0)}</span>
-                <span style={{ fontSize: '12px' }}>
-                  {(trade.pnlPercentage || 0) >= 0 ? '+' : '-'}{Math.abs(trade.pnlPercentage || 0)}%
-                </span>
-              </div>
-              <div>
-                <span style={{
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  backgroundColor: trade.status === 'Open' 
-                    ? 'rgba(34, 197, 94, 0.1)' 
-                    : 'rgba(255, 255, 255, 0.1)',
-                  color: trade.status === 'Open' ? '#22c55e' : '#fff',
-                  border: `1px solid ${trade.status === 'Open' 
-                    ? 'rgba(34, 197, 94, 0.2)' 
-                    : 'rgba(255, 255, 255, 0.1)'}`
-                }}>
-                  {trade.status}
-                </span>
-              </div>
-              <div>
-                <button
-                  style={{
-                    padding: '8px',
-                    borderRadius: '8px',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <RiMoreLine />
-                </button>
-              </div>
-            </motion.div>
-          ))
-        )}
-      </div>
+      <TradesList fetchTrades={fetchTrades} initialPageSize={20} />
     </div>
   );
 }; 

@@ -12,7 +12,7 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   RiArrowUpLine, 
   RiArrowDownLine,
@@ -33,6 +33,10 @@ import {
 } from 'react-icons/ri';
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
+import { TradingCalendar } from '../components/TradingCalendar';
+import type { Trade as CalendarTrade } from '../components/TradingCalendar';
+import { supabase } from '../lib/supabase';
+import type { Trade as DBTrade } from '../types/trade';
 
 ChartJS.register(
   CategoryScale,
@@ -233,6 +237,16 @@ const recentTrades = [
   { symbol: 'AMZN', type: 'Long', result: 'Win', profit: '+$420', date: '2024-02-09', volume: '60', entry: '$168.75', exit: '$175.75' },
 ];
 
+const sampleTrades = [
+  { id: '1', date: '2024-02-12', symbol: 'AAPL', type: 'Long' as const, result: 'Win' as const, profit: 350, volume: 100, entry: 180.50, exit: 184.00 },
+  { id: '2', date: '2024-02-11', symbol: 'TSLA', type: 'Short' as const, result: 'Loss' as const, profit: -150, volume: 50, entry: 193.25, exit: 196.25 },
+  { id: '3', date: '2024-02-10', symbol: 'MSFT', type: 'Long' as const, result: 'Win' as const, profit: 275, volume: 75, entry: 402.50, exit: 406.15 },
+  { id: '4', date: '2024-02-09', symbol: 'AMZN', type: 'Long' as const, result: 'Win' as const, profit: 420, volume: 60, entry: 168.75, exit: 175.75 },
+  { id: '5', date: '2024-02-15', symbol: 'META', type: 'Long' as const, result: 'Win' as const, profit: 550, volume: 80, entry: 468.25, exit: 475.00 },
+  { id: '6', date: '2024-02-15', symbol: 'NVDA', type: 'Short' as const, result: 'Loss' as const, profit: -280, volume: 40, entry: 726.50, exit: 733.50 },
+  { id: '7', date: '2024-02-08', symbol: 'AMD', type: 'Long' as const, result: 'Loss' as const, profit: -180, volume: 120, entry: 172.75, exit: 171.25 },
+];
+
 interface CircularProgressProps {
   value: number;
   max: number;
@@ -303,6 +317,44 @@ export const Dashboard = () => {
   const [selectedChartType, setSelectedChartType] = useState('line');
   const [showMetricDetails, setShowMetricDetails] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [calendarTrades, setCalendarTrades] = useState<CalendarTrade[]>([]);
+  const [isLoadingTrades, setIsLoadingTrades] = useState(true);
+
+  useEffect(() => {
+    const fetchTrades = async () => {
+      try {
+        setIsLoadingTrades(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: trades } = await supabase
+          .from('trades')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('entry_date', { ascending: false });
+
+        if (trades) {
+          setCalendarTrades(trades.map(trade => ({
+            id: trade.id,
+            date: trade.entry_date.split('T')[0], // Convert to YYYY-MM-DD format for calendar
+            symbol: trade.symbol,
+            type: trade.type,
+            result: trade.pnl && trade.pnl > 0 ? 'Win' : 'Loss',
+            profit: trade.pnl || 0,
+            volume: trade.quantity,
+            entry: trade.entry_price,
+            exit: trade.exit_price || trade.entry_price
+          })));
+        }
+      } catch (error) {
+        console.error('Error fetching trades:', error);
+      } finally {
+        setIsLoadingTrades(false);
+      }
+    };
+
+    fetchTrades();
+  }, []);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -585,7 +637,8 @@ export const Dashboard = () => {
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '16px'
+            gap: '16px',
+            marginBottom: '24px'
           }}>
             <div style={{ 
               background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
@@ -614,6 +667,24 @@ export const Dashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* Trading Calendar */}
+          {isLoadingTrades ? (
+            <div style={{
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '16px',
+              padding: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: '400px'
+            }}>
+              <div style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Loading trades...</div>
+            </div>
+          ) : (
+            <TradingCalendar trades={calendarTrades} />
+          )}
         </div>
 
         {/* Right Column - Recent Trades & Quick Stats */}
