@@ -8,11 +8,20 @@ export const UserMenu = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [initials, setInitials] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.email) {
       const emailName = user.email.split('@')[0];
       setInitials(emailName.substring(0, 2).toUpperCase());
+      
+      // Get avatar URL from user metadata (Google OAuth)
+      const userMetadata = user.user_metadata;
+      if (userMetadata?.avatar_url || userMetadata?.picture) {
+        setAvatarUrl(userMetadata.avatar_url || userMetadata.picture);
+      } else {
+        setAvatarUrl(null);
+      }
     }
   }, [user]);
 
@@ -29,9 +38,24 @@ export const UserMenu = () => {
     <Menu as="div" className="relative">
       <div>
         <Menu.Button
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          {initials}
+          {avatarUrl ? (
+            <div className="absolute inset-0 rounded-full overflow-hidden">
+              <img 
+                src={avatarUrl} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+                style={{
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
+                onError={() => setAvatarUrl(null)}
+              />
+            </div>
+          ) : (
+            <span>{initials}</span>
+          )}
         </Menu.Button>
       </div>
 
@@ -42,9 +66,20 @@ export const UserMenu = () => {
         }}
       >
         <div className="px-1 py-1">
+          {/* User Info with Avatar */}
           {user?.email && (
-            <div className="px-4 py-2 text-sm text-gray-300 border-b border-gray-700">
-              {user.email}
+            <div className="px-4 py-3 text-sm text-gray-300 border-b border-gray-700 flex items-center gap-3">
+              {avatarUrl && (
+                <img 
+                  src={avatarUrl} 
+                  alt="Profile" 
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              )}
+              <div className="flex flex-col">
+                <span className="font-medium">{user.email.split('@')[0]}</span>
+                <span className="text-xs text-gray-400">{user.email}</span>
+              </div>
             </div>
           )}
 

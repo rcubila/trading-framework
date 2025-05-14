@@ -5,29 +5,42 @@ import { FcGoogle } from 'react-icons/fc';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const { signInWithGoogle, error, loading } = useAuth();
+  const { signInWithGoogle, error: authError, loading } = useAuth();
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await login(email, password);
-      // Get the redirect path from location state or default to '/'
-      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
-      navigate(from);
-    } catch (err) {
-      // Error is handled by the auth context
-      console.error('Login failed:', err);
+    if (email && password) {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) throw error;
+
+        if (data.user) {
+          // Get the redirect path from location state or default to '/'
+          const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
+          navigate(from);
+        }
+      } catch (err: any) {
+        console.error('Login failed:', err);
+        setError(err.message);
+      }
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (e: React.MouseEvent) => {
+    e.preventDefault();
     try {
       console.log('Starting Google login...');
       await signInWithGoogle();
@@ -59,9 +72,9 @@ const Login = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="bg-gray-800 rounded-xl shadow-2xl p-8"
         >
-          {error && (
+          {(error || authError) && (
             <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
-              {error}
+              {error || authError}
             </div>
           )}
 
@@ -135,19 +148,23 @@ const Login = () => {
                 </>
               )}
             </button>
+          </form>
 
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-600"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-800 text-gray-400">Or continue with</span>
-              </div>
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-600"></div>
             </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-800 text-gray-400">Or continue with</span>
+            </div>
+          </div>
 
+          {/* Social Login Buttons */}
+          <div className="space-y-3">
             {/* Google Login Button */}
             <button
+              type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
               className="w-full bg-white hover:bg-gray-100 text-gray-800 rounded-lg py-3 flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -165,7 +182,7 @@ const Login = () => {
               <FiGithub className="w-5 h-5" />
               <span>Continue with GitHub</span>
             </button>
-          </form>
+          </div>
 
           {/* Sign Up Link */}
           <p className="mt-6 text-center text-gray-400">
