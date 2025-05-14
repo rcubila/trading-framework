@@ -1,16 +1,16 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { MainLayout } from './layouts/MainLayout';
+import Login from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Strategy } from './pages/Strategy';
 import { Trades } from './pages/Trades';
-import Login from './pages/Login';
+import { DisciplineTracker } from './pages/DisciplineTracker';
+import { MainLayout } from './layouts/MainLayout';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
 
 // Placeholder components for other routes
 const Journal = () => <div style={{ color: 'white' }}>Journal Page</div>;
-const DisciplineTracker = () => <div style={{ color: 'white' }}>Discipline Tracker Page</div>;
 const ImportTrades = () => <div style={{ color: 'white' }}>Import Trades Page</div>;
 
 // Auth callback handler
