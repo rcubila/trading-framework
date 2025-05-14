@@ -212,11 +212,11 @@ const keyMetrics = [
     color: '#3b82f6'
   },
   {
-    name: 'Profit Factor',
-    value: '2.1',
-    change: '+0.3',
+    name: 'Avg. Win Rate',
+    value: '$0',
+    change: '0%',
     isPositive: true,
-    icon: RiScales3Line,
+    icon: RiBarChartGroupedLine,
     color: '#8b5cf6'
   },
   {
@@ -330,11 +330,11 @@ export const Dashboard = () => {
       color: '#3b82f6'
     },
     {
-      name: 'Profit Factor',
-      value: '0',
-      change: '0',
+      name: 'Avg. Win Rate',
+      value: '$0',
+      change: '0%',
       isPositive: true,
-      icon: RiScales3Line,
+      icon: RiBarChartGroupedLine,
       color: '#8b5cf6'
     },
     {
@@ -357,16 +357,10 @@ export const Dashboard = () => {
     const winningTrades = trades.filter(trade => (trade.pnl || 0) > 0);
     const winRate = (winningTrades.length / trades.length) * 100;
     
-    // Calculate Profit Factor
-    const grossProfit = trades.reduce((sum, trade) => {
-      const pnl = trade.pnl || 0;
-      return sum + (pnl > 0 ? pnl : 0);
-    }, 0);
-    const grossLoss = Math.abs(trades.reduce((sum, trade) => {
-      const pnl = trade.pnl || 0;
-      return sum + (pnl < 0 ? pnl : 0);
-    }, 0));
-    const profitFactor = grossLoss === 0 ? grossProfit : grossProfit / grossLoss;
+    // Calculate Average Win Rate (average profit of winning trades)
+    const avgWinRate = winningTrades.length > 0 
+      ? winningTrades.reduce((sum, trade) => sum + (trade.pnl || 0), 0) / winningTrades.length
+      : 0;
     
     // Calculate Sharpe Ratio
     const returns = trades.map(trade => trade.pnl || 0);
@@ -381,7 +375,7 @@ export const Dashboard = () => {
       {
         name: 'Total P&L',
         value: totalPnL >= 0 ? `+$${totalPnL.toFixed(2)}` : `-$${Math.abs(totalPnL).toFixed(2)}`,
-        change: '0%', // You could calculate this based on previous period
+        change: '0%',
         isPositive: totalPnL >= 0,
         icon: RiExchangeDollarLine,
         color: totalPnL >= 0 ? '#22c55e' : '#ef4444'
@@ -395,11 +389,11 @@ export const Dashboard = () => {
         color: '#3b82f6'
       },
       {
-        name: 'Profit Factor',
-        value: profitFactor.toFixed(2),
-        change: '0',
-        isPositive: profitFactor > 1,
-        icon: RiScales3Line,
+        name: 'Avg. Win Rate',
+        value: `$${avgWinRate.toFixed(2)}`,
+        change: '0%',
+        isPositive: avgWinRate > 0,
+        icon: RiBarChartGroupedLine,
         color: '#8b5cf6'
       },
       {
