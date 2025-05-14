@@ -178,18 +178,18 @@ export const DisciplineTracker = () => {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '5px',
+        marginBottom: '2px',
         background: 'rgba(15, 23, 42, 0.4)',
-        padding: '5px',
+        padding: '2px 5px',
         borderRadius: '16px',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       }}>
         <div>
           <h1 style={{
-            fontSize: '28px',
+            fontSize: '24px',
             fontWeight: 'bold',
-            marginBottom: '4px',
+            marginBottom: '2px',
             background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
@@ -200,7 +200,8 @@ export const DisciplineTracker = () => {
             color: 'rgba(255, 255, 255, 0.6)',
             display: 'flex',
             alignItems: 'center',
-            gap: '5px'
+            gap: '5px',
+            fontSize: '13px'
           }}>
             <RiMedalLine />
             <span>Track your trading discipline and improve consistency</span>
