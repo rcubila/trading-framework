@@ -9,9 +9,7 @@ import { MainLayout } from './layouts/MainLayout';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
-
-// Placeholder components for other routes
-const ImportTrades = () => <div style={{ color: 'white' }}>Import Trades Page</div>;
+import { ImportTrades } from './pages/ImportTrades';
 
 // Auth callback handler
 const AuthCallback = () => {
