@@ -4,13 +4,13 @@ import { Dashboard } from './pages/Dashboard';
 import { Strategy } from './pages/Strategy';
 import { Trades } from './pages/Trades';
 import { DisciplineTracker } from './pages/DisciplineTracker';
+import { Journal } from './pages/Journal';
 import { MainLayout } from './layouts/MainLayout';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
 
 // Placeholder components for other routes
-const Journal = () => <div style={{ color: 'white' }}>Journal Page</div>;
 const ImportTrades = () => <div style={{ color: 'white' }}>Import Trades Page</div>;
 
 // Auth callback handler

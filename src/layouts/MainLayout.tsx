@@ -30,7 +30,7 @@ export const MainLayout = () => {
       backgroundAttachment: 'fixed'
     }}>
       <aside style={{ 
-        width: '280px', 
+        width: '240px',
         background: 'rgba(15, 23, 42, 0.6)',
         backdropFilter: 'blur(10px)',
         borderRight: '1px solid rgba(255, 255, 255, 0.1)',
@@ -42,15 +42,15 @@ export const MainLayout = () => {
         zIndex: 40
       }}>
         <div style={{ 
-          height: '80px', 
+          height: '60px', 
           display: 'flex', 
           alignItems: 'center',
-          padding: '0 24px',
+          padding: '0 5px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
           <h1 style={{ 
             color: 'white', 
-            fontSize: '24px',
+            fontSize: '20px',
             fontWeight: 'bold',
             background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
             WebkitBackgroundClip: 'text',
@@ -60,7 +60,7 @@ export const MainLayout = () => {
           </h1>
         </div>
         
-        <nav style={{ padding: '24px 16px', flex: 1 }}>
+        <nav style={{ padding: '5px', flex: 1 }}>
           {navigation.map((item) => (
             <Link
               key={item.name}
@@ -68,14 +68,14 @@ export const MainLayout = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '12px 16px',
+                padding: '5px',
                 color: location.pathname === item.path ? '#fff' : 'rgba(255, 255, 255, 0.6)',
                 backgroundColor: location.pathname === item.path 
                   ? 'rgba(59, 130, 246, 0.15)' 
                   : 'transparent',
                 textDecoration: 'none',
-                margin: '4px 0',
-                borderRadius: '12px',
+                margin: '3px 0',
+                borderRadius: '10px',
                 transition: 'all 0.2s ease',
                 position: 'relative',
                 overflow: 'hidden'
@@ -96,13 +96,13 @@ export const MainLayout = () => {
               }}
             >
               <item.icon style={{ 
-                width: '20px', 
-                height: '20px',
-                marginRight: '12px',
+                width: '18px', 
+                height: '18px',
+                marginRight: '5px',
                 transition: 'all 0.2s ease'
               }} />
               <span style={{ 
-                fontSize: '14px',
+                fontSize: '13px',
                 fontWeight: location.pathname === item.path ? '600' : '400'
               }}>
                 {item.name}
@@ -117,7 +117,7 @@ export const MainLayout = () => {
                     height: '100%',
                     background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0) 100%)',
                     borderLeft: '3px solid #3b82f6',
-                    borderRadius: '12px',
+                    borderRadius: '10px',
                     zIndex: -1,
                   }}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
@@ -129,18 +129,18 @@ export const MainLayout = () => {
       </aside>
       <main style={{ 
         flex: 1, 
-        marginLeft: '280px',
+        marginLeft: '240px',
         minHeight: '100vh',
         background: 'rgba(15, 23, 42, 0.4)',
         backdropFilter: 'blur(10px)',
       }}>
         {/* Header with UserMenu */}
         <header style={{
-          height: '80px',
+          height: '50px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-end',
-          padding: '0 32px',
+          padding: '0 20px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           background: 'rgba(15, 23, 42, 0.6)',
           backdropFilter: 'blur(10px)',
@@ -150,7 +150,7 @@ export const MainLayout = () => {
         }}>
           <UserMenu />
         </header>
-        <div style={{ padding: '24px' }}>
+        <div style={{ padding: '12px' }}>
           <Outlet />
         </div>
       </main>
