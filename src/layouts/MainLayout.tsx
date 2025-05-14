@@ -6,10 +6,9 @@ import {
   RiLightbulbLine,
   RiMedalLine,
   RiDownloadLine,
-  RiUser3Line,
-  RiSettings4Line
 } from 'react-icons/ri';
 import { motion } from 'framer-motion';
+import { UserMenu } from '../components/UserMenu';
 
 const navigation = [
   { name: 'Dashboard', icon: RiDashboardLine, path: '/' },
@@ -39,7 +38,8 @@ export const MainLayout = () => {
         flexDirection: 'column',
         position: 'fixed',
         height: '100vh',
-        boxShadow: '4px 0 15px rgba(0, 0, 0, 0.1)'
+        boxShadow: '4px 0 15px rgba(0, 0, 0, 0.1)',
+        zIndex: 40
       }}>
         <div style={{ 
           height: '80px', 
@@ -126,64 +126,6 @@ export const MainLayout = () => {
             </Link>
           ))}
         </nav>
-
-        <div style={{ 
-          padding: '16px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          display: 'flex',
-          gap: '12px'
-        }}>
-          <button style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            backgroundColor: 'transparent',
-            color: 'rgba(255, 255, 255, 0.6)',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}>
-            <RiUser3Line size={20} />
-          </button>
-          <button style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            backgroundColor: 'transparent',
-            color: 'rgba(255, 255, 255, 0.6)',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}>
-            <RiSettings4Line size={20} />
-          </button>
-        </div>
       </aside>
       <main style={{ 
         flex: 1, 
@@ -192,7 +134,25 @@ export const MainLayout = () => {
         background: 'rgba(15, 23, 42, 0.4)',
         backdropFilter: 'blur(10px)',
       }}>
-        <Outlet />
+        {/* Header with UserMenu */}
+        <header style={{
+          height: '80px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          padding: '0 32px',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          background: 'rgba(15, 23, 42, 0.6)',
+          backdropFilter: 'blur(10px)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 30,
+        }}>
+          <UserMenu />
+        </header>
+        <div style={{ padding: '24px' }}>
+          <Outlet />
+        </div>
       </main>
     </div>
   );
