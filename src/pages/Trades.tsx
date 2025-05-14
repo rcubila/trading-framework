@@ -827,6 +827,10 @@ const fetchTradesFromAPI = async (page: number, pageSize: number) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('No user logged in');
 
+    // Calculate the range for pagination
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize - 1;
+
     // First, get the total count
     const { count } = await supabase
       .from('trades')
@@ -839,14 +843,11 @@ const fetchTradesFromAPI = async (page: number, pageSize: number) => {
       .select('*')
       .eq('user_id', user.id)
       .order('entry_date', { ascending: false })
-      .range((page - 1) * pageSize, page * pageSize - 1);
+      .range(start, end);
 
     if (error) throw error;
     
-    return {
-      trades: trades || [],
-      totalCount: count || 0
-    };
+    return trades || [];
   } catch (error) {
     console.error('Error fetching trades:', error);
     throw error;
@@ -856,110 +857,27 @@ const fetchTradesFromAPI = async (page: number, pageSize: number) => {
 export const Trades = () => {
   const [showAddTrade, setShowAddTrade] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
-  const [trades, setTrades] = useState<Trade[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'open' | 'closed'>('all');
   const [importing, setImporting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [tradeToDelete, setTradeToDelete] = useState<Trade | null>(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const PAGE_SIZE = 10;
 
   useEffect(() => {
-    const fetchInitialTrades = async () => {
-      setLoading(true);
-      try {
-        const { trades, totalCount } = await fetchTradesFromAPI(1, PAGE_SIZE);
-        setTrades(trades);
-        setHasMore(trades.length < totalCount);
-      } catch (error) {
-        console.error('Error fetching trades:', error);
-        alert('Failed to fetch trades');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInitialTrades();
+    // Remove the initial fetch since it's now handled by TradesList
   }, []);
 
-  const loadMoreTrades = async () => {
-    if (loadingMore || !hasMore) return;
-    
-    setLoadingMore(true);
+  const handleFetchTrades = async (page: number, pageSize: number) => {
     try {
-      const nextPage = page + 1;
-      const { trades: newTrades, totalCount } = await fetchTradesFromAPI(nextPage, PAGE_SIZE);
-      
-      setTrades(prevTrades => [...prevTrades, ...newTrades]);
-      setPage(nextPage);
-      setHasMore(trades.length + newTrades.length < totalCount);
+      const trades = await fetchTradesFromAPI(page, pageSize);
+      return trades;
     } catch (error) {
-      console.error('Error loading more trades:', error);
-    } finally {
-      setLoadingMore(false);
+      console.error('Error fetching trades:', error);
+      throw error;
     }
-  };
-
-  const LoadMoreButton = () => {
-    if (!hasMore) return null;
-
-    return (
-      <div style={{
-        padding: '20px',
-        display: 'flex',
-        justifyContent: 'center',
-        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-      }}>
-        <button
-          onClick={loadMoreTrades}
-          disabled={loadingMore}
-          style={{
-            padding: '10px 20px',
-            borderRadius: '12px',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            color: 'white',
-            cursor: loadingMore ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            if (!loadingMore) {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-          }}
-        >
-          {loadingMore ? (
-            <>
-              <div style={{
-                width: '16px',
-                height: '16px',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                borderTop: '2px solid white',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite',
-              }} />
-              Loading...
-            </>
-          ) : (
-            <>
-              <RiArrowDownLine />
-              Load More Trades
-            </>
-          )}
-        </button>
-      </div>
-    );
   };
 
   const handleDeleteTrade = async (trade: Trade) => {
@@ -992,7 +910,7 @@ export const Trades = () => {
       successMessage.style.display = 'flex';
       successMessage.style.alignItems = 'center';
       successMessage.style.gap = '8px';
-      successMessage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Trade deleted successfully!';
+      successMessage.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Trade ${tradeToDelete.symbol} deleted successfully!`;
       document.body.appendChild(successMessage);
 
       setTimeout(() => {
@@ -1000,7 +918,7 @@ export const Trades = () => {
       }, 2000);
 
       // Update local state
-      setTrades(trades.filter(t => t.id !== tradeToDelete.id));
+      setSelectedTrade(null);
       setShowDeleteConfirm(false);
       setTradeToDelete(null);
     } catch (error) {
@@ -1009,119 +927,102 @@ export const Trades = () => {
     }
   };
 
+  const handleDeleteAllTrades = async () => {
+    try {
+      setIsDeletingAll(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user logged in');
+
+      const { error } = await supabase
+        .from('trades')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Show success message
+      const successMessage = document.createElement('div');
+      successMessage.style.position = 'fixed';
+      successMessage.style.top = '20px';
+      successMessage.style.right = '20px';
+      successMessage.style.padding = '16px 24px';
+      successMessage.style.background = 'rgba(34, 197, 94, 0.9)';
+      successMessage.style.color = 'white';
+      successMessage.style.borderRadius = '8px';
+      successMessage.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+      successMessage.style.zIndex = '9999';
+      successMessage.style.display = 'flex';
+      successMessage.style.alignItems = 'center';
+      successMessage.style.gap = '8px';
+      successMessage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>All trades deleted successfully!';
+      document.body.appendChild(successMessage);
+
+      setTimeout(() => {
+        document.body.removeChild(successMessage);
+      }, 2000);
+
+      // Update local state
+      setSelectedTrade(null);
+      setShowDeleteAllConfirm(false);
+    } catch (error) {
+      console.error('Error deleting all trades:', error);
+      alert('Failed to delete trades');
+    } finally {
+      setIsDeletingAll(false);
+    }
+  };
+
   return (
     <div style={{ 
-      padding: '24px',
-      color: 'white',
-      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
-      minHeight: '100vh',
-      backdropFilter: 'blur(10px)'
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '24px',
+      minHeight: '100%'
     }}>
       <div style={{ 
-        marginBottom: '24px',
         background: 'rgba(15, 23, 42, 0.4)',
-        padding: '20px',
+        padding: '2px 5px',
         borderRadius: '16px',
         border: '1px solid rgba(255, 255, 255, 0.05)',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        marginBottom: '2px'
       }}>
         <h1 style={{ 
-          fontSize: '28px', 
+          fontSize: '24px', 
           fontWeight: 'bold',
           background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
           WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
+          WebkitTextFillColor: 'transparent',
+          marginBottom: '2px'
         }}>
           Trade History
         </h1>
-        <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+        <p style={{ 
+          color: 'rgba(255, 255, 255, 0.6)',
+          fontSize: '13px'
+        }}>
           View and analyze your trading history
         </p>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.7)',
-          backdropFilter: 'blur(5px)',
-          zIndex: 50,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
-            borderRadius: '20px',
-            padding: '32px',
-            width: '90%',
-            maxWidth: '400px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-          }}>
-            <h3 style={{ marginBottom: '16px', fontSize: '20px', fontWeight: 'bold' }}>
-              Delete Trade
-            </h3>
-            <p style={{ marginBottom: '24px', color: 'rgba(255, 255, 255, 0.8)' }}>
-              Are you sure you want to delete this trade? This action cannot be undone.
-            </p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  setTradeToDelete(null);
-                }}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  border: 'none',
-                  color: 'white',
-                  cursor: 'pointer',
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                  color: '#ef4444',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <RiDeleteBinLine />
-                Delete Trade
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Trades List */}
+      {/* Trades List Container */}
       <div style={{
+        flex: 1,
         background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
         borderRadius: '16px',
         border: '1px solid rgba(255, 255, 255, 0.05)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         {/* Actions Bar */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '16px 20px',
+          padding: '16px 24px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+          background: 'rgba(15, 23, 42, 0.2)',
         }}>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
@@ -1160,6 +1061,29 @@ export const Trades = () => {
               <RiUploadLine />
               Import Trades
             </button>
+            {selectedTrade && (
+              <button
+                onClick={() => {
+                  setTradeToDelete(selectedTrade);
+                  setShowDeleteConfirm(true);
+                }}
+                style={{
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  color: '#ef4444',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <RiDeleteBinLine />
+                Delete Trade
+              </button>
+            )}
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
             <div style={{ position: 'relative' }}>
@@ -1207,152 +1131,220 @@ export const Trades = () => {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 80px',
-          padding: '16px 20px',
+          padding: '16px 24px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
           gap: '16px',
           color: 'rgba(255, 255, 255, 0.6)',
           fontWeight: '500',
           fontSize: '14px',
+          background: 'rgba(15, 23, 42, 0.1)',
         }}>
           <div>Market/Symbol</div>
+          <div>Date/Time</div>
           <div>Type</div>
           <div>Entry/Exit</div>
-          <div>Quantity</div>
           <div>P&L</div>
           <div>Status</div>
           <div></div>
         </div>
 
-        {loading ? (
-          <div style={{
-            padding: '32px',
-            textAlign: 'center',
-            color: 'rgba(255, 255, 255, 0.6)'
-          }}>
-            Loading trades...
-          </div>
-        ) : trades.length === 0 ? (
-          <div style={{
-            padding: '32px',
-            textAlign: 'center',
-            color: 'rgba(255, 255, 255, 0.6)'
-          }}>
-            No trades found. Import trades or add a new trade to get started.
-          </div>
-        ) : (
-          <>
-            {trades.map((trade) => (
-              <motion.div
-                key={trade.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 80px',
-                  padding: '16px 20px',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                  gap: '16px',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
-                }}
-                onClick={() => setSelectedTrade(trade)}
-              >
-                <div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '2px' }}>{trade.market}</div>
-                  <div style={{ fontWeight: '600' }}>{trade.symbol}</div>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  color: trade.type === 'Long' ? '#22c55e' : '#ef4444'
-                }}>
-                  {trade.type === 'Long' ? <RiArrowUpLine /> : <RiArrowDownLine />}
-                  {trade.type}
-                </div>
-                <div>
-                  <div style={{ marginBottom: '2px' }}>${trade.entry_price}</div>
-                  {trade.exit_price && (
-                    <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)' }}>
-                      ${trade.exit_price}
-                    </div>
-                  )}
-                </div>
-                <div>{trade.quantity}</div>
-                <div style={{
-                  color: (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}>
-                  <span>${Math.abs(trade.pnl || 0)}</span>
-                  <span style={{ fontSize: '12px' }}>
-                    {(trade.pnl_percentage || 0) >= 0 ? '+' : '-'}{Math.abs(trade.pnl_percentage || 0)}%
-                  </span>
-                </div>
-                <div>
-                  <span style={{
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    backgroundColor: trade.status === 'Open' 
-                      ? 'rgba(34, 197, 94, 0.1)' 
-                      : 'rgba(255, 255, 255, 0.1)',
-                    color: trade.status === 'Open' ? '#22c55e' : '#fff',
-                    border: `1px solid ${trade.status === 'Open' 
-                      ? 'rgba(34, 197, 94, 0.2)' 
-                      : 'rgba(255, 255, 255, 0.1)'}`
-                  }}>
-                    {trade.status}
-                  </span>
-                </div>
-                <div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteTrade(trade);
-                    }}
-                    style={{
-                      padding: '8px',
-                      borderRadius: '8px',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      color: 'rgba(255, 255, 255, 0.6)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                      e.currentTarget.style.color = '#ef4444';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
-                    }}
-                  >
-                    <RiDeleteBinLine />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-            <LoadMoreButton />
-          </>
-        )}
+        {/* TradesList Component */}
+        <div style={{ flex: 1 }}>
+          <TradesList 
+            fetchTrades={handleFetchTrades}
+            initialPageSize={20}
+          />
+        </div>
       </div>
       
       {/* Add Trade Modal */}
       <AddTradeModal isOpen={showAddTrade} onClose={() => setShowAddTrade(false)} />
+      
+      {/* Delete Confirmation Modals */}
+      {showDeleteConfirm && tradeToDelete && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(5px)',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
+            borderRadius: '20px',
+            padding: '32px',
+            width: '90%',
+            maxWidth: '400px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          }}>
+            <h3 style={{ marginBottom: '16px', fontSize: '20px', fontWeight: 'bold' }}>
+              Delete Trade
+            </h3>
+            <div style={{ marginBottom: '24px' }}>
+              <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '12px' }}>
+                Are you sure you want to delete this trade?
+              </p>
+              <div style={{
+                padding: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '8px',
+                marginTop: '12px',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Symbol:</span>
+                  <span style={{ fontWeight: '600' }}>{tradeToDelete.symbol}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Type:</span>
+                  <span style={{ 
+                    color: tradeToDelete.type === 'Long' ? '#22c55e' : '#ef4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    {tradeToDelete.type === 'Long' ? <RiArrowUpLine /> : <RiArrowDownLine />}
+                    {tradeToDelete.type}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>P&L:</span>
+                  <span style={{ 
+                    color: (tradeToDelete.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
+                    fontWeight: '600'
+                  }}>
+                    ${Math.abs(tradeToDelete.pnl || 0)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setTradeToDelete(null);
+                }}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  color: '#ef4444',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <RiDeleteBinLine />
+                Delete Trade
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteAllConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(5px)',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
+            borderRadius: '20px',
+            padding: '32px',
+            width: '90%',
+            maxWidth: '400px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          }}>
+            <h3 style={{ marginBottom: '16px', fontSize: '20px', fontWeight: 'bold' }}>
+              Delete All Trades
+            </h3>
+            <p style={{ marginBottom: '24px', color: 'rgba(255, 255, 255, 0.8)' }}>
+              Are you sure you want to delete all trades? This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowDeleteAllConfirm(false)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAllTrades}
+                disabled={isDeletingAll}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  color: '#ef4444',
+                  cursor: isDeletingAll ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  opacity: isDeletingAll ? 0.7 : 1,
+                }}
+              >
+                {isDeletingAll ? (
+                  <>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid rgba(239, 68, 68, 0.3)',
+                      borderTop: '2px solid #ef4444',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                    }} />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <RiDeleteBinLine />
+                    Delete All Trades
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }; 

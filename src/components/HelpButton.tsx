@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { RiQuestionLine, RiCloseLine, RiSendPlaneFill } from 'react-icons/ri';
+import { motion, AnimatePresence } from 'framer-motion';
+import { RiQuestionLine, RiCloseLine, RiSendPlaneFill, RiMessage2Line } from 'react-icons/ri';
 
 export const HelpButton = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [message, setMessage] = useState('');
+  const [showBubble, setShowBubble] = useState(true);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,7 +16,7 @@ export const HelpButton = () => {
 
   return (
     <>
-      {/* Help Button */}
+      {/* Help Button with Chat Bubble */}
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -25,34 +26,85 @@ export const HelpButton = () => {
           bottom: '24px',
           right: '24px',
           zIndex: 9999,
+          display: 'flex',
+          alignItems: 'flex-end',
+          gap: '16px'
         }}
       >
+        <AnimatePresence>
+          {showBubble && !showHelp && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              style={{
+                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%)',
+                padding: '12px 20px',
+                borderRadius: '20px 20px 4px 20px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                maxWidth: '200px',
+                position: 'relative',
+                cursor: 'pointer',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+              }}
+              onClick={() => {
+                setShowBubble(false);
+                setShowHelp(true);
+              }}
+            >
+              <p style={{ 
+                color: 'white', 
+                fontSize: '14px',
+                margin: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <RiMessage2Line style={{ flexShrink: 0 }} />
+                Hi! Need help? 👋
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <button
-          onClick={() => setShowHelp(!showHelp)}
+          onClick={() => {
+            setShowHelp(!showHelp);
+            setShowBubble(false);
+          }}
           style={{
             width: '56px',
             height: '56px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-            border: 'none',
+            background: showHelp 
+              ? 'rgba(255, 255, 255, 0.1)'
+              : 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+            border: showHelp 
+              ? '1px solid rgba(255, 255, 255, 0.2)'
+              : 'none',
             color: 'white',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
             boxShadow: '0 4px 12px rgba(59, 130, 246, 0.5)',
-            transition: 'all 0.2s ease',
+            transition: 'all 0.3s ease',
+            transform: showHelp ? 'rotate(90deg)' : 'rotate(0deg)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.1)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.6)';
+            if (!showHelp) {
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.6)';
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.5)';
+            if (!showHelp) {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.5)';
+            }
           }}
         >
-          {showHelp ? <RiCloseLine size={28} /> : <RiQuestionLine size={28} />}
+          {showHelp ? <RiCloseLine size={28} /> : <RiMessage2Line size={24} />}
         </button>
       </motion.div>
 
@@ -69,7 +121,7 @@ export const HelpButton = () => {
             width: '320px',
             maxHeight: '70vh',
             overflowY: 'auto',
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%)',
             borderRadius: '16px',
             padding: '24px',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
