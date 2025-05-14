@@ -32,17 +32,41 @@ export const MainLayout = () => {
         backgroundAttachment: 'fixed'
       }}>
         <aside style={{ 
-          width: '240px',
+          width: '200px',
           background: 'rgba(15, 23, 42, 0.6)',
           backdropFilter: 'blur(10px)',
-          borderRight: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
           flexDirection: 'column',
-          position: 'fixed',
           height: '100vh',
-          boxShadow: '4px 0 15px rgba(0, 0, 0, 0.1)',
-          zIndex: 40
+          boxShadow: '2px 0 10px rgba(0, 0, 0, 0.1)',
+          zIndex: 40,
+          position: 'fixed',
+          overflow: 'hidden'
         }}>
+          {/* Gradient border effect */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '1px',
+            height: '100%',
+            background: 'linear-gradient(to bottom, transparent, rgba(96, 165, 250, 0.2), rgba(167, 139, 250, 0.2), transparent)',
+            boxShadow: '0 0 5px rgba(96, 165, 250, 0.1)',
+            zIndex: 1,
+            pointerEvents: 'none'
+          }} />
+          {/* Inner glow effect */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '1px',
+            height: '100%',
+            background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.03))',
+            filter: 'blur(1px)',
+            zIndex: 0,
+            pointerEvents: 'none'
+          }} />
           <div style={{ 
             height: '60px', 
             display: 'flex', 
@@ -131,18 +155,20 @@ export const MainLayout = () => {
         </aside>
         <main style={{ 
           flex: 1, 
-          marginLeft: '240px',
+          marginLeft: '200px',
           minHeight: '100vh',
           background: 'rgba(15, 23, 42, 0.4)',
           backdropFilter: 'blur(10px)',
+          display: 'flex',
+          flexDirection: 'column'
         }}>
           {/* Header with UserMenu */}
           <header style={{
-            height: '50px',
+            height: '60px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
-            padding: '0 20px',
+            padding: '0 24px',
             borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             background: 'rgba(15, 23, 42, 0.6)',
             backdropFilter: 'blur(10px)',
@@ -152,7 +178,7 @@ export const MainLayout = () => {
           }}>
             <UserMenu />
           </header>
-          <div style={{ padding: '12px' }}>
+          <div style={{ flex: 1, padding: '24px' }}>
             <Outlet />
           </div>
         </main>
