@@ -389,7 +389,7 @@ export const Dashboard = () => {
 
   return (
     <div style={{ 
-      padding: '24px', 
+      padding: '5px', 
       color: 'white',
       background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
       minHeight: '100vh',
@@ -400,9 +400,9 @@ export const Dashboard = () => {
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        marginBottom: '24px',
+        marginBottom: '5px',
         background: 'rgba(15, 23, 42, 0.4)',
-        padding: '20px',
+        padding: '5px',
         borderRadius: '16px',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
@@ -422,7 +422,7 @@ export const Dashboard = () => {
             color: 'rgba(255, 255, 255, 0.6)', 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '6px' 
+            gap: '5px' 
           }}>
             <RiCalendarCheckLine />
             <span>February 12, 2024</span>
@@ -508,8 +508,8 @@ export const Dashboard = () => {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '16px',
-        marginBottom: '24px'
+        gap: '5px',
+        marginBottom: '5px'
       }}>
         {keyMetrics.map((metric, index) => (
           <motion.div
@@ -520,7 +520,7 @@ export const Dashboard = () => {
             style={{
               background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
               borderRadius: '16px',
-              padding: '20px',
+              padding: '5px',
               border: `1px solid ${metric.color}20`,
               position: 'relative',
               overflow: 'hidden'
@@ -538,8 +538,8 @@ export const Dashboard = () => {
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
-              marginBottom: '8px'
+              gap: '5px',
+              marginBottom: '5px'
             }}>
               <metric.icon style={{ color: metric.color, width: '20px', height: '20px' }} />
               <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>{metric.name}</span>
@@ -565,20 +565,20 @@ export const Dashboard = () => {
       <div style={{
         display: 'grid',
         gridTemplateColumns: '2fr 1fr',
-        gap: '24px',
-        marginBottom: '24px'
+        gap: '5px',
+        marginBottom: '5px'
       }}>
         {/* Left Column - Chart */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '24px'
+          gap: '5px'
         }}>
           {/* Performance Chart */}
           <div style={{ 
             background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
             borderRadius: '16px',
-            padding: '24px',
+            padding: '5px',
             border: '1px solid rgba(255, 255, 255, 0.05)',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
           }}>
@@ -691,7 +691,7 @@ export const Dashboard = () => {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '24px'
+          gap: '5px'
         }}>
           {/* Recent Trades */}
           <div style={{ 

@@ -165,19 +165,37 @@ export const Strategy = () => {
   };
 
   return (
-    <div style={{ padding: '24px', color: 'white' }}>
+    <div style={{ 
+      padding: '5px',
+      color: 'white',
+      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
+      minHeight: '100vh',
+      backdropFilter: 'blur(10px)'
+    }}>
       {/* Header */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        marginBottom: '24px' 
+        marginBottom: '5px',
+        background: 'rgba(15, 23, 42, 0.4)',
+        padding: '5px',
+        borderRadius: '16px',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px' }}>Strategy Management</h1>
-          <p style={{ color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <RiSettings4Line />
-            <span>Hybrid Trading System</span>
+          <h1 style={{ 
+            fontSize: '28px', 
+            fontWeight: 'bold',
+            background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Trading Strategies
+          </h1>
+          <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+            Manage and analyze your trading strategies
           </p>
         </div>
         <button
@@ -185,16 +203,16 @@ export const Strategy = () => {
             setSelectedStrategy(null);
             setShowStrategyModal(true);
           }}
-          style={{ 
-            backgroundColor: '#2563eb',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            border: 'none',
+          style={{
+            padding: '5px',
+            borderRadius: '12px',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            border: '1px solid rgba(59, 130, 246, 0.2)',
+            color: '#60a5fa',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
+            gap: '5px',
             transition: 'all 0.2s ease',
           }}
         >
@@ -203,12 +221,12 @@ export const Strategy = () => {
         </button>
       </div>
 
-      {/* Strategy Cards */}
+      {/* Strategy Grid */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
-        gap: '20px',
-        marginBottom: '24px' 
+        gap: '5px',
+        marginBottom: '5px' 
       }}>
         {strategies.map((strategy) => (
           <div
@@ -216,18 +234,18 @@ export const Strategy = () => {
             style={{
               backgroundColor: '#1e293b',
               borderRadius: '12px',
-              padding: '20px',
+              padding: '5px',
               border: '1px solid rgba(255, 255, 255, 0.05)',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
               <div>
                 <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>{strategy.name}</h3>
                 <div style={{ 
                   display: 'flex', 
-                  gap: '8px', 
+                  gap: '5px', 
                   alignItems: 'center',
                   color: '#94a3b8',
                   fontSize: '14px'

@@ -167,7 +167,7 @@ export const DisciplineTracker = () => {
 
   return (
     <div style={{
-      padding: '24px',
+      padding: '5px',
       color: 'white',
       minHeight: '100vh',
       background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
@@ -178,9 +178,9 @@ export const DisciplineTracker = () => {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '24px',
+        marginBottom: '5px',
         background: 'rgba(15, 23, 42, 0.4)',
-        padding: '20px',
+        padding: '5px',
         borderRadius: '16px',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
@@ -200,13 +200,13 @@ export const DisciplineTracker = () => {
             color: 'rgba(255, 255, 255, 0.6)',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
+            gap: '5px'
           }}>
             <RiMedalLine />
             <span>Track your trading discipline and improve consistency</span>
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '5px' }}>
           <button
             onClick={() => setShowAddRule(true)}
             style={{
@@ -267,9 +267,9 @@ export const DisciplineTracker = () => {
       {/* Navigation Tabs */}
       <div style={{
         display: 'flex',
-        gap: '12px',
-        marginBottom: '24px',
-        padding: '8px',
+        gap: '5px',
+        marginBottom: '5px',
+        padding: '5px',
         background: 'rgba(15, 23, 42, 0.4)',
         borderRadius: '12px',
         width: 'fit-content'
@@ -304,14 +304,14 @@ export const DisciplineTracker = () => {
       {/* Content Area */}
       <div style={{
         display: 'grid',
-        gap: '24px',
+        gap: '5px',
         gridTemplateColumns: activeTab === 'stats' ? '2fr 1fr' : '1fr'
       }}>
         {/* Main Content */}
         <div style={{
           background: 'rgba(15, 23, 42, 0.4)',
           borderRadius: '16px',
-          padding: '24px',
+          padding: '5px',
           border: '1px solid rgba(255, 255, 255, 0.05)',
         }}>
           {loading ? (
