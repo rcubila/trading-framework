@@ -16,7 +16,6 @@ const AuthCallback = () => {
   const { isAuthenticated } = useAuth();
   
   if (isAuthenticated) {
-    // Navigate to root path since we're already using basename
     return <Navigate to="/" replace />;
   }
   

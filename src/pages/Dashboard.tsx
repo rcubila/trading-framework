@@ -55,8 +55,7 @@ const timeRanges = ['1D', '1W', '1M', '3M', '6M', '1Y', 'ALL'];
 
 const chartTypes = [
   { id: 'line', icon: RiLineChartLine, label: 'Line' },
-  { id: 'bar', icon: RiBarChartLine, label: 'Bar' },
-  { id: 'distribution', icon: RiPieChart2Line, label: 'Distribution' }
+  { id: 'bar', icon: RiBarChartLine, label: 'Bar' }
 ];
 
 const performanceData = {
@@ -230,13 +229,6 @@ const keyMetrics = [
   }
 ];
 
-const recentTrades = [
-  { symbol: 'AAPL', type: 'Long', result: 'Win', profit: '+$350', date: '2024-02-12', volume: '100', entry: '$180.50', exit: '$184.00' },
-  { symbol: 'TSLA', type: 'Short', result: 'Loss', profit: '-$150', date: '2024-02-11', volume: '50', entry: '$193.25', exit: '$196.25' },
-  { symbol: 'MSFT', type: 'Long', result: 'Win', profit: '+$275', date: '2024-02-10', volume: '75', entry: '$402.50', exit: '$406.15' },
-  { symbol: 'AMZN', type: 'Long', result: 'Win', profit: '+$420', date: '2024-02-09', volume: '60', entry: '$168.75', exit: '$175.75' },
-];
-
 const sampleTrades = [
   { id: '1', date: '2024-02-12', symbol: 'AAPL', type: 'Long' as const, result: 'Win' as const, profit: 350, volume: 100, entry: 180.50, exit: 184.00 },
   { id: '2', date: '2024-02-11', symbol: 'TSLA', type: 'Short' as const, result: 'Loss' as const, profit: -150, volume: 50, entry: 193.25, exit: 196.25 },
@@ -319,24 +311,130 @@ export const Dashboard = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [calendarTrades, setCalendarTrades] = useState<CalendarTrade[]>([]);
   const [isLoadingTrades, setIsLoadingTrades] = useState(true);
+  const [recentTrades, setRecentTrades] = useState<DBTrade[]>([]);
+  const [keyMetrics, setKeyMetrics] = useState([
+    {
+      name: 'Total P&L',
+      value: '$0',
+      change: '0%',
+      isPositive: true,
+      icon: RiExchangeDollarLine,
+      color: '#22c55e'
+    },
+    {
+      name: 'Win Rate',
+      value: '0%',
+      change: '0%',
+      isPositive: true,
+      icon: RiPieChartLine,
+      color: '#3b82f6'
+    },
+    {
+      name: 'Profit Factor',
+      value: '0',
+      change: '0',
+      isPositive: true,
+      icon: RiScales3Line,
+      color: '#8b5cf6'
+    },
+    {
+      name: 'Sharpe Ratio',
+      value: '0',
+      change: '0',
+      isPositive: true,
+      icon: RiLineChartLine,
+      color: '#f59e0b'
+    }
+  ]);
+
+  const calculateMetrics = (trades: DBTrade[]) => {
+    if (!trades.length) return;
+
+    // Calculate Total P&L
+    const totalPnL = trades.reduce((sum, trade) => sum + (trade.pnl || 0), 0);
+    
+    // Calculate Win Rate
+    const winningTrades = trades.filter(trade => (trade.pnl || 0) > 0);
+    const winRate = (winningTrades.length / trades.length) * 100;
+    
+    // Calculate Profit Factor
+    const grossProfit = trades.reduce((sum, trade) => {
+      const pnl = trade.pnl || 0;
+      return sum + (pnl > 0 ? pnl : 0);
+    }, 0);
+    const grossLoss = Math.abs(trades.reduce((sum, trade) => {
+      const pnl = trade.pnl || 0;
+      return sum + (pnl < 0 ? pnl : 0);
+    }, 0));
+    const profitFactor = grossLoss === 0 ? grossProfit : grossProfit / grossLoss;
+    
+    // Calculate Sharpe Ratio
+    const returns = trades.map(trade => trade.pnl || 0);
+    const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+    const stdDev = Math.sqrt(
+      returns.reduce((sum, r) => sum + Math.pow(r - avgReturn, 2), 0) / returns.length
+    );
+    const sharpeRatio = stdDev === 0 ? 0 : avgReturn / stdDev;
+
+    // Update metrics
+    setKeyMetrics([
+      {
+        name: 'Total P&L',
+        value: totalPnL >= 0 ? `+$${totalPnL.toFixed(2)}` : `-$${Math.abs(totalPnL).toFixed(2)}`,
+        change: '0%', // You could calculate this based on previous period
+        isPositive: totalPnL >= 0,
+        icon: RiExchangeDollarLine,
+        color: totalPnL >= 0 ? '#22c55e' : '#ef4444'
+      },
+      {
+        name: 'Win Rate',
+        value: `${winRate.toFixed(1)}%`,
+        change: '0%',
+        isPositive: winRate > 50,
+        icon: RiPieChartLine,
+        color: '#3b82f6'
+      },
+      {
+        name: 'Profit Factor',
+        value: profitFactor.toFixed(2),
+        change: '0',
+        isPositive: profitFactor > 1,
+        icon: RiScales3Line,
+        color: '#8b5cf6'
+      },
+      {
+        name: 'Sharpe Ratio',
+        value: sharpeRatio.toFixed(2),
+        change: '0',
+        isPositive: sharpeRatio > 0,
+        icon: RiLineChartLine,
+        color: '#f59e0b'
+      }
+    ]);
+  };
 
   useEffect(() => {
-    const fetchTrades = async () => {
+    const fetchData = async () => {
       try {
         setIsLoadingTrades(true);
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: trades } = await supabase
+        // Fetch all trades for metrics calculation
+        const { data: allTrades, error: allTradesError } = await supabase
           .from('trades')
           .select('*')
           .eq('user_id', user.id)
           .order('entry_date', { ascending: false });
 
-        if (trades) {
-          setCalendarTrades(trades.map(trade => ({
+        if (allTradesError) throw allTradesError;
+        
+        // Calculate metrics from all trades
+        if (allTrades) {
+          calculateMetrics(allTrades);
+          setCalendarTrades(allTrades.map(trade => ({
             id: trade.id,
-            date: trade.entry_date.split('T')[0], // Convert to YYYY-MM-DD format for calendar
+            date: trade.entry_date.split('T')[0],
             symbol: trade.symbol,
             type: trade.type,
             result: trade.pnl && trade.pnl > 0 ? 'Win' : 'Loss',
@@ -346,6 +444,22 @@ export const Dashboard = () => {
             exit: trade.exit_price || trade.entry_price
           })));
         }
+
+        // Fetch recent trades (last 24 hours)
+        const twentyFourHoursAgo = new Date();
+        twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
+        const { data: recentTradesData, error: recentError } = await supabase
+          .from('trades')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('entry_date', twentyFourHoursAgo.toISOString())
+          .order('entry_date', { ascending: false })
+          .limit(4);
+
+        if (recentError) throw recentError;
+        setRecentTrades(recentTradesData || []);
+
       } catch (error) {
         console.error('Error fetching trades:', error);
       } finally {
@@ -353,7 +467,7 @@ export const Dashboard = () => {
       }
     };
 
-    fetchTrades();
+    fetchData();
   }, []);
 
   const handleRefresh = () => {
@@ -365,23 +479,6 @@ export const Dashboard = () => {
     switch (selectedChartType) {
       case 'bar':
         return <Bar data={performanceData} options={chartOptions} />;
-      case 'distribution':
-        return (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div>
-              <h4 style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '12px', textAlign: 'center' }}>
-                Win/Loss Distribution
-              </h4>
-              <Doughnut data={profitDistributionData} options={doughnutOptions} />
-            </div>
-            <div>
-              <h4 style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '12px', textAlign: 'center' }}>
-                Trade Types
-              </h4>
-              <Doughnut data={tradeTypeData} options={doughnutOptions} />
-            </div>
-          </div>
-        );
       default:
         return <Line data={performanceData} options={chartOptions} />;
     }
@@ -393,7 +490,7 @@ export const Dashboard = () => {
       color: 'white',
       background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
       minHeight: '100vh',
-      backdropFilter: 'blur(10px)'
+      backdropFilter: 'blur(10px)',
     }}>
       {/* Header */}
       <div style={{ 
@@ -633,41 +730,6 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          {/* Trade Distribution */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '16px',
-            marginBottom: '24px'
-          }}>
-            <div style={{ 
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '16px',
-              padding: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.05)'
-            }}>
-              <h4 style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '16px' }}>
-                Win/Loss Distribution
-              </h4>
-              <div style={{ height: '200px' }}>
-                <Doughnut data={profitDistributionData} options={doughnutOptions} />
-              </div>
-            </div>
-            <div style={{ 
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '16px',
-              padding: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.05)'
-            }}>
-              <h4 style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '16px' }}>
-                Trade Types
-              </h4>
-              <div style={{ height: '200px' }}>
-                <Doughnut data={tradeTypeData} options={doughnutOptions} />
-              </div>
-            </div>
-          </div>
-
           {/* Trading Calendar */}
           {isLoadingTrades ? (
             <div style={{
@@ -735,61 +797,150 @@ export const Dashboard = () => {
               </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {recentTrades.map((trade, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '12px',
-                    backgroundColor: hoveredTrade === index 
-                      ? 'rgba(255, 255, 255, 0.05)' 
-                      : 'rgba(255, 255, 255, 0.02)',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={() => setHoveredTrade(index)}
-                  onMouseLeave={() => setHoveredTrade(null)}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '10px',
-                      backgroundColor: trade.type === 'Long' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+              {isLoadingTrades ? (
+                // Loading skeleton
+                Array(4).fill(null).map((_, index) => (
+                  <div
+                    key={index}
+                    style={{
                       display: 'flex',
+                      justifyContent: 'space-between',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      color: trade.type === 'Long' ? '#22c55e' : '#ef4444'
-                    }}>
-                      {trade.type === 'Long' ? <RiArrowUpLine size={20} /> : <RiArrowDownLine size={20} />}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: '600', marginBottom: '2px' }}>{trade.symbol}</div>
-                      <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                        {trade.entry} → {trade.exit}
+                      padding: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                      borderRadius: '12px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '10px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      }} />
+                      <div>
+                        <div style={{ 
+                          width: '80px', 
+                          height: '14px', 
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          borderRadius: '4px',
+                          marginBottom: '8px'
+                        }} />
+                        <div style={{ 
+                          width: '120px', 
+                          height: '10px', 
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          borderRadius: '4px'
+                        }} />
                       </div>
                     </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ 
-                      color: trade.result === 'Win' ? '#22c55e' : '#ef4444',
-                      fontWeight: '600',
-                      marginBottom: '2px'
-                    }}>
-                      {trade.profit}
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ 
+                        width: '60px', 
+                        height: '14px', 
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '4px',
+                        marginBottom: '8px'
+                      }} />
+                      <div style={{ 
+                        width: '80px', 
+                        height: '10px', 
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '4px'
+                      }} />
                     </div>
-                    <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                      {trade.volume} shares
-                    </div>
                   </div>
-                </motion.div>
-              ))}
+                ))
+              ) : recentTrades.length === 0 ? (
+                <div style={{
+                  padding: '24px',
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                  borderRadius: '12px',
+                }}>
+                  No trades in the last 24 hours
+                </div>
+              ) : (
+                recentTrades.map((trade, index) => (
+                  <motion.div
+                    key={trade.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '12px',
+                      backgroundColor: hoveredTrade === index 
+                        ? 'rgba(255, 255, 255, 0.05)' 
+                        : 'rgba(255, 255, 255, 0.02)',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={() => setHoveredTrade(index)}
+                    onMouseLeave={() => setHoveredTrade(null)}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '10px',
+                        backgroundColor: trade.type === 'Long' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: trade.type === 'Long' ? '#22c55e' : '#ef4444'
+                      }}>
+                        {trade.type === 'Long' ? <RiArrowUpLine size={20} /> : <RiArrowDownLine size={20} />}
+                      </div>
+                      <div>
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '8px', 
+                          marginBottom: '2px' 
+                        }}>
+                          <span style={{ fontWeight: '600' }}>{trade.symbol}</span>
+                          <span style={{ 
+                            fontSize: '12px', 
+                            color: 'rgba(255, 255, 255, 0.4)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <RiTimeLine size={12} />
+                            {new Date(trade.entry_date).toLocaleString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              hour12: true
+                            })}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                          ${trade.entry_price} → ${trade.exit_price || 'Open'}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ 
+                        color: (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
+                        fontWeight: '600',
+                        marginBottom: '2px'
+                      }}>
+                        ${Math.abs(trade.pnl || 0)}
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                        {trade.quantity} shares
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </div>
           </div>
         </div>
