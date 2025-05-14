@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { RiQuestionLine, RiCloseLine } from 'react-icons/ri';
+import { RiQuestionLine, RiCloseLine, RiSendPlaneFill } from 'react-icons/ri';
 
 export const HelpButton = () => {
   const [showHelp, setShowHelp] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would typically send the message to your backend
+    console.log('Message sent:', message);
+    setMessage('');
+  };
 
   return (
     <>
@@ -70,40 +78,152 @@ export const HelpButton = () => {
             zIndex: 9999,
           }}
         >
-          <h3 style={{
-            fontSize: '18px',
-            fontWeight: 'bold',
-            marginBottom: '16px',
-            background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Trading Framework Help
-          </h3>
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '8px',
+              background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              Hi there 👋
+            </h3>
+            <p style={{ 
+              color: 'rgba(255, 255, 255, 0.8)', 
+              fontSize: '16px',
+              marginBottom: '24px'
+            }}>
+              How can we help?
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} style={{ marginBottom: '24px' }}>
+            <div style={{ 
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              padding: '12px',
+              display: 'flex',
+              gap: '12px'
+            }}>
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Send us a message..."
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '14px',
+                  outline: 'none',
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '8px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                <RiSendPlaneFill size={16} />
+              </button>
+            </div>
+          </form>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <h4 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Navigation</h4>
-              <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>
-                Use the sidebar to navigate between different sections of the application.
-              </p>
+              <h4 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Quick Links</h4>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr 1fr', 
+                gap: '8px' 
+              }}>
+                {['Dashboard', 'Trades', 'Journal', 'Analytics'].map((item) => (
+                  <button
+                    key={item}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px',
+                      padding: '8px',
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                    }}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
             </div>
+
             <div>
-              <h4 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Dashboard</h4>
-              <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>
-                View your trading performance, recent trades, and key metrics at a glance.
-              </p>
-            </div>
-            <div>
-              <h4 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Trade Management</h4>
-              <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>
-                Add, edit, or remove trades. Import trade data from external sources.
-              </p>
-            </div>
-            <div>
-              <h4 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Analytics</h4>
-              <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>
-                Access detailed trading statistics, charts, and performance metrics.
-              </p>
+              <h4 style={{ color: '#fff', marginBottom: '8px', fontSize: '14px' }}>Resources</h4>
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column',
+                gap: '8px'
+              }}>
+                {[
+                  'Documentation',
+                  'Video Tutorials',
+                  'FAQ',
+                  'Contact Support'
+                ].map((item) => (
+                  <button
+                    key={item}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      padding: '8px',
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '13px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'white';
+                      e.currentTarget.style.transform = 'translateX(4px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </motion.div>
