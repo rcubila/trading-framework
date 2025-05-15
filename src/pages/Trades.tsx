@@ -23,6 +23,7 @@ import {
   RiDeleteBinLine,
 } from 'react-icons/ri';
 import { TradesList } from '../components/TradesList';
+import { TradeDetails } from '../components/TradeDetails';
 import type { Trade } from '../types/trade';
 
 interface MarketConfigType {
@@ -857,6 +858,7 @@ const fetchTradesFromAPI = async (page: number, pageSize: number) => {
 export const Trades = () => {
   const [showAddTrade, setShowAddTrade] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
+  const [showTradeDetails, setShowTradeDetails] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'open' | 'closed'>('all');
   const [importing, setImporting] = useState(false);
@@ -972,6 +974,11 @@ export const Trades = () => {
     }
   };
 
+  const handleTradeClick = (trade: Trade) => {
+    setSelectedTrade(trade);
+    setShowTradeDetails(true);
+  };
+
   return (
     <div style={{ 
       display: 'flex',
@@ -1060,6 +1067,24 @@ export const Trades = () => {
             >
               <RiUploadLine />
               Import Trades
+            </button>
+            <button
+              onClick={() => setShowDeleteAllConfirm(true)}
+              style={{
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                color: '#ef4444',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <RiDeleteBinLine />
+              Delete All
             </button>
             {selectedTrade && (
               <button
@@ -1153,12 +1178,23 @@ export const Trades = () => {
           <TradesList 
             fetchTrades={handleFetchTrades}
             initialPageSize={20}
+            onTradeClick={handleTradeClick}
           />
         </div>
       </div>
       
       {/* Add Trade Modal */}
       <AddTradeModal isOpen={showAddTrade} onClose={() => setShowAddTrade(false)} />
+      
+      {/* Trade Details Slide Over */}
+      <TradeDetails 
+        trade={selectedTrade}
+        isOpen={showTradeDetails}
+        onClose={() => {
+          setShowTradeDetails(false);
+          setSelectedTrade(null);
+        }}
+      />
       
       {/* Delete Confirmation Modals */}
       {showDeleteConfirm && tradeToDelete && (
