@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Tab } from '@headlessui/react';
+import { PlusIcon, ChartBarIcon, ClipboardDocumentCheckIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 import {
   RiMedalLine,
@@ -16,7 +18,10 @@ import {
 import type { TradingRule, DisciplineEntry, DisciplineStats } from '../types/discipline';
 import { supabase } from '../lib/supabaseClient';
 import { AddRuleModal } from '../components/AddRuleModal';
-import AddEntryModal from '../components/AddEntryModal';
+import { AddEntryModal } from '../components/AddEntryModal';
+import { AddGoalModal } from '../components/AddGoalModal';
+import type { DailyEntry, Goal } from '../types/discipline';
+import { useDiscipline } from '../context/DisciplineContext';
 
 const ruleCategories = [
   'Entry',
@@ -32,14 +37,26 @@ const importanceLevels = [
   'Good Practice'
 ] as const;
 
-export const DisciplineTracker = () => {
+function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(' ');
+}
+
+export const DisciplineTracker: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'rules' | 'tracker' | 'stats'>('rules');
   const [rules, setRules] = useState<TradingRule[]>([]);
-  const [entries, setEntries] = useState<DisciplineEntry[]>([]);
+  const [entries, setEntries] = useState<DailyEntry[]>([]);
   const [stats, setStats] = useState<DisciplineStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAddRule, setShowAddRule] = useState(false);
   const [showAddEntry, setShowAddEntry] = useState(false);
+  const [showAddGoal, setShowAddGoal] = useState(false);
+  const [categories] = useState({
+    'Daily Entries': [],
+    'Goals': [],
+    'Statistics': [],
+  });
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const { entries: disciplineEntries, goals: disciplineGoals, stats: disciplineStats, addEntry, addGoal } = useDiscipline();
 
   useEffect(() => {
     fetchRules();
@@ -84,7 +101,7 @@ export const DisciplineTracker = () => {
     }
   };
 
-  const calculateStats = (entries: DisciplineEntry[]) => {
+  const calculateStats = (entries: DailyEntry[]): void => {
     if (!entries.length) {
       setStats(null);
       return;
@@ -93,15 +110,14 @@ export const DisciplineTracker = () => {
     const totalRating = entries.reduce((sum, entry) => sum + entry.rating, 0);
     const averageRating = totalRating / entries.length;
 
-    // Count rule occurrences
     const ruleBreakCount: Record<string, number> = {};
     const ruleFollowCount: Record<string, number> = {};
 
     entries.forEach(entry => {
-      entry.rules_broken.forEach(rule => {
+      entry.rulesBroken.forEach((rule: string) => {
         ruleBreakCount[rule] = (ruleBreakCount[rule] || 0) + 1;
       });
-      entry.rules_followed.forEach(rule => {
+      entry.rulesFollowed.forEach((rule: string) => {
         ruleFollowCount[rule] = (ruleFollowCount[rule] || 0) + 1;
       });
     });
@@ -111,14 +127,20 @@ export const DisciplineTracker = () => {
 
     // Calculate compliance rate
     const totalRules = entries.reduce(
-      (sum, entry) => sum + entry.rules_followed.length + entry.rules_broken.length,
+      (sum, entry) => sum + entry.rulesFollowed.length + entry.rulesBroken.length,
       0
     );
     const totalFollowed = entries.reduce(
-      (sum, entry) => sum + entry.rules_followed.length,
+      (sum, entry) => sum + entry.rulesFollowed.length,
       0
     );
     const complianceRate = (totalFollowed / totalRules) * 100;
+
+    // Calculate mood distribution
+    const moodDistribution = entries.reduce((acc, entry) => {
+      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
     setStats({
       averageRating,
@@ -132,11 +154,12 @@ export const DisciplineTracker = () => {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5),
       weeklyTrend,
-      complianceRate
+      complianceRate,
+      moodDistribution
     });
   };
 
-  const calculateWeeklyTrend = (entries: DisciplineEntry[]) => {
+  const calculateWeeklyTrend = (entries: DailyEntry[]) => {
     const weeklyData: Record<string, { sum: number; count: number }> = {};
 
     entries.forEach(entry => {
@@ -165,281 +188,115 @@ export const DisciplineTracker = () => {
     return `${year}-${month + 1}-W${weekNum}`;
   };
 
+  const handleSaveEntry = (entry: Omit<DailyEntry, 'id'>) => {
+    const newEntry: DailyEntry = {
+      ...entry,
+      id: Date.now().toString()
+    };
+    setEntries([newEntry, ...entries]);
+  };
+
+  const handleSaveGoal = (goal: Omit<Goal, 'id' | 'progress'>) => {
+    const newGoal: Goal = {
+      ...goal,
+      id: Date.now().toString(),
+      progress: 0
+    };
+    setGoals([newGoal, ...goals]);
+  };
+
   return (
-    <div style={{
-      padding: '5px',
-      color: 'white',
-      minHeight: '100vh',
-      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
-      backdropFilter: 'blur(10px)'
-    }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2px',
-        background: 'rgba(15, 23, 42, 0.4)',
-        padding: '2px 5px',
-        borderRadius: '16px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div>
-          <h1 style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            marginBottom: '2px',
-            background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Discipline Tracker
-          </h1>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            fontSize: '13px'
-          }}>
-            <RiMedalLine />
-            <span>Track your trading discipline and improve consistency</span>
-          </p>
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Trading Discipline Tracker</h1>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => setShowAddGoal(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+              New Goal
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowAddEntry(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+              New Entry
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '5px' }}>
-          <button
-            onClick={() => setShowAddRule(true)}
-            style={{
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-              color: 'white',
-              padding: '10px 20px',
-              borderRadius: '12px',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 8px rgba(37, 99, 235, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.2)';
-            }}
-          >
-            <RiAddLine />
-            Add Rule
-          </button>
-          <button
-            onClick={() => setShowAddEntry(true)}
-            style={{
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-              color: 'white',
-              padding: '10px 20px',
-              borderRadius: '12px',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 8px rgba(37, 99, 235, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.2)';
-            }}
-          >
-            <RiAddLine />
-            New Entry
-          </button>
-        </div>
-      </div>
 
-      {/* Navigation Tabs */}
-      <div style={{
-        display: 'flex',
-        gap: '5px',
-        marginBottom: '5px',
-        padding: '5px',
-        background: 'rgba(15, 23, 42, 0.4)',
-        borderRadius: '12px',
-        width: 'fit-content'
-      }}>
-        {[
-          { id: 'rules', label: 'Trading Rules', icon: RiFileTextLine },
-          { id: 'tracker', label: 'Daily Tracker', icon: RiCalendarLine },
-          { id: 'stats', label: 'Statistics', icon: RiBarChartLine }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as typeof activeTab)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '8px',
-              border: 'none',
-              background: activeTab === tab.id ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-              color: activeTab === tab.id ? 'white' : 'rgba(255, 255, 255, 0.6)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            <tab.icon />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Content Area */}
-      <div style={{
-        display: 'grid',
-        gap: '5px',
-        gridTemplateColumns: activeTab === 'stats' ? '2fr 1fr' : '1fr'
-      }}>
-        {/* Main Content */}
-        <div style={{
-          background: 'rgba(15, 23, 42, 0.4)',
-          borderRadius: '16px',
-          padding: '5px',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
-        }}>
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              Loading...
-            </div>
-          ) : (
-            <>
-              {activeTab === 'rules' && (
-                <div>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '20px'
-                  }}>
-                    <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Trading Rules</h2>
-                    <button
-                      onClick={() => setShowAddRule(true)}
-                      style={{
-                        padding: '8px 16px',
-                        borderRadius: '8px',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <RiAddLine />
-                      Add Rule
-                    </button>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {rules.map(rule => (
-                      <motion.div
-                        key={rule.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        style={{
-                          padding: '16px',
-                          borderRadius: '12px',
-                          background: 'rgba(255, 255, 255, 0.03)',
-                          border: '1px solid rgba(255, 255, 255, 0.05)',
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                          marginBottom: '8px'
-                        }}>
-                          <div>
-                            <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '4px' }}>
-                              {rule.name}
-                            </h3>
-                            <div style={{
-                              display: 'flex',
-                              gap: '8px',
-                              fontSize: '12px',
-                              color: 'rgba(255, 255, 255, 0.6)'
-                            }}>
-                              <span style={{
-                                padding: '2px 8px',
-                                borderRadius: '4px',
-                                background: 'rgba(59, 130, 246, 0.1)',
-                                color: '#60a5fa'
-                              }}>
-                                {rule.category}
-                              </span>
-                              <span style={{
-                                padding: '2px 8px',
-                                borderRadius: '4px',
-                                background: rule.importance === 'Critical' ? 'rgba(239, 68, 68, 0.1)' :
-                                  rule.importance === 'Important' ? 'rgba(245, 158, 11, 0.1)' :
-                                    'rgba(34, 197, 94, 0.1)',
-                                color: rule.importance === 'Critical' ? '#ef4444' :
-                                  rule.importance === 'Important' ? '#f59e0b' :
-                                    '#22c55e'
-                              }}>
-                                {rule.importance}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <p style={{
-                          fontSize: '14px',
-                          color: 'rgba(255, 255, 255, 0.8)',
-                          lineHeight: '1.5'
-                        }}>
-                          {rule.description}
-                        </p>
-                      </motion.div>
-                    ))}
-                  </div>
+        <Tab.Group>
+          <Tab.List className="flex space-x-1 rounded-xl bg-indigo-900/20 p-1">
+            <Tab
+              className={({ selected }) =>
+                classNames(
+                  'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
+                  'ring-white/60 ring-offset-2 ring-offset-indigo-400 focus:outline-none focus:ring-2',
+                  selected
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'text-gray-300 hover:bg-indigo-800/[0.12] hover:text-white'
+                )
+              }
+            >
+              <div className="flex items-center justify-center">
+                <BookOpenIcon className="h-5 w-5 mr-2" />
+                Daily Entries
+              </div>
+            </Tab>
+            <Tab
+              className={({ selected }) =>
+                classNames(
+                  'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
+                  'ring-white/60 ring-offset-2 ring-offset-indigo-400 focus:outline-none focus:ring-2',
+                  selected
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'text-gray-300 hover:bg-indigo-800/[0.12] hover:text-white'
+                )
+              }
+            >
+              <div className="flex items-center justify-center">
+                <ClipboardDocumentCheckIcon className="h-5 w-5 mr-2" />
+                Goals
+              </div>
+            </Tab>
+            <Tab
+              className={({ selected }) =>
+                classNames(
+                  'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
+                  'ring-white/60 ring-offset-2 ring-offset-indigo-400 focus:outline-none focus:ring-2',
+                  selected
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'text-gray-300 hover:bg-indigo-800/[0.12] hover:text-white'
+                )
+              }
+            >
+              <div className="flex items-center justify-center">
+                <ChartBarIcon className="h-5 w-5 mr-2" />
+                Statistics
+              </div>
+            </Tab>
+          </Tab.List>
+          <Tab.Panels className="mt-4">
+            <Tab.Panel className="rounded-xl bg-gray-800 p-4">
+              {entries.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-400">No entries yet. Click "New Entry" to get started.</p>
                 </div>
-              )}
-
-              {activeTab === 'tracker' && (
-                <div>
-                  <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '20px' }}>
-                    Daily Discipline Tracker
-                  </h2>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {entries.map(entry => (
-                      <motion.div
-                        key={entry.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        style={{
-                          padding: '16px',
-                          borderRadius: '12px',
-                          background: 'rgba(255, 255, 255, 0.03)',
-                          border: '1px solid rgba(255, 255, 255, 0.05)',
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          marginBottom: '12px'
-                        }}>
-                          <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+              ) : (
+                <div className="space-y-4">
+                  {entries.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="bg-gray-700 rounded-lg p-4 shadow-sm hover:bg-gray-600 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <div className="text-sm text-gray-300">
                             {new Date(entry.date).toLocaleDateString('en-US', {
                               weekday: 'long',
                               year: 'numeric',
@@ -447,323 +304,214 @@ export const DisciplineTracker = () => {
                               day: 'numeric'
                             })}
                           </div>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            color: '#f59e0b'
-                          }}>
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <RiStarLine
-                                key={i}
-                                style={{
-                                  color: i < entry.rating ? '#f59e0b' : 'rgba(245, 158, 11, 0.2)'
-                                }}
-                              />
+                          <div className="text-sm text-indigo-400 mt-1">{entry.mood}</div>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium text-gray-300 mr-2">Rating:</span>
+                          <span className="text-lg font-semibold text-indigo-400">{entry.rating}/5</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-300 mb-2">Rules Followed</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {entry.rulesFollowed.map((rule: string, index: number) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-900/30 text-green-400"
+                              >
+                                {rule}
+                              </span>
                             ))}
                           </div>
                         </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                          <div>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              color: '#22c55e',
-                              marginBottom: '8px'
-                            }}>
-                              <RiCheckLine />
-                              <span>Rules Followed</span>
-                            </div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                              {entry.rules_followed.map(rule => (
-                                <span
-                                  key={rule}
-                                  style={{
-                                    padding: '4px 8px',
-                                    borderRadius: '6px',
-                                    background: 'rgba(34, 197, 94, 0.1)',
-                                    fontSize: '12px'
-                                  }}
-                                >
-                                  {rule}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              color: '#ef4444',
-                              marginBottom: '8px'
-                            }}>
-                              <RiCloseLine />
-                              <span>Rules Broken</span>
-                            </div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                              {entry.rules_broken.map(rule => (
-                                <span
-                                  key={rule}
-                                  style={{
-                                    padding: '4px 8px',
-                                    borderRadius: '6px',
-                                    background: 'rgba(239, 68, 68, 0.1)',
-                                    fontSize: '12px'
-                                  }}
-                                >
-                                  {rule}
-                                </span>
-                              ))}
-                            </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-300 mb-2">Rules Broken</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {entry.rulesBroken.map((rule: string, index: number) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-900/30 text-red-400"
+                              >
+                                {rule}
+                              </span>
+                            ))}
                           </div>
                         </div>
+                      </div>
 
-                        {entry.notes && (
-                          <div style={{
-                            marginTop: '12px',
-                            padding: '12px',
-                            borderRadius: '8px',
-                            background: 'rgba(255, 255, 255, 0.02)',
-                            fontSize: '14px',
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            lineHeight: '1.5'
-                          }}>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              color: 'rgba(255, 255, 255, 0.6)',
-                              marginBottom: '4px'
-                            }}>
-                              <RiInformationLine />
-                              <span>Notes</span>
-                            </div>
-                            {entry.notes}
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
+                      {entry.learnings && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium text-gray-300 mb-2">Key Learnings</h4>
+                          <p className="text-sm text-gray-300">{entry.learnings}</p>
+                        </div>
+                      )}
+
+                      {entry.notes && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-300 mb-2">Additional Notes</h4>
+                          <p className="text-sm text-gray-300">{entry.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
-
-              {activeTab === 'stats' && stats && (
-                <div>
-                  <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '20px' }}>
-                    Performance Statistics
-                  </h2>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                    <div style={{
-                      padding: '20px',
-                      borderRadius: '12px',
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid rgba(255, 255, 255, 0.05)',
-                    }}>
-                      <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>Most Followed Rules</h3>
-                      {stats.mostFollowedRules.map(({ rule, count }) => (
-                        <div
-                          key={rule}
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '8px 0',
-                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
-                          }}
+            </Tab.Panel>
+            <Tab.Panel className="rounded-xl bg-gray-800 p-4">
+              {goals.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-400">No goals set. Start by setting your trading goals.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {goals.map((goal) => (
+                    <div
+                      key={goal.id}
+                      className="bg-gray-700 rounded-lg p-4 shadow-sm hover:bg-gray-600 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-lg font-medium text-white">{goal.title}</h3>
+                        <span
+                          className={classNames(
+                            'px-2 py-1 text-xs font-medium rounded-full',
+                            goal.status === 'completed'
+                              ? 'bg-green-900/30 text-green-400'
+                              : goal.status === 'in_progress'
+                              ? 'bg-yellow-900/30 text-yellow-400'
+                              : 'bg-gray-900/30 text-gray-400'
+                          )}
                         >
-                          <span style={{ fontSize: '14px' }}>{rule}</span>
-                          <span style={{
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            background: 'rgba(34, 197, 94, 0.1)',
-                            color: '#22c55e',
-                            fontSize: '12px'
-                          }}>
-                            {count} times
-                          </span>
+                          {goal.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-300 mb-4">{goal.description}</p>
+                      <div className="mb-4">
+                        <div className="flex justify-between text-sm text-gray-300 mb-1">
+                          <span>Progress</span>
+                          <span>{goal.progress}%</span>
                         </div>
-                      ))}
+                        <div className="w-full bg-gray-600 rounded-full h-2">
+                          <div
+                            className="bg-indigo-600 h-2 rounded-full"
+                            style={{ width: `${goal.progress}%` }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-300 mb-2">Metrics</h4>
+                        <div className="space-y-2">
+                          {goal.metrics.map((metric, index) => (
+                            <div key={index} className="flex justify-between items-center">
+                              <span className="text-sm text-gray-300">{metric.key}</span>
+                              <span className="text-sm text-gray-300">
+                                {metric.value} / {metric.target}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="mt-4 text-sm text-gray-400">
+                        Target Date: {new Date(goal.targetDate).toLocaleDateString()}
+                      </div>
                     </div>
+                  ))}
+                </div>
+              )}
+            </Tab.Panel>
+            <Tab.Panel className="rounded-xl bg-gray-800 p-4">
+              {!stats ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-400">Statistics will appear once you have some entries.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gray-700 rounded-lg p-4">
+                    <h3 className="text-lg font-medium text-white mb-4">Overview</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="text-sm text-gray-300">Average Rating</div>
+                        <div className="text-2xl font-semibold text-indigo-400">
+                          {stats.averageRating.toFixed(1)}/5
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-300">Compliance Rate</div>
+                        <div className="text-2xl font-semibold text-green-400">
+                          {stats.complianceRate.toFixed(1)}%
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-300">Total Entries</div>
+                        <div className="text-2xl font-semibold text-indigo-400">
+                          {stats.totalEntries}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-                    <div style={{
-                      padding: '20px',
-                      borderRadius: '12px',
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid rgba(255, 255, 255, 0.05)',
-                    }}>
-                      <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>Most Broken Rules</h3>
-                      {stats.mostBrokenRules.map(({ rule, count }) => (
+                  <div className="bg-gray-700 rounded-lg p-4">
+                    <h3 className="text-lg font-medium text-white mb-4">Most Followed Rules</h3>
+                    <div className="space-y-2">
+                      {stats.mostFollowedRules.map((item, index) => (
                         <div
-                          key={rule}
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '8px 0',
-                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
-                          }}
+                          key={index}
+                          className="flex justify-between items-center text-sm"
                         >
-                          <span style={{ fontSize: '14px' }}>{rule}</span>
-                          <span style={{
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            color: '#ef4444',
-                            fontSize: '12px'
-                          }}>
-                            {count} times
-                          </span>
+                          <span className="text-gray-300">{item.rule}</span>
+                          <span className="text-green-400">{item.count} times</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div style={{
-                    marginTop: '20px',
-                    padding: '20px',
-                    borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.05)',
-                  }}>
-                    <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>Weekly Rating Trend</h3>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      gap: '12px',
-                      height: '200px'
-                    }}>
-                      {stats.weeklyTrend.map(({ week, averageRating }) => (
+                  <div className="bg-gray-700 rounded-lg p-4">
+                    <h3 className="text-lg font-medium text-white mb-4">Most Broken Rules</h3>
+                    <div className="space-y-2">
+                      {stats.mostBrokenRules.map((item, index) => (
                         <div
-                          key={week}
-                          style={{
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '8px'
-                          }}
+                          key={index}
+                          className="flex justify-between items-center text-sm"
                         >
-                          <div style={{
-                            height: `${averageRating * 20}%`,
-                            width: '100%',
-                            background: 'linear-gradient(180deg, #3b82f6 0%, #8b5cf6 100%)',
-                            borderRadius: '4px',
-                            transition: 'height 0.3s ease'
-                          }} />
-                          <div style={{
-                            fontSize: '12px',
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            transform: 'rotate(-45deg)',
-                            transformOrigin: 'center',
-                            whiteSpace: 'nowrap'
-                          }}>
-                            {week}
-                          </div>
+                          <span className="text-gray-300">{item.rule}</span>
+                          <span className="text-red-400">{item.count} times</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-700 rounded-lg p-4">
+                    <h3 className="text-lg font-medium text-white mb-4">Mood Distribution</h3>
+                    <div className="space-y-2">
+                      {Object.entries(stats.moodDistribution).map(([mood, count], index) => (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center text-sm"
+                        >
+                          <span className="text-gray-300">{mood}</span>
+                          <span className="text-indigo-400">{count} times</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
               )}
-            </>
-          )}
-        </div>
-
-        {/* Side Panel for Stats */}
-        {activeTab === 'stats' && stats && (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px'
-          }}>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              style={{
-                padding: '24px',
-                borderRadius: '16px',
-                background: 'rgba(15, 23, 42, 0.4)',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-              }}
-            >
-              <h3 style={{ fontSize: '18px', marginBottom: '20px' }}>Quick Stats</h3>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div>
-                  <div style={{
-                    fontSize: '14px',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    marginBottom: '4px'
-                  }}>
-                    Average Rating
-                  </div>
-                  <div style={{
-                    fontSize: '24px',
-                    fontWeight: 'bold',
-                    color: stats.averageRating >= 4 ? '#22c55e' :
-                      stats.averageRating >= 3 ? '#f59e0b' : '#ef4444'
-                  }}>
-                    {stats.averageRating.toFixed(1)} / 5
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{
-                    fontSize: '14px',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    marginBottom: '4px'
-                  }}>
-                    Compliance Rate
-                  </div>
-                  <div style={{
-                    fontSize: '24px',
-                    fontWeight: 'bold',
-                    color: stats.complianceRate >= 80 ? '#22c55e' :
-                      stats.complianceRate >= 60 ? '#f59e0b' : '#ef4444'
-                  }}>
-                    {stats.complianceRate.toFixed(1)}%
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{
-                    fontSize: '14px',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    marginBottom: '4px'
-                  }}>
-                    Total Entries
-                  </div>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                    {stats.totalEntries}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
+            </Tab.Panel>
+          </Tab.Panels>
+        </Tab.Group>
       </div>
 
-      {/* Modals */}
-      <AddRuleModal
-        isOpen={showAddRule}
-        onClose={() => setShowAddRule(false)}
-        onRuleAdded={(rule) => {
-          setRules([...rules, rule]);
-          setShowAddRule(false);
-        }}
-      />
       <AddEntryModal
         isOpen={showAddEntry}
         onClose={() => setShowAddEntry(false)}
-        onEntryAdded={() => {
-          fetchEntries();
-          setShowAddEntry(false);
-        }}
+        onSave={addEntry}
+      />
+
+      <AddGoalModal
+        isOpen={showAddGoal}
+        onClose={() => setShowAddGoal(false)}
+        onSave={addGoal}
       />
     </div>
   );

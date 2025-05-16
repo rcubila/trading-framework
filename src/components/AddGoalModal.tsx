@@ -1,45 +1,49 @@
 import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import type { DailyEntry } from '../types/discipline';
+import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import type { Goal } from '../types/discipline';
 
-interface AddEntryModalProps {
+interface AddGoalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (entry: Omit<DailyEntry, 'id'>) => void;
+  onSave: (goal: Omit<Goal, 'id' | 'progress'>) => void;
 }
 
-const MOOD_OPTIONS = [
-  'Confident',
-  'Focused',
-  'Anxious',
-  'Frustrated',
-  'Neutral',
-  'Optimistic',
-  'Tired',
-  'Distracted'
-];
-
-export const AddEntryModal = ({ isOpen, onClose, onSave }: AddEntryModalProps) => {
-  const [rating, setRating] = useState(3);
-  const [rulesFollowed, setRulesFollowed] = useState<string[]>([]);
-  const [rulesBroken, setRulesBroken] = useState<string[]>([]);
-  const [notes, setNotes] = useState('');
-  const [mood, setMood] = useState('Neutral');
-  const [learnings, setLearnings] = useState('');
+export const AddGoalModal = ({ isOpen, onClose, onSave }: AddGoalModalProps) => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [targetDate, setTargetDate] = useState('');
+  const [metrics, setMetrics] = useState<{ key: string; value: number; target: number }[]>([
+    { key: '', value: 0, target: 0 }
+  ]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      date: new Date().toISOString(),
-      rating,
-      rulesFollowed,
-      rulesBroken,
-      notes,
-      mood,
-      learnings
+      title,
+      description,
+      targetDate,
+      metrics,
+      status: 'not_started'
     });
     onClose();
+  };
+
+  const addMetric = () => {
+    setMetrics([...metrics, { key: '', value: 0, target: 0 }]);
+  };
+
+  const removeMetric = (index: number) => {
+    setMetrics(metrics.filter((_, i) => i !== index));
+  };
+
+  const updateMetric = (index: number, field: keyof typeof metrics[0], value: string | number) => {
+    const newMetrics = [...metrics];
+    newMetrics[index] = {
+      ...newMetrics[index],
+      [field]: field === 'key' ? value : Number(value)
+    };
+    setMetrics(newMetrics);
   };
 
   return (
@@ -83,100 +87,98 @@ export const AddEntryModal = ({ isOpen, onClose, onSave }: AddEntryModalProps) =
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-white mb-4">
-                      Add Daily Entry
+                      Set New Trading Goal
                     </Dialog.Title>
 
-                    {/* Rating */}
+                    {/* Title */}
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-200 mb-2">
-                        How would you rate your discipline today? (1-5)
+                        Goal Title
                       </label>
                       <input
-                        type="range"
-                        min="1"
-                        max="5"
-                        value={rating}
-                        onChange={(e) => setRating(Number(e.target.value))}
-                        className="w-full"
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-0 bg-gray-700 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        placeholder="e.g., Improve Risk Management"
+                        required
                       />
-                      <div className="flex justify-between text-sm text-gray-400">
-                        <span>Poor</span>
-                        <span>Excellent</span>
-                      </div>
                     </div>
 
-                    {/* Mood */}
+                    {/* Description */}
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-200 mb-2">
-                        How are you feeling today?
+                        Description
                       </label>
-                      <select
-                        value={mood}
-                        onChange={(e) => setMood(e.target.value)}
-                        className="mt-1 block w-full rounded-md border-0 bg-gray-700 py-1.5 pl-3 pr-10 text-white shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        rows={3}
+                        className="mt-1 block w-full rounded-md border-0 bg-gray-700 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        placeholder="Describe your goal and how you plan to achieve it..."
+                        required
+                      />
+                    </div>
+
+                    {/* Target Date */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-200 mb-2">
+                        Target Date
+                      </label>
+                      <input
+                        type="date"
+                        value={targetDate}
+                        onChange={(e) => setTargetDate(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-0 bg-gray-700 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        required
+                      />
+                    </div>
+
+                    {/* Metrics */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-200 mb-2">
+                        Progress Metrics
+                      </label>
+                      {metrics.map((metric, index) => (
+                        <div key={index} className="flex gap-2 mb-2">
+                          <input
+                            type="text"
+                            value={metric.key}
+                            onChange={(e) => updateMetric(index, 'key', e.target.value)}
+                            placeholder="Metric name"
+                            className="flex-1 rounded-md border-0 bg-gray-700 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          />
+                          <input
+                            type="number"
+                            value={metric.value}
+                            onChange={(e) => updateMetric(index, 'value', e.target.value)}
+                            placeholder="Current"
+                            className="w-20 rounded-md border-0 bg-gray-700 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          />
+                          <input
+                            type="number"
+                            value={metric.target}
+                            onChange={(e) => updateMetric(index, 'target', e.target.value)}
+                            placeholder="Target"
+                            className="w-20 rounded-md border-0 bg-gray-700 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeMetric(index)}
+                            className="rounded-md bg-red-600 p-1.5 text-white shadow-sm hover:bg-red-500"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={addMetric}
+                        className="mt-2 inline-flex items-center rounded-md bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-600"
                       >
-                        {MOOD_OPTIONS.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Rules Followed */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-200 mb-2">
-                        Rules Followed (comma-separated)
-                      </label>
-                      <input
-                        type="text"
-                        value={rulesFollowed.join(', ')}
-                        onChange={(e) => setRulesFollowed(e.target.value.split(',').map(s => s.trim()))}
-                        className="mt-1 block w-full rounded-md border-0 bg-gray-700 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        placeholder="e.g. Stop loss, Position sizing, Pre-trade checklist"
-                      />
-                    </div>
-
-                    {/* Rules Broken */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-200 mb-2">
-                        Rules Broken (comma-separated)
-                      </label>
-                      <input
-                        type="text"
-                        value={rulesBroken.join(', ')}
-                        onChange={(e) => setRulesBroken(e.target.value.split(',').map(s => s.trim()))}
-                        className="mt-1 block w-full rounded-md border-0 bg-gray-700 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        placeholder="e.g. Overtrading, Revenge trading"
-                      />
-                    </div>
-
-                    {/* Learnings */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-200 mb-2">
-                        Key Learnings
-                      </label>
-                      <textarea
-                        value={learnings}
-                        onChange={(e) => setLearnings(e.target.value)}
-                        rows={3}
-                        className="mt-1 block w-full rounded-md border-0 bg-gray-700 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        placeholder="What did you learn today about your trading discipline?"
-                      />
-                    </div>
-
-                    {/* Notes */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-200 mb-2">
-                        Additional Notes
-                      </label>
-                      <textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        rows={3}
-                        className="mt-1 block w-full rounded-md border-0 bg-gray-700 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        placeholder="Any additional thoughts or observations..."
-                      />
+                        <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+                        Add Metric
+                      </button>
                     </div>
                   </div>
 
@@ -185,7 +187,7 @@ export const AddEntryModal = ({ isOpen, onClose, onSave }: AddEntryModalProps) =
                       type="submit"
                       className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
                     >
-                      Save Entry
+                      Save Goal
                     </button>
                     <button
                       type="button"

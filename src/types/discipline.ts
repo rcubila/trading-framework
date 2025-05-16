@@ -20,11 +20,37 @@ export interface DisciplineEntry {
   updated_at?: string;
 }
 
+export interface DailyEntry {
+  id: string;
+  date: string;
+  rating: number;
+  rulesFollowed: string[];
+  rulesBroken: string[];
+  notes?: string;
+  mood: string;
+  learnings: string;
+}
+
+export interface Goal {
+  id: string;
+  title: string;
+  description: string;
+  targetDate: string;
+  progress: number;
+  status: 'not_started' | 'in_progress' | 'completed';
+  metrics: {
+    key: string;
+    value: number;
+    target: number;
+  }[];
+}
+
 export interface DisciplineStats {
   averageRating: number;
-  totalEntries: number;
-  mostBrokenRules: Array<{rule: string; count: number}>;
-  mostFollowedRules: Array<{rule: string; count: number}>;
-  weeklyTrend: Array<{week: string; averageRating: number}>;
   complianceRate: number;
+  totalEntries: number;
+  mostFollowedRules: Array<{ rule: string; count: number }>;
+  mostBrokenRules: Array<{ rule: string; count: number }>;
+  weeklyTrend: Array<{ week: string; averageRating: number }>;
+  moodDistribution: Record<string, number>;
 } 
