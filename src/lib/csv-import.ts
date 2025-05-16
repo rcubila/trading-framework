@@ -45,7 +45,7 @@ const validateDate = (value: string, fieldName: string): string => {
   // Try parsing different date formats
   let date: Date | null = null;
   
-  // Try DD/MM/YY HH:mm format
+  // Try DD/MM/YY HH:mm format (European)
   if (cleanValue.match(/^\d{2}\/\d{2}\/\d{2}\s+\d{2}:\d{2}$/)) {
     const [datePart, timePart] = cleanValue.split(' ');
     const [day, month, year] = datePart.split('/');
@@ -54,7 +54,7 @@ const validateDate = (value: string, fieldName: string): string => {
     const fullYear = parseInt(year) + 2000;
     date = new Date(fullYear, parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute));
   }
-  // Try DD.MM.YY HH:mm format
+  // Try DD.MM.YY HH:mm format (European)
   else if (cleanValue.match(/^\d{2}\.\d{2}\.\d{2}\s+\d{2}:\d{2}$/)) {
     const [datePart, timePart] = cleanValue.split(' ');
     const [day, month, year] = datePart.split('.');
@@ -62,13 +62,34 @@ const validateDate = (value: string, fieldName: string): string => {
     const fullYear = parseInt(year) + 2000;
     date = new Date(fullYear, parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute));
   }
+  // Try DD/MM/YYYY format (European)
+  else if (cleanValue.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+    const [day, month, year] = cleanValue.split('/');
+    date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  }
+  // Try DD.MM.YYYY format (European)
+  else if (cleanValue.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
+    const [day, month, year] = cleanValue.split('.');
+    date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  }
   // Try standard ISO format and other common formats
   else {
     date = new Date(cleanValue);
   }
 
   if (!date || isNaN(date.getTime())) {
-    throw new Error(`Invalid ${fieldName}: ${value}. Must be a valid date.`);
+    throw new Error(`Invalid ${fieldName}: ${value}. Must be a valid date in DD/MM/YY or DD/MM/YYYY format.`);
+  }
+
+  // Validate that the date is reasonable (not too far in the past or future)
+  const now = new Date();
+  const fiveYearsAgo = new Date();
+  fiveYearsAgo.setFullYear(now.getFullYear() - 5);
+  const fiveYearsFromNow = new Date();
+  fiveYearsFromNow.setFullYear(now.getFullYear() + 5);
+
+  if (date < fiveYearsAgo || date > fiveYearsFromNow) {
+    throw new Error(`Invalid ${fieldName}: ${value}. Date must be within 5 years of current date.`);
   }
 
   return date.toISOString();
