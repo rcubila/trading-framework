@@ -440,14 +440,19 @@ export const Dashboard = () => {
         }
 
         // Fetch recent trades (last 24 hours)
-        const twentyFourHoursAgo = new Date();
-        twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+        const now = new Date();
+        const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        
+        // Format dates in ISO format but keep them in local timezone
+        const startDate = twentyFourHoursAgo.toISOString().split('.')[0];
+        const endDate = now.toISOString().split('.')[0];
 
         const { data: recentTradesData, error: recentError } = await supabase
           .from('trades')
           .select('*')
           .eq('user_id', user.id)
-          .gte('entry_date', twentyFourHoursAgo.toISOString())
+          .gte('entry_date', startDate)
+          .lte('entry_date', endDate)
           .order('entry_date', { ascending: false })
           .limit(4);
 

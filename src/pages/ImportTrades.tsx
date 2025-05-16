@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { importTradesFromCSV } from '../lib/csv-import';
 import { processTradeImages, testOpenAIAccess } from '../lib/image-import';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 interface FileWithPreview extends File {
   preview?: string;
@@ -42,6 +43,7 @@ const SAMPLE_TEMPLATE = `Open,Symbol,Open Price,Volume,Action,Close,Close Price,
 
 export const ImportTrades = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [imageFiles, setImageFiles] = useState<FileWithPreview[]>([]);
   const [importing, setImporting] = useState(false);
@@ -455,40 +457,42 @@ export const ImportTrades = () => {
               <RiMagicLine style={{ color: '#a855f7' }} />
               AI Screenshot Import
             </h2>
-            <button
-              onClick={handleTestAPI}
-              disabled={isTestingAPI}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                backgroundColor: isTestingAPI ? 'rgba(168, 85, 247, 0.3)' : 'rgba(168, 85, 247, 0.1)',
-                border: '1px solid rgba(168, 85, 247, 0.2)',
-                color: '#a855f7',
-                cursor: isTestingAPI ? 'default' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              {isTestingAPI ? (
-                <>
-                  <div style={{
-                    width: '16px',
-                    height: '16px',
-                    border: '2px solid rgba(168, 85, 247, 0.3)',
-                    borderTop: '2px solid #a855f7',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite',
-                  }} />
-                  Testing API...
-                </>
-              ) : (
-                <>
-                  <RiTestTubeLine />
-                  Test API Access
-                </>
-              )}
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleTestAPI}
+                disabled={isTestingAPI}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  backgroundColor: isTestingAPI ? 'rgba(168, 85, 247, 0.3)' : 'rgba(168, 85, 247, 0.1)',
+                  border: '1px solid rgba(168, 85, 247, 0.2)',
+                  color: '#a855f7',
+                  cursor: isTestingAPI ? 'default' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                {isTestingAPI ? (
+                  <>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid rgba(168, 85, 247, 0.3)',
+                      borderTop: '2px solid #a855f7',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                    }} />
+                    Testing API...
+                  </>
+                ) : (
+                  <>
+                    <RiTestTubeLine />
+                    Test API Access
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
           {apiTestResult && (

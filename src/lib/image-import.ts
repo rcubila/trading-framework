@@ -70,7 +70,7 @@ const extractTradesFromImage = async (imageBase64: string): Promise<Trade[]> => 
         messages: [
           {
             role: 'system',
-            content: 'You are a trading expert that specializes in extracting trade information from screenshots of various trading platforms. You can identify and extract trade details from platforms like MT4, MT5, TradingView, and other common trading platforms. Always return data in a consistent JSON format.'
+            content: 'You are a trading expert that specializes in extracting trade information from screenshots of various trading platforms. You can identify and extract trade details from platforms like MT4, MT5, TradingView, and other common trading platforms. Always return data in a consistent JSON format. For dates in DD/MM/YY format (European style), ensure to parse them correctly - for example, 16/05/25 should be interpreted as May 16th, 2025, not as 16th month which would be invalid.'
           },
           {
             role: 'user',
@@ -83,21 +83,24 @@ const extractTradesFromImage = async (imageBase64: string): Promise<Trade[]> => 
                 - Trade direction (buy/sell)
                 - Position sizes
                 - Profit/loss values
-                - Dates and times
+                - Dates and times (Note: For dates in DD/MM/YY format, interpret as European format)
                 - Trading pairs or symbols
                 - Market type indicators
 
                 If you see partial information, include what you can find and leave other fields null.
                 If you can't find any trade information, explain what's missing.
 
+                For dates in DD/MM/YY format, always interpret as European format (day/month/year).
+                Example: 16/05/25 should be interpreted as May 16th, 2025.
+
                 Return the data in this exact JSON format:
                 {
                   "trades": [
                     {
                       "symbol": "EURUSD",
-                      "entry_date": "2024-03-18T10:30:00Z",
+                      "entry_date": "2025-05-16T10:30:00Z",  // Note: Date converted to ISO format
                       "entry_price": 1.0850,
-                      "exit_date": "2024-03-18T14:45:00Z",
+                      "exit_date": "2025-05-16T14:45:00Z",
                       "exit_price": 1.0870,
                       "quantity": 1.0,
                       "type": "Long",
