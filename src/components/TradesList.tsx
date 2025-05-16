@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
+import { RiArrowUpLine, RiArrowDownLine, RiDeleteBinLine } from 'react-icons/ri';
 import { FixedSizeList as List } from 'react-window';
 import type { Trade } from '../types/trade';
 
@@ -7,6 +7,8 @@ interface TradesListProps {
   fetchTrades: (page: number, pageSize: number) => Promise<Trade[]>;
   initialPageSize?: number;
   onTradeClick?: (trade: Trade) => void;
+  onDeleteClick?: (trade: Trade) => void;
+  refreshTrigger?: number;
 }
 
 const ITEM_SIZE = 72; // Height of each trade row
@@ -70,7 +72,11 @@ TradeContent.displayName = 'TradeContent';
 const Row = memo(({ index, style, data }: { 
   index: number; 
   style: React.CSSProperties; 
-  data: { trades: Trade[]; onTradeClick?: (trade: Trade) => void } 
+  data: { 
+    trades: Trade[]; 
+    onTradeClick?: (trade: Trade) => void;
+    onDeleteClick?: (trade: Trade) => void;
+  } 
 }) => {
   const trade = data.trades[index];
   
@@ -112,7 +118,6 @@ const Row = memo(({ index, style, data }: {
         transition: 'all 0.2s ease',
         cursor: 'pointer',
       }}
-      onClick={() => data.onTradeClick?.(trade)}
       onMouseEnter={(e) => {
         e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
         e.currentTarget.style.transform = 'translateY(-2px)';
@@ -122,7 +127,42 @@ const Row = memo(({ index, style, data }: {
         e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
-      <TradeContent trade={trade} />
+      <div 
+        style={{ flex: 1, display: 'flex', alignItems: 'center' }}
+        onClick={() => data.onTradeClick?.(trade)}
+      >
+        <TradeContent trade={trade} />
+      </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          data.onDeleteClick?.(trade);
+        }}
+        style={{
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          color: '#ef4444',
+          padding: '8px',
+          borderRadius: '8px',
+          border: '1px solid rgba(239, 68, 68, 0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          marginLeft: '16px',
+          opacity: 0.6,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.opacity = '1';
+          e.currentTarget.style.transform = 'scale(1.1)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = '0.6';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        <RiDeleteBinLine size={16} />
+      </button>
     </div>
   );
 });
@@ -166,7 +206,13 @@ const PageSizeSelector = memo(({
 
 PageSizeSelector.displayName = 'PageSizeSelector';
 
-export const TradesList = ({ fetchTrades, initialPageSize = 20, onTradeClick }: TradesListProps) => {
+export const TradesList = ({ 
+  fetchTrades, 
+  initialPageSize = 20, 
+  onTradeClick,
+  onDeleteClick,
+  refreshTrigger = 0
+}: TradesListProps) => {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
@@ -179,15 +225,14 @@ export const TradesList = ({ fetchTrades, initialPageSize = 20, onTradeClick }: 
   const listHeight = 600;
 
   const loadTrades = useCallback(async () => {
-    if (loadingRef.current || !hasMore) return;
+    if (loadingRef.current) return;
     try {
       loadingRef.current = true;
       setLoading(true);
       setError(null);
-      const newTrades = await fetchTrades(1, pageSize); // Always fetch from start with pageSize
-      
-      setTrades(newTrades); // Replace trades instead of appending
-      setHasMore(false); // Don't load more since we're getting exactly what we want
+      const newTrades = await fetchTrades(1, pageSize);
+      setTrades(newTrades);
+      setHasMore(newTrades.length >= pageSize);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load trades');
     } finally {
@@ -197,12 +242,13 @@ export const TradesList = ({ fetchTrades, initialPageSize = 20, onTradeClick }: 
   }, [fetchTrades, pageSize]);
 
   useEffect(() => {
+    // Don't clear trades immediately to avoid flickering
     loadTrades();
-  }, [loadTrades]);
+  }, [loadTrades, refreshTrigger]);
 
   const handlePageSizeChange = useCallback((newSize: number) => {
     setPageSize(newSize);
-    setHasMore(true); // Reset hasMore to trigger a new load
+    setHasMore(true);
     loadingRef.current = false;
   }, []);
 
@@ -235,7 +281,7 @@ export const TradesList = ({ fetchTrades, initialPageSize = 20, onTradeClick }: 
               itemCount={trades.length}
               itemSize={ITEM_SIZE}
               width="100%"
-              itemData={{ trades, onTradeClick }}
+              itemData={{ trades, onTradeClick, onDeleteClick }}
               style={{
                 overflowX: 'hidden'
               }}
