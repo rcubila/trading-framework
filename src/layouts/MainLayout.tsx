@@ -6,6 +6,7 @@ import {
   RiLightbulbLine,
   RiMedalLine,
   RiDownloadLine,
+  RiBarChartLine,
 } from 'react-icons/ri';
 import { motion } from 'framer-motion';
 import { UserMenu } from '../components/UserMenu';
@@ -14,6 +15,7 @@ import { HelpButton } from '../components/HelpButton';
 const navigation = [
   { name: 'Dashboard', icon: RiDashboardLine, path: '/' },
   { name: 'Trades', icon: RiExchangeLine, path: '/trades' },
+  { name: 'Analytics', icon: RiBarChartLine, path: '/analytics' },
   { name: 'Journal', icon: RiBookReadLine, path: '/journal' },
   { name: 'Strategy', icon: RiLightbulbLine, path: '/strategy' },
   { name: 'Discipline Tracker', icon: RiMedalLine, path: '/discipline' },

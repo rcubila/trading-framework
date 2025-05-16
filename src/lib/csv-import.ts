@@ -39,6 +39,11 @@ const validateNumber = (value: string, fieldName: string): number => {
 
 // Helper function to validate dates
 const validateDate = (value: string, fieldName: string): string => {
+  // If value is empty, invalid, or epoch, use current date
+  if (!value || value.trim() === '' || value === '1970-01-01 00:00' || value.includes('1970-01-01')) {
+    return new Date().toISOString();
+  }
+
   // Remove any quotes
   const cleanValue = value.replace(/['"]/g, '').trim();
   
@@ -78,7 +83,8 @@ const validateDate = (value: string, fieldName: string): string => {
   }
 
   if (!date || isNaN(date.getTime())) {
-    throw new Error(`Invalid ${fieldName}: ${value}. Must be a valid date in DD/MM/YY or DD/MM/YYYY format.`);
+    // If date is invalid, use current date
+    return new Date().toISOString();
   }
 
   // Validate that the date is reasonable (not too far in the past or future)
@@ -89,7 +95,8 @@ const validateDate = (value: string, fieldName: string): string => {
   fiveYearsFromNow.setFullYear(now.getFullYear() + 5);
 
   if (date < fiveYearsAgo || date > fiveYearsFromNow) {
-    throw new Error(`Invalid ${fieldName}: ${value}. Date must be within 5 years of current date.`);
+    // If date is outside range, use current date
+    return new Date().toISOString();
   }
 
   return date.toISOString();
@@ -112,6 +119,14 @@ const detectColumnType = (headers: string[], values: string[][]): { [key: string
     // Get all non-empty values for this column
     const columnValues = values.map(row => row[index]).filter(val => val && val.trim());
     if (columnValues.length === 0) return;
+
+    // Check for market patterns
+    const marketPattern = /(stocks?|crypto|forex|futures|equities|etfs?)/i;
+    const isMarketColumn = columnValues.some(val => marketPattern.test(val));
+    if (isMarketColumn) {
+      columnTypes[header] = 'market';
+      return;
+    }
 
     // Check for date patterns
     const datePattern = /^\d{2}[-.]\d{2}[-.]\d{2}|\d{4}-\d{2}-\d{2}|^\d{2}:\d{2}|\d{2}[-.]\d{2}[-.]\d{2}\s+\d{2}:\d{2}/;
@@ -164,6 +179,40 @@ const detectColumnType = (headers: string[], values: string[][]): { [key: string
   return columnTypes;
 };
 
+// Helper function to determine market and category
+const determineMarketAndCategory = (symbol: string, market?: string): { market: string; market_category: 'Equities' | 'Crypto' | 'Forex' | 'Futures' | 'Other' } => {
+  // If market is provided, use it to determine category
+  if (market) {
+    const normalizedMarket = market.toLowerCase();
+    if (normalizedMarket.includes('stock') || normalizedMarket.includes('equity') || normalizedMarket.includes('etf')) {
+      return { market: 'Stocks', market_category: 'Equities' };
+    }
+    if (normalizedMarket.includes('crypto') || normalizedMarket.includes('binance')) {
+      return { market: 'Spot Crypto', market_category: 'Crypto' };
+    }
+    if (normalizedMarket.includes('forex') || normalizedMarket.includes('fx')) {
+      return { market: 'Spot Forex', market_category: 'Forex' };
+    }
+    if (normalizedMarket.includes('future')) {
+      return { market: 'Futures', market_category: 'Futures' };
+    }
+  }
+
+  // Try to determine from symbol pattern
+  if (symbol.length === 6 && /^[A-Z]{6}$/.test(symbol)) {
+    return { market: 'Spot Forex', market_category: 'Forex' };
+  }
+  if (symbol.includes('USDT') || symbol.includes('BTC') || symbol.includes('ETH')) {
+    return { market: 'Spot Crypto', market_category: 'Crypto' };
+  }
+  if (['ES', 'NQ', 'YM', 'RTY', 'CL', 'GC', 'SI', '6E'].includes(symbol)) {
+    return { market: 'Futures', market_category: 'Futures' };
+  }
+  
+  // Default to Stocks/Equities
+  return { market: 'Stocks', market_category: 'Equities' };
+};
+
 export const importTradesFromCSV = async (csvContent: string): Promise<ImportResult> => {
   const errors: ImportError[] = [];
   const trades: Trade[] = [];
@@ -177,11 +226,12 @@ export const importTradesFromCSV = async (csvContent: string): Promise<ImportRes
       .map(line => line.split(',').map(v => v.trim()));
 
     // Find required columns (case insensitive)
-    const dateColumn = headers.find(h => h.toLowerCase().includes('open') || h.toLowerCase().includes('date'));
-    const symbolColumn = headers.find(h => h.toLowerCase().includes('symbol'));
-    const priceColumn = headers.find(h => h.toLowerCase().includes('price'));
-    const volumeColumn = headers.find(h => h.toLowerCase().includes('volume'));
-    let actionColumn = headers.find(h => h.toLowerCase().includes('action') || h.toLowerCase().includes('type'));
+    const dateColumn = headers.find(h => h.toLowerCase().includes('open') || h.toLowerCase().includes('date') || h.toLowerCase().includes('time'));
+    const symbolColumn = headers.find(h => h.toLowerCase().includes('symbol') || h.toLowerCase().includes('ticker'));
+    const priceColumn = headers.find(h => h.toLowerCase().includes('price') || h.toLowerCase().includes('entry'));
+    const volumeColumn = headers.find(h => h.toLowerCase().includes('volume') || h.toLowerCase().includes('size') || h.toLowerCase().includes('quantity'));
+    let actionColumn = headers.find(h => h.toLowerCase().includes('action') || h.toLowerCase().includes('type') || h.toLowerCase().includes('side'));
+    const marketColumn = headers.find(h => h.toLowerCase().includes('market') || h.toLowerCase().includes('asset'));
 
     // If no explicit action column, look for a column containing buy/sell values
     if (!actionColumn) {
@@ -235,12 +285,18 @@ export const importTradesFromCSV = async (csvContent: string): Promise<ImportRes
           throw new Error('Required columns not found');
         }
 
+        const symbol = rowData[symbolColumn].toUpperCase();
+        const marketInfo = determineMarketAndCategory(
+          symbol,
+          marketColumn ? rowData[marketColumn] : undefined
+        );
+
         // Create trade object
         const trade: Trade = {
           id: uuidv4(),
-          symbol: rowData[symbolColumn].toUpperCase(),
-          market_category: 'Equities',
-          market: 'Stocks',
+          symbol: symbol,
+          market: marketInfo.market,
+          market_category: marketInfo.market_category,
           type: normalizedAction === 'buy' ? 'Long' : 'Short',
           status: 'Open', // Default to open
           entry_price: validateNumber(rowData[priceColumn], 'Price'),

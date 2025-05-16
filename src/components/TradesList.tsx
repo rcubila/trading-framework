@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { RiArrowUpLine, RiArrowDownLine, RiDeleteBinLine } from 'react-icons/ri';
+import { RiArrowUpLine, RiArrowDownLine, RiDeleteBinLine, RiMoreLine, RiEditLine, RiFileCopyLine } from 'react-icons/ri';
 import { FixedSizeList as List } from 'react-window';
 import type { Trade } from '../types/trade';
 
@@ -14,57 +14,250 @@ interface TradesListProps {
 const ITEM_SIZE = 72; // Height of each trade row
 const LOADING_BUFFER = 10; // Number of items to load before reaching the end
 
-// Memoize the individual trade row content
-const TradeContent = memo(({ trade }: { trade: Trade }) => (
-  <>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-      <div style={{
-        width: '32px',
-        height: '32px',
-        borderRadius: '8px',
-        backgroundColor: trade.type === 'Long' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+// Add dropdown menu component
+const TradeMenu = memo(({ 
+  trade, 
+  onDeleteClick,
+  onClose,
+  position
+}: { 
+  trade: Trade;
+  onDeleteClick?: (trade: Trade) => void;
+  onClose: () => void;
+  position: { top: number; right: number };
+}) => (
+  <div 
+    style={{
+      position: 'absolute',
+      top: position.top,
+      right: position.right,
+      backgroundColor: 'rgba(30, 41, 59, 0.95)',
+      borderRadius: '8px',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      padding: '8px 0',
+      minWidth: '160px',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      zIndex: 1000,
+    }}
+  >
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        // TODO: Implement edit functionality
+        onClose();
+      }}
+      style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        color: trade.type === 'Long' ? '#22c55e' : '#ef4444',
-      }}>
-        {trade.type === 'Long' ? <RiArrowUpLine size={16} /> : <RiArrowDownLine size={16} />}
-      </div>
-      <div>
-        <div style={{ 
-          fontSize: '14px', 
-          fontWeight: 'bold', 
-          marginBottom: '2px',
-        }}>
-          {trade.symbol}
-        </div>
-        <div style={{ 
-          fontSize: '12px', 
-          color: 'rgba(255, 255, 255, 0.6)',
+        gap: '8px',
+        padding: '8px 16px',
+        width: '100%',
+        backgroundColor: 'transparent',
+        border: 'none',
+        color: 'white',
+        cursor: 'pointer',
+        fontSize: '14px',
+        textAlign: 'left',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+      }}
+    >
+      <RiEditLine size={16} />
+      Edit Trade
+    </button>
+    
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        // TODO: Implement duplicate functionality
+        onClose();
+      }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '8px 16px',
+        width: '100%',
+        backgroundColor: 'transparent',
+        border: 'none',
+        color: 'white',
+        cursor: 'pointer',
+        fontSize: '14px',
+        textAlign: 'left',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+      }}
+    >
+      <RiFileCopyLine size={16} />
+      Duplicate Trade
+    </button>
+    
+    <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.1)', margin: '4px 0' }} />
+    
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        if (onDeleteClick) {
+          onDeleteClick(trade);
+        }
+        onClose();
+      }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '8px 16px',
+        width: '100%',
+        backgroundColor: 'transparent',
+        border: 'none',
+        color: '#ef4444',
+        cursor: 'pointer',
+        fontSize: '14px',
+        textAlign: 'left',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+      }}
+    >
+      <RiDeleteBinLine size={16} />
+      Delete Trade
+    </button>
+  </div>
+));
+
+TradeMenu.displayName = 'TradeMenu';
+
+// Modify TradeContent to include menu functionality
+const TradeContent = memo(({ trade, onDeleteClick }: { trade: Trade; onDeleteClick?: (trade: Trade) => void }) => {
+  const [showMenu, setShowMenu] = useState(false);
+  const menuButtonRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuButtonRef.current && !menuButtonRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div style={{ 
+      display: 'grid', 
+      gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 80px',
+      width: '100%',
+      gap: '16px',
+      alignItems: 'center',
+      position: 'relative'
+    }}>
+      {/* Market/Symbol */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{
+          width: '24px',
+          height: '24px',
+          borderRadius: '6px',
+          backgroundColor: trade.type === 'Long' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
           display: 'flex',
-          gap: '8px',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: trade.type === 'Long' ? '#22c55e' : '#ef4444',
         }}>
-          <span>{new Date(trade.entry_date).toLocaleDateString()}</span>
-          <span>•</span>
-          <span>{trade.quantity} shares</span>
+          {trade.type === 'Long' ? <RiArrowUpLine size={14} /> : <RiArrowDownLine size={14} />}
+        </div>
+        <div>
+          <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{trade.symbol}</div>
+          <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>{trade.market}</div>
         </div>
       </div>
-    </div>
-    <div style={{ textAlign: 'right' }}>
+
+      {/* Date/Time */}
+      <div>
+        <div style={{ fontSize: '14px' }}>{new Date(trade.entry_date).toLocaleDateString()}</div>
+        <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+          {new Date(trade.entry_date).toLocaleTimeString()}
+        </div>
+      </div>
+
+      {/* Type */}
+      <div style={{ 
+        fontSize: '14px',
+        color: trade.type === 'Long' ? '#22c55e' : '#ef4444'
+      }}>
+        {trade.type}
+      </div>
+
+      {/* Entry/Exit */}
+      <div>
+        <div style={{ fontSize: '14px' }}>${trade.entry_price.toFixed(2)}</div>
+        <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+          {trade.exit_price ? `$${trade.exit_price.toFixed(2)}` : 'Open'}
+        </div>
+      </div>
+
+      {/* P&L */}
       <div style={{
         fontSize: '14px',
         fontWeight: 'bold',
         color: (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
-        marginBottom: '2px',
       }}>
-        ${trade.pnl?.toLocaleString() ?? 'Open'}
+        ${Math.abs(trade.pnl || 0).toLocaleString()}
       </div>
-      <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
-        {trade.entry_price.toFixed(2)} → {trade.exit_price?.toFixed(2) ?? 'Open'}
+
+      {/* Status */}
+      <div style={{
+        fontSize: '14px',
+        color: trade.status === 'Open' ? '#f59e0b' : '#22c55e'
+      }}>
+        {trade.status}
+      </div>
+
+      {/* Actions */}
+      <div 
+        ref={menuButtonRef}
+        style={{ 
+          textAlign: 'right',
+          cursor: 'pointer',
+          position: 'relative'
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowMenu(!showMenu);
+        }}
+      >
+        <RiMoreLine 
+          size={20} 
+          style={{ 
+            color: showMenu ? 'white' : 'rgba(255, 255, 255, 0.6)',
+            transition: 'color 0.2s ease'
+          }} 
+        />
+        {showMenu && (
+          <TradeMenu
+            trade={trade}
+            onDeleteClick={onDeleteClick}
+            onClose={() => setShowMenu(false)}
+            position={{ top: 24, right: 0 }}
+          />
+        )}
       </div>
     </div>
-  </>
-));
+  );
+});
 
 TradeContent.displayName = 'TradeContent';
 
@@ -84,9 +277,9 @@ const Row = memo(({ index, style, data }: {
     return (
       <div style={{
         ...style,
-        padding: '16px',
+        padding: '12px 24px',
         backgroundColor: 'rgba(255, 255, 255, 0.02)',
-        borderRadius: '12px',
+        borderRadius: '8px',
       }}>
         <div style={{
           height: '20px',
@@ -109,60 +302,23 @@ const Row = memo(({ index, style, data }: {
     <div
       style={{
         ...style,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '10px 16px',
+        padding: '12px 24px',
         backgroundColor: 'rgba(255, 255, 255, 0.02)',
-        borderRadius: '10px',
+        borderRadius: '8px',
         transition: 'all 0.2s ease',
         cursor: 'pointer',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.transform = 'translateY(-1px)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
         e.currentTarget.style.transform = 'translateY(0)';
       }}
+      onClick={() => data.onTradeClick?.(trade)}
     >
-      <div 
-        style={{ flex: 1, display: 'flex', alignItems: 'center' }}
-        onClick={() => data.onTradeClick?.(trade)}
-      >
-        <TradeContent trade={trade} />
-      </div>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onDeleteClick?.(trade);
-        }}
-        style={{
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-          color: '#ef4444',
-          padding: '8px',
-          borderRadius: '8px',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          marginLeft: '16px',
-          opacity: 0.6,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.opacity = '1';
-          e.currentTarget.style.transform = 'scale(1.1)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.opacity = '0.6';
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
-      >
-        <RiDeleteBinLine size={16} />
-      </button>
+      <TradeContent trade={trade} onDeleteClick={data.onDeleteClick} />
     </div>
   );
 });

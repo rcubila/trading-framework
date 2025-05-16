@@ -18,9 +18,18 @@ const getFormattedSymbol = (trade: Trade): string => {
     return 'NASDAQ:AAPL'; // Default fallback symbol
   }
 
-  // Special case for .USTEC
+  // Special cases for indices and commodities
   if (trade.symbol === '.USTEC') {
     return 'NASDAQ:NDX';
+  }
+  if (trade.symbol === 'GER40' || trade.symbol === 'DE40') {
+    return 'OANDA:DE30EUR';  // OANDA's DAX feed
+  }
+  if (trade.symbol === 'US30') {
+    return 'DJ:DJI';  // Dow Jones Industrial Average
+  }
+  if (trade.symbol === 'XAUUSD' || trade.symbol === 'GOLD') {
+    return 'OANDA:XAUUSD';  // OANDA's Gold feed
   }
 
   // Handle futures

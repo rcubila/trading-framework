@@ -120,72 +120,50 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
               </div>
             </div>
 
-            {/* Quick Stats */}
+            {/* Trade Info List */}
             <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(2, 1fr)', 
-              gap: '16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
               marginTop: '24px'
             }}>
-              {[
-                { 
-                  label: 'Entry Price', 
-                  value: `$${trade.entry_price.toFixed(2)}`,
-                  icon: RiExchangeDollarLine,
-                  color: '#3b82f6'
-                },
-                { 
-                  label: 'Exit Price', 
-                  value: trade.exit_price ? `$${trade.exit_price.toFixed(2)}` : '-',
-                  icon: RiExchangeDollarLine,
-                  color: '#8b5cf6'
-                },
-                { 
-                  label: 'Duration', 
-                  value: trade.exit_date ? calculateDuration(trade.entry_date, trade.exit_date) : 'Open',
-                  icon: RiTimeLine,
-                  color: '#f59e0b'
-                },
-                { 
-                  label: 'R:R Ratio', 
-                  value: calculateRiskRewardRatio(trade),
-                  icon: RiScales3Line,
-                  color: '#22c55e'
-                }
-              ].map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '12px',
-                    padding: '16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px'
-                  }}
-                >
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '8px',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '14px'
-                  }}>
-                    <stat.icon style={{ color: stat.color }} />
-                    {stat.label}
-                  </div>
-                  <div style={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold',
-                    color: stat.color
-                  }}>
-                    {stat.value}
-                  </div>
-                </motion.div>
-              ))}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  <RiExchangeDollarLine style={{ color: '#3b82f6' }} />
+                  Entry Price
+                </div>
+                <div style={{ color: '#3b82f6', fontWeight: '500' }}>${trade.entry_price.toFixed(2)}</div>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  <RiExchangeDollarLine style={{ color: '#8b5cf6' }} />
+                  Exit Price
+                </div>
+                <div style={{ color: '#8b5cf6', fontWeight: '500' }}>
+                  {trade.exit_price ? `$${trade.exit_price.toFixed(2)}` : '-'}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  <RiTimeLine style={{ color: '#f59e0b' }} />
+                  Duration
+                </div>
+                <div style={{ color: '#f59e0b', fontWeight: '500' }}>
+                  {trade.exit_date ? calculateDuration(trade.entry_date, trade.exit_date) : 'Open'}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  <RiScales3Line style={{ color: '#22c55e' }} />
+                  Risk/Reward
+                </div>
+                <div style={{ color: '#22c55e', fontWeight: '500' }}>
+                  {calculateRiskRewardRatio(trade)}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -203,9 +181,12 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
               Market Context
             </h3>
             <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(2, 1fr)', 
-              gap: '16px' 
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              padding: '16px',
+              borderRadius: '12px'
             }}>
               {[
                 { label: 'Market', value: trade.market },
@@ -214,16 +195,12 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
                 { label: 'Timeframe', value: trade.timeframe || '-' }
               ].map((item) => (
                 <div key={item.label} style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  padding: '16px',
-                  borderRadius: '12px'
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
                 }}>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '8px', fontSize: '14px' }}>
-                    {item.label}
-                  </div>
-                  <div style={{ fontSize: '16px', fontWeight: '500' }}>
-                    {item.value}
-                  </div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.6)' }}>{item.label}</div>
+                  <div style={{ fontWeight: '500' }}>{item.value}</div>
                 </div>
               ))}
             </div>
@@ -243,9 +220,12 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
               Strategy Details
             </h3>
             <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(2, 1fr)', 
-              gap: '16px' 
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              padding: '16px',
+              borderRadius: '12px'
             }}>
               {[
                 { label: 'Strategy', value: trade.strategy || '-' },
@@ -254,16 +234,12 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
                 { label: 'Leverage', value: trade.leverage ? `${trade.leverage}x` : '-' }
               ].map((item) => (
                 <div key={item.label} style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  padding: '16px',
-                  borderRadius: '12px'
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
                 }}>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '8px', fontSize: '14px' }}>
-                    {item.label}
-                  </div>
-                  <div style={{ fontSize: '16px', fontWeight: '500' }}>
-                    {item.value}
-                  </div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.6)' }}>{item.label}</div>
+                  <div style={{ fontWeight: '500' }}>{item.value}</div>
                 </div>
               ))}
             </div>
