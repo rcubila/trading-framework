@@ -70,7 +70,7 @@ const extractTradesFromImage = async (imageBase64: string): Promise<Trade[]> => 
         messages: [
           {
             role: 'system',
-            content: 'You are a trading expert that specializes in extracting trade information from screenshots of various trading platforms. You can identify and extract trade details from platforms like MT4, MT5, TradingView, and other common trading platforms. Always return data in a consistent JSON format. For dates in DD/MM/YY format (European style), ensure to parse them correctly - for example, 16/05/25 should be interpreted as May 16th, 2025, not as 16th month which would be invalid.'
+            content: 'You are a trading expert that specializes in extracting trade information from screenshots of various trading platforms. You can identify and extract trade details from platforms like MT4, MT5, TradingView, and other common trading platforms. Always return data in a consistent JSON format. For dates in DD/MM/YY format (European style), ensure to parse them correctly - for example, 16/05/25 should be interpreted as May 16th, 2025, not as 16th month which would be invalid. When returning dates, use the local time from the screenshot and return in ISO format WITHOUT timezone conversion (do not add Z suffix). Example: if screenshot shows 16/05/25 10:30, return as "2025-05-16T10:30:00".'
           },
           {
             role: 'user',
@@ -83,7 +83,7 @@ const extractTradesFromImage = async (imageBase64: string): Promise<Trade[]> => 
                 - Trade direction (buy/sell)
                 - Position sizes
                 - Profit/loss values
-                - Dates and times (Note: For dates in DD/MM/YY format, interpret as European format)
+                - Dates and times (Note: For dates in DD/MM/YY format, interpret as European format and return in ISO format WITHOUT timezone conversion)
                 - Trading pairs or symbols
                 - Market type indicators
 
@@ -91,16 +91,16 @@ const extractTradesFromImage = async (imageBase64: string): Promise<Trade[]> => 
                 If you can't find any trade information, explain what's missing.
 
                 For dates in DD/MM/YY format, always interpret as European format (day/month/year).
-                Example: 16/05/25 should be interpreted as May 16th, 2025.
+                Example: if screenshot shows 16/05/25 10:30, return as "2025-05-16T10:30:00" (no timezone conversion).
 
                 Return the data in this exact JSON format:
                 {
                   "trades": [
                     {
                       "symbol": "EURUSD",
-                      "entry_date": "2025-05-16T10:30:00Z",  // Note: Date converted to ISO format
+                      "entry_date": "2025-05-16T10:30:00",  // Note: Local time, no timezone
                       "entry_price": 1.0850,
-                      "exit_date": "2025-05-16T14:45:00Z",
+                      "exit_date": "2025-05-16T14:45:00",   // Note: Local time, no timezone
                       "exit_price": 1.0870,
                       "quantity": 1.0,
                       "type": "Long",

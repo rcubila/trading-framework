@@ -426,33 +426,39 @@ export const Dashboard = () => {
         // Calculate metrics from all trades
         if (allTrades) {
           calculateMetrics(allTrades);
-          setCalendarTrades(allTrades.map(trade => ({
-            id: trade.id,
-            date: trade.entry_date.split('T')[0],
-            symbol: trade.symbol,
-            type: trade.type,
-            result: trade.pnl && trade.pnl > 0 ? 'Win' : 'Loss',
-            profit: trade.pnl || 0,
-            volume: trade.quantity,
-            entry: trade.entry_price,
-            exit: trade.exit_price || trade.entry_price
-          })));
+          setCalendarTrades(allTrades.map(trade => {
+            // Convert UTC date to local date for calendar display
+            const date = new Date(trade.entry_date);
+            // Format as YYYY-MM-DD in local time
+            const localDate = date.toLocaleDateString('en-CA'); // en-CA gives YYYY-MM-DD format
+            return {
+              id: trade.id,
+              date: localDate,
+              symbol: trade.symbol,
+              type: trade.type,
+              result: trade.pnl && trade.pnl > 0 ? 'Win' : 'Loss',
+              profit: trade.pnl || 0,
+              volume: trade.quantity,
+              entry: trade.entry_price,
+              exit: trade.exit_price || trade.entry_price
+            };
+          }));
         }
 
         // Fetch recent trades (last 24 hours)
         const now = new Date();
         const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
         
-        // Format dates in ISO format but keep them in local timezone
-        const startDate = twentyFourHoursAgo.toISOString().split('.')[0];
-        const endDate = now.toISOString().split('.')[0];
+        // Format dates in UTC ISO format
+        const recentStartDate = twentyFourHoursAgo.toISOString();
+        const recentEndDate = now.toISOString();
 
         const { data: recentTradesData, error: recentError } = await supabase
           .from('trades')
           .select('*')
           .eq('user_id', user.id)
-          .gte('entry_date', startDate)
-          .lte('entry_date', endDate)
+          .gte('entry_date', recentStartDate)
+          .lte('entry_date', recentEndDate)
           .order('entry_date', { ascending: false })
           .limit(4);
 
