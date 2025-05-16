@@ -12,32 +12,35 @@ import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
+import { DisciplineProvider } from './context/DisciplineContext';
 import { AuthCallback } from './components/AuthCallback';
 
 export const App = () => {
   return (
     <BrowserRouter basename="/trading-framework">
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/" element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Dashboard />} />
-            <Route path="trades" element={<Trades />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="journal" element={<Journal />} />
-            <Route path="strategy" element={<Strategy />} />
-            <Route path="discipline" element={<DisciplineTracker />} />
-            <Route path="import" element={<ImportTrades />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <DisciplineProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="trades" element={<Trades />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="journal" element={<Journal />} />
+              <Route path="strategy" element={<Strategy />} />
+              <Route path="discipline" element={<DisciplineTracker />} />
+              <Route path="import" element={<ImportTrades />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </DisciplineProvider>
       </AuthProvider>
     </BrowserRouter>
   );
