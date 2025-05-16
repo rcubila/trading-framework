@@ -1,52 +1,46 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import { Dashboard } from './pages/Dashboard';
-import { Strategy } from './pages/Strategy';
-import { Trades } from './pages/Trades';
-import { DisciplineTracker } from './pages/DisciplineTracker';
-import { Journal } from './pages/Journal';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
-import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { useAuth } from './context/AuthContext';
+import { Dashboard } from './pages/Dashboard';
+import { Trades } from './pages/Trades';
+import { Journal } from './pages/Journal';
+import { Strategy } from './pages/Strategy';
+import { DisciplineTracker } from './pages/DisciplineTracker';
 import { ImportTrades } from './pages/ImportTrades';
+import { Analytics } from './pages/Analytics';
+import Login from './pages/Login';
+import { Profile } from './pages/Profile';
+import { Settings } from './pages/Settings';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
+import { AuthCallback } from './components/AuthCallback';
 
-// Auth callback handler
-const AuthCallback = () => {
-  const { isAuthenticated } = useAuth();
-  
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-  
+export const App = () => {
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-  );
-};
-
-function App() {
-  return (
-    <AuthProvider>
-      <Router basename="/trading-framework">
+    <BrowserRouter basename="/trading-framework">
+      <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+          <Route path="/" element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }>
             <Route index element={<Dashboard />} />
-            <Route path="strategy" element={<Strategy />} />
             <Route path="trades" element={<Trades />} />
+            <Route path="analytics" element={<Analytics />} />
             <Route path="journal" element={<Journal />} />
+            <Route path="strategy" element={<Strategy />} />
             <Route path="discipline" element={<DisciplineTracker />} />
             <Route path="import" element={<ImportTrades />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
-          {/* Catch any unknown routes and redirect to root */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

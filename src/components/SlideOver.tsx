@@ -9,7 +9,7 @@ interface SlideOverProps {
   width?: string;
 }
 
-export const SlideOver = ({ isOpen, onClose, children, width = '90vw' }: SlideOverProps) => {
+export const SlideOver = ({ isOpen, onClose, children, width = 'calc(98vw - 220px)' }: SlideOverProps) => {
   return (
     <AnimatePresence mode="wait">
       {isOpen && (
@@ -40,7 +40,7 @@ export const SlideOver = ({ isOpen, onClose, children, width = '90vw' }: SlideOv
               top: 0,
               right: 0,
               width,
-              maxWidth: '1600px',
+              maxWidth: '1800px',
               height: '100vh',
               background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
               borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
@@ -49,6 +49,7 @@ export const SlideOver = ({ isOpen, onClose, children, width = '90vw' }: SlideOv
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
+              marginLeft: '220px',
             }}
           >
             {/* Close button with gradient hover effect */}
