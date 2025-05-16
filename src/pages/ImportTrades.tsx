@@ -12,10 +12,11 @@ import {
   RiFileWarningLine,
   RiImageLine,
   RiMagicLine,
+  RiTestTubeLine,
 } from 'react-icons/ri';
 import { motion, AnimatePresence } from 'framer-motion';
 import { importTradesFromCSV } from '../lib/csv-import';
-import { processTradeImages } from '../lib/image-import';
+import { processTradeImages, testOpenAIAccess } from '../lib/image-import';
 import { supabase } from '../lib/supabase';
 
 interface FileWithPreview extends File {
@@ -49,6 +50,8 @@ export const ImportTrades = () => {
   const [errors, setErrors] = useState<ImportError[]>([]);
   const [showTemplate, setShowTemplate] = useState(false);
   const templateRef = useRef<HTMLTextAreaElement>(null);
+  const [isTestingAPI, setIsTestingAPI] = useState(false);
+  const [apiTestResult, setApiTestResult] = useState<{ isValid: boolean; message: string } | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles(acceptedFiles.map(file => Object.assign(file, {
@@ -251,6 +254,17 @@ export const ImportTrades = () => {
     }
   };
 
+  const handleTestAPI = async () => {
+    setIsTestingAPI(true);
+    setApiTestResult(null);
+    try {
+      const result = await testOpenAIAccess();
+      setApiTestResult(result);
+    } finally {
+      setIsTestingAPI(false);
+    }
+  };
+
   return (
     <div style={{
       display: 'flex',
@@ -425,17 +439,74 @@ export const ImportTrades = () => {
           padding: '24px',
           border: '1px solid rgba(255, 255, 255, 0.05)',
         }}>
-          <h2 style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold',
-            marginBottom: '16px',
+          <div style={{
             display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '8px'
+            marginBottom: '16px',
           }}>
-            <RiMagicLine style={{ color: '#a855f7' }} />
-            AI Screenshot Import
-          </h2>
+            <h2 style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <RiMagicLine style={{ color: '#a855f7' }} />
+              AI Screenshot Import
+            </h2>
+            <button
+              onClick={handleTestAPI}
+              disabled={isTestingAPI}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                backgroundColor: isTestingAPI ? 'rgba(168, 85, 247, 0.3)' : 'rgba(168, 85, 247, 0.1)',
+                border: '1px solid rgba(168, 85, 247, 0.2)',
+                color: '#a855f7',
+                cursor: isTestingAPI ? 'default' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              {isTestingAPI ? (
+                <>
+                  <div style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2px solid rgba(168, 85, 247, 0.3)',
+                    borderTop: '2px solid #a855f7',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }} />
+                  Testing API...
+                </>
+              ) : (
+                <>
+                  <RiTestTubeLine />
+                  Test API Access
+                </>
+              )}
+            </button>
+          </div>
+
+          {apiTestResult && (
+            <div style={{
+              padding: '12px 16px',
+              borderRadius: '8px',
+              backgroundColor: apiTestResult.isValid ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+              border: `1px solid ${apiTestResult.isValid ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+              color: apiTestResult.isValid ? '#22c55e' : '#ef4444',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}>
+              {apiTestResult.isValid ? <RiCheckLine /> : <RiFileWarningLine />}
+              {apiTestResult.message}
+            </div>
+          )}
           
           <div
             {...getImageRootProps()}
