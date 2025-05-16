@@ -46,8 +46,11 @@ export const TradingCalendar = ({ trades }: TradingCalendarProps) => {
   };
 
   const getTradesForDay = (day: number): DayTrades => {
-    const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toISOString().split('T')[0];
-    const dayTrades = trades.filter(trade => trade.date.startsWith(dayDate));
+    // Create a date object for the current day in local time
+    const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    // Format as YYYY-MM-DD in local time
+    const dayDate = targetDate.toLocaleDateString('en-CA'); // en-CA gives YYYY-MM-DD format
+    const dayTrades = trades.filter(trade => trade.date === dayDate);
     
     return {
       trades: dayTrades,
