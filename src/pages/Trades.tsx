@@ -866,11 +866,8 @@ export const Trades = () => {
   const [tradeToDelete, setTradeToDelete] = useState<Trade | null>(null);
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    // Remove the initial fetch since it's now handled by TradesList
-  }, []);
 
   const handleFetchTrades = async (page: number, pageSize: number) => {
     try {
@@ -919,10 +916,12 @@ export const Trades = () => {
         document.body.removeChild(successMessage);
       }, 2000);
 
-      // Update local state
+      // Update local state and trigger immediate refresh
       setSelectedTrade(null);
       setShowDeleteConfirm(false);
       setTradeToDelete(null);
+      setShowTradeDetails(false);
+      setRefreshTrigger(prev => prev + 1); // Trigger refresh
     } catch (error) {
       console.error('Error deleting trade:', error);
       alert('Failed to delete trade');
@@ -963,9 +962,11 @@ export const Trades = () => {
         document.body.removeChild(successMessage);
       }, 2000);
 
-      // Update local state
+      // Update local state and trigger immediate refresh
       setSelectedTrade(null);
       setShowDeleteAllConfirm(false);
+      setShowTradeDetails(false);
+      setRefreshTrigger(prev => prev + 1); // Trigger refresh
     } catch (error) {
       console.error('Error deleting all trades:', error);
       alert('Failed to delete trades');
@@ -1179,6 +1180,8 @@ export const Trades = () => {
             fetchTrades={handleFetchTrades}
             initialPageSize={20}
             onTradeClick={handleTradeClick}
+            onDeleteClick={handleDeleteTrade}
+            refreshTrigger={refreshTrigger}
           />
         </div>
       </div>
