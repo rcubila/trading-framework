@@ -562,6 +562,7 @@ export const ImportTrades = () => {
                     height: '48px',
                     borderRadius: '8px',
                     objectFit: 'cover',
+                    aspectRatio: '1/1'
                   }}
                 />
                 <div style={{ flex: 1 }}>
