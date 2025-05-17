@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
-import { Dashboard } from './pages/Dashboard';
+import Dashboard from './pages/Dashboard';
 import { Trades } from './pages/Trades';
 import { Journal } from './pages/Journal';
 import { Strategy } from './pages/Strategy';
@@ -14,8 +14,15 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { DisciplineProvider } from './context/DisciplineContext';
 import { AuthCallback } from './components/AuthCallback';
+import { useEffect } from 'react';
+import { trackPerformance } from './utils/performance';
 
 export const App = () => {
+  useEffect(() => {
+    // Initialize performance tracking
+    trackPerformance();
+  }, []);
+
   return (
     <BrowserRouter basename="/trading-framework">
       <AuthProvider>
