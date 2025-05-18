@@ -337,15 +337,15 @@ const PageSizeSelector = memo(({
     display: 'flex', 
     alignItems: 'center', 
     gap: '8px',
-    marginBottom: '16px'
+    marginBottom: '8px'
   }}>
     <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Show:</span>
     <select
       value={pageSize}
       onChange={(e) => onPageSizeChange(Number(e.target.value))}
       style={{
-        padding: '8px 12px',
-        borderRadius: '8px',
+        padding: '4px 8px',
+        borderRadius: '6px',
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
         border: '1px solid rgba(255, 255, 255, 0.1)',
         color: 'white',
@@ -413,8 +413,8 @@ export const TradesList = ({
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      padding: '10px',
-      gap: '16px'
+      padding: '5px',
+      gap: '8px'
     }}>
       <PageSizeSelector pageSize={pageSize} onPageSizeChange={handlePageSizeChange} />
       

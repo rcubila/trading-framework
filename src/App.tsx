@@ -10,6 +10,7 @@ import { Analytics } from './pages/Analytics';
 import Login from './pages/Login';
 import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
+import { UIRecommendationsPage } from './pages/UIRecommendationsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { DisciplineProvider } from './context/DisciplineContext';
@@ -44,6 +45,7 @@ export const App = () => {
               <Route path="import" element={<ImportTrades />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="ui-recommendations" element={<UIRecommendationsPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
