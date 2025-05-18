@@ -7,6 +7,7 @@ import {
   RiMedalLine,
   RiDownloadLine,
   RiBarChartLine,
+  RiPaintBrushLine,
 } from 'react-icons/ri';
 import { motion } from 'framer-motion';
 import { UserMenu } from '../components/UserMenu';
@@ -20,6 +21,7 @@ const navigation = [
   { name: 'Strategy', icon: RiLightbulbLine, path: '/strategy' },
   { name: 'Discipline Tracker', icon: RiMedalLine, path: '/discipline' },
   { name: 'Import Trades', icon: RiDownloadLine, path: '/import' },
+  { name: 'UI Recommendations', icon: RiPaintBrushLine, path: '/ui-recommendations' },
 ];
 
 export const MainLayout = () => {
