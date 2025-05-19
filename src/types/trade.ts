@@ -15,6 +15,7 @@ export interface Trade {
   pnl_percentage?: number | null;
   risk?: number | null;
   reward?: number | null;
+  risk_reward?: number | null;
   strategy?: string | null;
   tags?: string[] | null;
   notes?: string | null;
