@@ -36,7 +36,10 @@ export const generateTestTrades = async () => {
         exit_date: new Date().toISOString(),
         pnl: 100, // Positive P&L (winning trade)
         pnl_percentage: 6.67,
-        strategy: 'Test Strategy'
+        strategy: 'Test Strategy',
+        risk: 50, // Risk $50
+        reward: 100, // Reward $100 (2:1 R:R)
+        risk_reward: 2.0 // 100/50 = 2:1 R:R
       },
       {
         user_id: user.id,
@@ -52,7 +55,10 @@ export const generateTestTrades = async () => {
         exit_date: new Date().toISOString(),
         pnl: 500, // Positive P&L (winning trade)
         pnl_percentage: 5,
-        strategy: 'Test Strategy'
+        strategy: 'Test Strategy',
+        risk: 250, // Risk $250
+        reward: 500, // Reward $500 (2:1 R:R)
+        risk_reward: 2.0 // 500/250 = 2:1 R:R
       },
       // Losing trades
       {
@@ -69,7 +75,10 @@ export const generateTestTrades = async () => {
         exit_date: new Date().toISOString(),
         pnl: -100, // Negative P&L (losing trade)
         pnl_percentage: -3.33,
-        strategy: 'Test Strategy'
+        strategy: 'Test Strategy',
+        risk: 100, // Risk $100
+        reward: 200, // Reward $200 (2:1 R:R)
+        risk_reward: 2.0 // 200/100 = 2:1 R:R
       },
       // Another losing trade
       {
@@ -86,7 +95,10 @@ export const generateTestTrades = async () => {
         exit_date: new Date().toISOString(),
         pnl: -200, // Negative P&L (losing trade)
         pnl_percentage: -10,
-        strategy: 'Test Strategy'
+        strategy: 'Test Strategy',
+        risk: 200, // Risk $200
+        reward: 400, // Reward $400 (2:1 R:R)
+        risk_reward: 2.0 // 400/200 = 2:1 R:R
       }
     ];
 

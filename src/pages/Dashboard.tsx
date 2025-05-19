@@ -188,8 +188,8 @@ const Dashboard = () => {
 
     // Calculate Risk-Reward Ratio
     const validRiskRewardTrades = trades.filter(trade => {
-      const rr = Number(trade.risk_reward);
-      return !isNaN(rr) && rr > 0;
+      const riskReward = Number(trade.risk_reward);
+      return !isNaN(riskReward) && riskReward > 0;
     });
     
     const riskReward = validRiskRewardTrades.length > 0
@@ -346,12 +346,8 @@ const Dashboard = () => {
         fill: true,
         tension: 0.4,
         borderWidth: 2,
-        pointBackgroundColor: '#3b82f6',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: '#3b82f6',
-        pointRadius: 4,
-        pointHoverRadius: 6,
+        pointRadius: 0,
+        pointHoverRadius: 0
       },
     ],
   };
