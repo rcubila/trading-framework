@@ -14,6 +14,7 @@ import {
   RiAlertLine,
 } from 'react-icons/ri';
 import { StrategyModal } from '../components/StrategyModal';
+import { PageHeader } from '../components/PageHeader';
 
 interface Strategy {
   id: string;
@@ -172,54 +173,33 @@ export const Strategy = () => {
       minHeight: '100vh',
       backdropFilter: 'blur(10px)'
     }}>
-      {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '5px',
-        background: 'rgba(15, 23, 42, 0.4)',
-        padding: '5px',
-        borderRadius: '16px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div>
-          <h1 style={{ 
-            fontSize: '28px', 
-            fontWeight: 'bold',
-            background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Trading Strategies
-          </h1>
-          <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-            Manage and analyze your trading strategies
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            setSelectedStrategy(null);
-            setShowStrategyModal(true);
-          }}
-          style={{
-            padding: '5px',
-            borderRadius: '12px',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            border: '1px solid rgba(59, 130, 246, 0.2)',
-            color: '#60a5fa',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <RiAddLine />
-          New Strategy
-        </button>
-      </div>
+      <PageHeader 
+        title="Trading Strategies"
+        subtitle="Manage and analyze your trading strategies"
+        actions={
+          <button
+            onClick={() => {
+              setSelectedStrategy(null);
+              setShowStrategyModal(true);
+            }}
+            style={{
+              padding: '5px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+              color: '#60a5fa',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <RiAddLine />
+            New Strategy
+          </button>
+        }
+      />
 
       {/* Strategy Grid */}
       <div style={{ 

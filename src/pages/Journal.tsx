@@ -35,6 +35,7 @@ import {
   Filler,
 } from 'chart.js';
 import { supabase } from '../lib/supabase';
+import { PageHeader } from '../components/PageHeader';
 
 ChartJS.register(
   CategoryScale,
@@ -363,39 +364,10 @@ export const Journal = () => {
       minHeight: '100vh',
       backdropFilter: 'blur(10px)'
     }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2px',
-        background: 'rgba(15, 23, 42, 0.4)',
-        padding: '2px 5px',
-        borderRadius: '16px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-      }}>
-        <div>
-          <h1 style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            marginBottom: '2px',
-            background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Trading Journal
-          </h1>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '13px'
-          }}>
-            Track, analyze, and improve your trading performance
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '5px' }}>
+      <PageHeader 
+        title="Trading Journal"
+        subtitle="Track, analyze, and improve your trading performance"
+        actions={
           <button
             style={{
               padding: '5px',
@@ -413,8 +385,8 @@ export const Journal = () => {
             <RiAddLine />
             New Entry
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* View Selector */}
       <div style={{

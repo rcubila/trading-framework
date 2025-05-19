@@ -1,102 +1,105 @@
 import React from 'react';
+import { PageHeader } from '../components/PageHeader';
 
 export const UIRecommendationsPage = () => {
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            UI Recommendations
-          </h1>
-          <p className="text-gray-400 text-sm mt-1">
-            Suggestions to improve your user experience
-          </p>
-        </div>
-      </div>
+    <div style={{ 
+      padding: '5px',
+      color: 'white',
+      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
+      minHeight: '100vh',
+      backdropFilter: 'blur(10px)'
+    }}>
+      <PageHeader 
+        title="UI Recommendations"
+        subtitle="Suggestions to improve your user experience"
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
-          <h2 className="text-xl font-semibold text-white mb-4">Visual Improvements</h2>
-          <ul className="space-y-4">
-            <RecommendationItem 
-              title="Consistent Spacing"
-              description="Use consistent margin and padding throughout the application."
-              status="implemented"
-            />
-            <RecommendationItem 
-              title="Color Contrast"
-              description="Improve contrast ratios for better accessibility."
-              status="pending"
-            />
-            <RecommendationItem 
-              title="Loading States"
-              description="Add skeleton loaders for all data fetching operations."
-              status="in-progress"
-            />
-          </ul>
-        </div>
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
+            <h2 className="text-xl font-semibold text-white mb-4">Visual Improvements</h2>
+            <ul className="space-y-4">
+              <RecommendationItem 
+                title="Consistent Spacing"
+                description="Use consistent margin and padding throughout the application."
+                status="implemented"
+              />
+              <RecommendationItem 
+                title="Color Contrast"
+                description="Improve contrast ratios for better accessibility."
+                status="pending"
+              />
+              <RecommendationItem 
+                title="Loading States"
+                description="Add skeleton loaders for all data fetching operations."
+                status="in-progress"
+              />
+            </ul>
+          </div>
 
-        <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
-          <h2 className="text-xl font-semibold text-white mb-4">Interaction Improvements</h2>
-          <ul className="space-y-4">
-            <RecommendationItem 
-              title="Error Messages"
-              description="Provide clear error messages for all form submissions."
-              status="implemented"
-            />
-            <RecommendationItem 
-              title="Keyboard Navigation"
-              description="Ensure all interactive elements are keyboard accessible."
-              status="pending"
-            />
-            <RecommendationItem 
-              title="Responsive Behavior"
-              description="Optimize layouts for mobile and tablet devices."
-              status="in-progress"
-            />
-          </ul>
-        </div>
+          <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
+            <h2 className="text-xl font-semibold text-white mb-4">Interaction Improvements</h2>
+            <ul className="space-y-4">
+              <RecommendationItem 
+                title="Error Messages"
+                description="Provide clear error messages for all form submissions."
+                status="implemented"
+              />
+              <RecommendationItem 
+                title="Keyboard Navigation"
+                description="Ensure all interactive elements are keyboard accessible."
+                status="pending"
+              />
+              <RecommendationItem 
+                title="Responsive Behavior"
+                description="Optimize layouts for mobile and tablet devices."
+                status="in-progress"
+              />
+            </ul>
+          </div>
 
-        <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
-          <h2 className="text-xl font-semibold text-white mb-4">Performance Optimizations</h2>
-          <ul className="space-y-4">
-            <RecommendationItem 
-              title="Image Optimization"
-              description="Optimize all images for faster loading times."
-              status="implemented"
-            />
-            <RecommendationItem 
-              title="Code Splitting"
-              description="Implement code splitting for faster initial load."
-              status="pending"
-            />
-            <RecommendationItem 
-              title="Caching Strategy"
-              description="Implement proper caching for API responses."
-              status="in-progress"
-            />
-          </ul>
-        </div>
+          <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
+            <h2 className="text-xl font-semibold text-white mb-4">Performance Optimizations</h2>
+            <ul className="space-y-4">
+              <RecommendationItem 
+                title="Image Optimization"
+                description="Optimize all images for faster loading times."
+                status="implemented"
+              />
+              <RecommendationItem 
+                title="Code Splitting"
+                description="Implement code splitting for faster initial load."
+                status="pending"
+              />
+              <RecommendationItem 
+                title="Caching Strategy"
+                description="Implement proper caching for API responses."
+                status="in-progress"
+              />
+            </ul>
+          </div>
 
-        <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
-          <h2 className="text-xl font-semibold text-white mb-4">Animation Recommendations</h2>
-          <ul className="space-y-4">
-            <RecommendationItem 
-              title="Transition Effects"
-              description="Add smooth transitions between routes and components."
-              status="implemented"
-            />
-            <RecommendationItem 
-              title="Micro-interactions"
-              description="Add subtle animations to improve user feedback."
-              status="pending"
-            />
-            <RecommendationItem 
-              title="Loading Animations"
-              description="Create engaging loading animations."
-              status="in-progress"
-            />
-          </ul>
+          <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
+            <h2 className="text-xl font-semibold text-white mb-4">Animation Recommendations</h2>
+            <ul className="space-y-4">
+              <RecommendationItem 
+                title="Transition Effects"
+                description="Add smooth transitions between routes and components."
+                status="implemented"
+              />
+              <RecommendationItem 
+                title="Micro-interactions"
+                description="Add subtle animations to improve user feedback."
+                status="pending"
+              />
+              <RecommendationItem 
+                title="Loading Animations"
+                description="Create engaging loading animations."
+                status="in-progress"
+              />
+            </ul>
+          </div>
         </div>
       </div>
     </div>

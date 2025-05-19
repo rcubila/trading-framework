@@ -14,11 +14,14 @@ import {
   RiPulseLine,
   RiFlowChart,
   RiBarChartBoxLine,
+  RiRefreshLine,
+  RiDownload2Line,
 } from 'react-icons/ri';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { PatternAnalysis } from '../components/PatternAnalysis';
 import type { Database } from '../lib/supabase-types';
+import { PageHeader } from '../components/PageHeader';
 
 interface CalculatorInputs {
   accountSize: number;
@@ -80,6 +83,7 @@ interface AdvancedMetrics {
 }
 
 export const Analytics = () => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [calculatorInputs, setCalculatorInputs] = useState<CalculatorInputs>({
     accountSize: 10000,
     riskPercentage: 1,
@@ -311,490 +315,594 @@ export const Analytics = () => {
   const positionMetrics = calculatePositionSize();
   const riskMetrics = calculateRiskMetrics();
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchTrades();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleDownload = () => {
+    // Create CSV content
+    const headers = [
+      'Date',
+      'Symbol',
+      'Type',
+      'Entry Price',
+      'Exit Price',
+      'Quantity',
+      'P&L',
+      'P&L %',
+      'Strategy',
+      'Notes'
+    ].join(',');
+
+    const rows = trades.map(trade => [
+      trade.entry_date,
+      trade.symbol,
+      trade.type,
+      trade.entry_price,
+      trade.exit_price || '',
+      trade.quantity,
+      trade.pnl || '',
+      trade.pnl_percentage || '',
+      trade.strategy || '',
+      trade.notes || ''
+    ].join(','));
+
+    const csvContent = [headers, ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `trades_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '24px'
-      }}>
-        <h1 style={{ 
-          fontSize: '24px', 
-          fontWeight: 'bold',
-          background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
-        }}>
-          Advanced Analytics
-        </h1>
-      </div>
-
-      {/* Calculator Tabs */}
-      <div style={{
-        display: 'flex',
-        gap: '12px',
-        marginBottom: '24px',
-      }}>
-        {[
-          { id: 'position', label: 'Position Sizing', icon: RiCalculatorLine },
-          { id: 'risk', label: 'Risk Analysis', icon: RiScales3Line },
-          { id: 'advanced', label: 'Advanced Metrics', icon: RiBarChartBoxLine },
-          { id: 'patterns', label: 'Pattern Analysis', icon: RiLineChartLine },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as 'position' | 'risk' | 'advanced' | 'patterns')}
-            style={{
-              padding: '12px 24px',
-              borderRadius: '12px',
-              border: 'none',
-              background: activeTab === tab.id 
-                ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))'
-                : 'rgba(255, 255, 255, 0.05)',
-              color: activeTab === tab.id ? 'white' : 'rgba(255, 255, 255, 0.6)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            <tab.icon />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Content Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '24px',
-      }}>
-        {activeTab === 'patterns' ? (
-          <div style={{ gridColumn: '1 / -1' }}>
-            <PatternAnalysis trades={trades} />
+    <div style={{ 
+      padding: '5px',
+      color: 'white',
+      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
+      minHeight: '100vh',
+      backdropFilter: 'blur(10px)'
+    }}>
+      <PageHeader 
+        title="Trading Analytics"
+        subtitle="Analyze your trading performance and patterns"
+        actions={
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={handleRefresh}
+              style={{
+                padding: '5px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                color: '#60a5fa',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <RiRefreshLine className={isRefreshing ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+            <button
+              onClick={handleDownload}
+              style={{
+                padding: '5px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                color: '#60a5fa',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <RiDownload2Line />
+              Download
+            </button>
           </div>
-        ) : activeTab === 'advanced' ? (
-          <>
-            {/* Advanced Metrics Section */}
-            <div style={{
-              gridColumn: '1 / -1',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '24px',
-            }}>
-              {/* Expectancy & Profit Factor */}
-              <div style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                borderRadius: '16px',
-                padding: '24px',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-              }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <RiStockLine />
-                  System Performance
-                </h2>
-                <div style={{ display: 'grid', gap: '16px' }}>
-                  <div style={{
-                    padding: '16px',
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(59, 130, 246, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Expectancy
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      ${advancedMetrics.expectancy.toFixed(2)}
-                    </div>
-                  </div>
-                  <div style={{
-                    padding: '16px',
-                    background: 'rgba(139, 92, 246, 0.1)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(139, 92, 246, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Profit Factor
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      {advancedMetrics.profitFactor.toFixed(2)}
-                    </div>
-                  </div>
-                </div>
-              </div>
+        }
+      />
 
-              {/* MAE & MFE */}
-              <div style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                borderRadius: '16px',
-                padding: '24px',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-              }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <RiPulseLine />
-                  Trade Efficiency
-                </h2>
-                <div style={{ display: 'grid', gap: '16px' }}>
-                  <div style={{
-                    padding: '16px',
-                    background: 'rgba(34, 197, 94, 0.1)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(34, 197, 94, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Maximum Favorable Excursion
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      ${advancedMetrics.mfe.toFixed(2)}
-                    </div>
-                  </div>
-                  <div style={{
-                    padding: '16px',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Maximum Adverse Excursion
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      ${advancedMetrics.mae.toFixed(2)}
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '24px'
+        }}>
+          <h1 style={{ 
+            fontSize: '24px', 
+            fontWeight: 'bold',
+            background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Advanced Analytics
+          </h1>
+        </div>
 
-              {/* Monte Carlo Simulation */}
+        {/* Calculator Tabs */}
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          marginBottom: '24px',
+        }}>
+          {[
+            { id: 'position', label: 'Position Sizing', icon: RiCalculatorLine },
+            { id: 'risk', label: 'Risk Analysis', icon: RiScales3Line },
+            { id: 'advanced', label: 'Advanced Metrics', icon: RiBarChartBoxLine },
+            { id: 'patterns', label: 'Pattern Analysis', icon: RiLineChartLine },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as 'position' | 'risk' | 'advanced' | 'patterns')}
+              style={{
+                padding: '12px 24px',
+                borderRadius: '12px',
+                border: 'none',
+                background: activeTab === tab.id 
+                  ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))'
+                  : 'rgba(255, 255, 255, 0.05)',
+                color: activeTab === tab.id ? 'white' : 'rgba(255, 255, 255, 0.6)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <tab.icon />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Content Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '24px',
+        }}>
+          {activeTab === 'patterns' ? (
+            <div style={{ gridColumn: '1 / -1' }}>
+              <PatternAnalysis trades={trades} />
+            </div>
+          ) : activeTab === 'advanced' ? (
+            <>
+              {/* Advanced Metrics Section */}
               <div style={{
                 gridColumn: '1 / -1',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '24px',
+              }}>
+                {/* Expectancy & Profit Factor */}
+                <div style={{
+                  background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                }}>
+                  <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <RiStockLine />
+                    System Performance
+                  </h2>
+                  <div style={{ display: 'grid', gap: '16px' }}>
+                    <div style={{
+                      padding: '16px',
+                      background: 'rgba(59, 130, 246, 0.1)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(59, 130, 246, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Expectancy
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        ${advancedMetrics.expectancy.toFixed(2)}
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: '16px',
+                      background: 'rgba(139, 92, 246, 0.1)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(139, 92, 246, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Profit Factor
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        {advancedMetrics.profitFactor.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* MAE & MFE */}
+                <div style={{
+                  background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                }}>
+                  <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <RiPulseLine />
+                    Trade Efficiency
+                  </h2>
+                  <div style={{ display: 'grid', gap: '16px' }}>
+                    <div style={{
+                      padding: '16px',
+                      background: 'rgba(34, 197, 94, 0.1)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(34, 197, 94, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Maximum Favorable Excursion
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        ${advancedMetrics.mfe.toFixed(2)}
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: '16px',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(239, 68, 68, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Maximum Adverse Excursion
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        ${advancedMetrics.mae.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Monte Carlo Simulation */}
+                <div style={{
+                  gridColumn: '1 / -1',
+                  background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                }}>
+                  <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <RiFlowChart />
+                    Monte Carlo Analysis
+                  </h2>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                    <div style={{
+                      padding: '16px',
+                      background: 'rgba(59, 130, 246, 0.1)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(59, 130, 246, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Expected Return (95% CI)
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                        {(advancedMetrics.monteCarloResults.confidenceInterval[0] * 100).toFixed(1)}% to {(advancedMetrics.monteCarloResults.confidenceInterval[1] * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: '16px',
+                      background: 'rgba(34, 197, 94, 0.1)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(34, 197, 94, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Average Return
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                        {(advancedMetrics.monteCarloResults.averageReturn * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: '16px',
+                      background: 'rgba(245, 158, 11, 0.1)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(245, 158, 11, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Best Possible Return
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                        {(advancedMetrics.monteCarloResults.bestReturn * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: '16px',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(239, 68, 68, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Worst Drawdown
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                        {(advancedMetrics.monteCarloResults.worstDrawdown * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Inputs Section */}
+              <div style={{
                 background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
                 borderRadius: '16px',
                 padding: '24px',
                 border: '1px solid rgba(255, 255, 255, 0.05)',
               }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <RiFlowChart />
-                  Monte Carlo Analysis
-                </h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-                  <div style={{
-                    padding: '16px',
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(59, 130, 246, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Expected Return (95% CI)
-                    </div>
-                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                      {(advancedMetrics.monteCarloResults.confidenceInterval[0] * 100).toFixed(1)}% to {(advancedMetrics.monteCarloResults.confidenceInterval[1] * 100).toFixed(1)}%
-                    </div>
+                <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>Calculator Inputs</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '14px' 
+                    }}>
+                      Account Size ($)
+                    </label>
+                    <input
+                      type="number"
+                      value={calculatorInputs.accountSize}
+                      onChange={(e) => handleInputChange('accountSize', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'white',
+                        fontSize: '16px',
+                      }}
+                    />
                   </div>
-                  <div style={{
-                    padding: '16px',
-                    background: 'rgba(34, 197, 94, 0.1)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(34, 197, 94, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Average Return
-                    </div>
-                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                      {(advancedMetrics.monteCarloResults.averageReturn * 100).toFixed(1)}%
-                    </div>
+                  <div>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '14px' 
+                    }}>
+                      Risk Per Trade (%)
+                    </label>
+                    <input
+                      type="number"
+                      value={calculatorInputs.riskPercentage}
+                      onChange={(e) => handleInputChange('riskPercentage', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'white',
+                        fontSize: '16px',
+                      }}
+                    />
                   </div>
-                  <div style={{
-                    padding: '16px',
-                    background: 'rgba(245, 158, 11, 0.1)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(245, 158, 11, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Best Possible Return
-                    </div>
-                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                      {(advancedMetrics.monteCarloResults.bestReturn * 100).toFixed(1)}%
-                    </div>
+                  <div>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '14px' 
+                    }}>
+                      Entry Price ($)
+                    </label>
+                    <input
+                      type="number"
+                      value={calculatorInputs.entryPrice}
+                      onChange={(e) => handleInputChange('entryPrice', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'white',
+                        fontSize: '16px',
+                      }}
+                    />
                   </div>
-                  <div style={{
-                    padding: '16px',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Worst Drawdown
-                    </div>
-                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                      {(advancedMetrics.monteCarloResults.worstDrawdown * 100).toFixed(1)}%
-                    </div>
+                  <div>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '14px' 
+                    }}>
+                      Stop Loss ($)
+                    </label>
+                    <input
+                      type="number"
+                      value={calculatorInputs.stopLoss}
+                      onChange={(e) => handleInputChange('stopLoss', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'white',
+                        fontSize: '16px',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '8px', 
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '14px' 
+                    }}>
+                      Take Profit ($)
+                    </label>
+                    <input
+                      type="number"
+                      value={calculatorInputs.takeProfit}
+                      onChange={(e) => handleInputChange('takeProfit', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'white',
+                        fontSize: '16px',
+                      }}
+                    />
                   </div>
                 </div>
               </div>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Inputs Section */}
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '16px',
-              padding: '24px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-            }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>Calculator Inputs</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px', 
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '14px' 
-                  }}>
-                    Account Size ($)
-                  </label>
-                  <input
-                    type="number"
-                    value={calculatorInputs.accountSize}
-                    onChange={(e) => handleInputChange('accountSize', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      color: 'white',
-                      fontSize: '16px',
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px', 
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '14px' 
-                  }}>
-                    Risk Per Trade (%)
-                  </label>
-                  <input
-                    type="number"
-                    value={calculatorInputs.riskPercentage}
-                    onChange={(e) => handleInputChange('riskPercentage', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      color: 'white',
-                      fontSize: '16px',
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px', 
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '14px' 
-                  }}>
-                    Entry Price ($)
-                  </label>
-                  <input
-                    type="number"
-                    value={calculatorInputs.entryPrice}
-                    onChange={(e) => handleInputChange('entryPrice', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      color: 'white',
-                      fontSize: '16px',
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px', 
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '14px' 
-                  }}>
-                    Stop Loss ($)
-                  </label>
-                  <input
-                    type="number"
-                    value={calculatorInputs.stopLoss}
-                    onChange={(e) => handleInputChange('stopLoss', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      color: 'white',
-                      fontSize: '16px',
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px', 
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '14px' 
-                  }}>
-                    Take Profit ($)
-                  </label>
-                  <input
-                    type="number"
-                    value={calculatorInputs.takeProfit}
-                    onChange={(e) => handleInputChange('takeProfit', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      color: 'white',
-                      fontSize: '16px',
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
 
-            {/* Results Section */}
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '16px',
-              padding: '24px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-            }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>
-                {activeTab === 'position' ? 'Position Size Results' : 'Risk Analysis Results'}
-              </h2>
-              
-              {activeTab === 'position' ? (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Position Size
+              {/* Results Section */}
+              <div style={{
+                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+                borderRadius: '16px',
+                padding: '24px',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+              }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>
+                  {activeTab === 'position' ? 'Position Size Results' : 'Risk Analysis Results'}
+                </h2>
+                
+                {activeTab === 'position' ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: 'rgba(59, 130, 246, 0.1)',
+                      border: '1px solid rgba(59, 130, 246, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Position Size
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        {positionMetrics.positionSize} units
+                      </div>
                     </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      {positionMetrics.positionSize} units
+                    <div style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: 'rgba(139, 92, 246, 0.1)',
+                      border: '1px solid rgba(139, 92, 246, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Risk Amount
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        ${positionMetrics.riskAmount}
+                      </div>
                     </div>
-                  </div>
-                  <div style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    background: 'rgba(139, 92, 246, 0.1)',
-                    border: '1px solid rgba(139, 92, 246, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Risk Amount
+                    <div style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: 'rgba(34, 197, 94, 0.1)',
+                      border: '1px solid rgba(34, 197, 94, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Position Value
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        ${positionMetrics.totalPositionValue}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      ${positionMetrics.riskAmount}
-                    </div>
-                  </div>
-                  <div style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    background: 'rgba(34, 197, 94, 0.1)',
-                    border: '1px solid rgba(34, 197, 94, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Position Value
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      ${positionMetrics.totalPositionValue}
-                    </div>
-                  </div>
-                  <div style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    background: 'rgba(245, 158, 11, 0.1)',
-                    border: '1px solid rgba(245, 158, 11, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Leverage
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      {positionMetrics.leverage}x
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Risk/Reward Ratio
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      1:{riskMetrics.riskRewardRatio}
+                    <div style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: 'rgba(245, 158, 11, 0.1)',
+                      border: '1px solid rgba(245, 158, 11, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Leverage
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        {positionMetrics.leverage}x
+                      </div>
                     </div>
                   </div>
-                  <div style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    background: 'rgba(139, 92, 246, 0.1)',
-                    border: '1px solid rgba(139, 92, 246, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Break-even Win Rate
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: 'rgba(59, 130, 246, 0.1)',
+                      border: '1px solid rgba(59, 130, 246, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Risk/Reward Ratio
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        1:{riskMetrics.riskRewardRatio}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      {riskMetrics.breakevenWinRate}%
+                    <div style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: 'rgba(139, 92, 246, 0.1)',
+                      border: '1px solid rgba(139, 92, 246, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Break-even Win Rate
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        {riskMetrics.breakevenWinRate}%
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: 'rgba(34, 197, 94, 0.1)',
+                      border: '1px solid rgba(34, 197, 94, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Potential Reward
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        ${riskMetrics.rewardPerTrade}
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: '16px',
+                      borderRadius: '12px',
+                      background: 'rgba(245, 158, 11, 0.1)',
+                      border: '1px solid rgba(245, 158, 11, 0.2)',
+                    }}>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
+                        Expected Value
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        ${riskMetrics.expectedValue}
+                      </div>
                     </div>
                   </div>
-                  <div style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    background: 'rgba(34, 197, 94, 0.1)',
-                    border: '1px solid rgba(34, 197, 94, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Potential Reward
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      ${riskMetrics.rewardPerTrade}
-                    </div>
-                  </div>
-                  <div style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    background: 'rgba(245, 158, 11, 0.1)',
-                    border: '1px solid rgba(245, 158, 11, 0.2)',
-                  }}>
-                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px', fontSize: '14px' }}>
-                      Expected Value
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      ${riskMetrics.expectedValue}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
-        )}
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
