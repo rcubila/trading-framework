@@ -28,6 +28,7 @@ import { TradingCalendar } from '../components/TradingCalendar';
 import type { Trade as CalendarTrade } from '../components/TradingCalendar';
 import type { Trade as DBTrade } from '../types/trade';
 import { generateTestTrades } from '../utils/testTrades';
+import { PageHeader } from '../components/PageHeader';
 
 ChartJS.register(
   CategoryScale,
@@ -761,126 +762,104 @@ const Dashboard = () => {
       minHeight: '100vh',
       backdropFilter: 'blur(10px)',
     }}>
-      {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '2px',
-        background: 'rgba(15, 23, 42, 0.4)',
-        padding: '2px 5px',
-        borderRadius: '16px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div>
-          <h1 style={{ 
-            fontSize: '24px', 
-            fontWeight: 'bold', 
-            marginBottom: '2px',
-            background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Trading Dashboard
-          </h1>
-          <p style={{ 
-            color: 'rgba(255, 255, 255, 0.6)', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '5px',
-            fontSize: '13px'
-          }}>
+      <PageHeader 
+        title="Trading Dashboard"
+        subtitle={
+          <span>
             <RiCalendarCheckLine />
-            <span>February 12, 2024</span>
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            onClick={handleGenerateTestTrades}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              backgroundColor: '#4B5563',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '8px 12px',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
-          >
-            <RiTestTubeLine />
-            Generate Test Trades
-          </button>
-          <button
-            onClick={handleRefresh}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              backgroundColor: '#3B82F6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '8px 12px',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
-          >
-            <RiRefreshLine className={isRefreshing ? 'animate-spin' : ''} />
-            Refresh
-          </button>
-          <button
-            style={{ 
-              padding: '10px',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            <RiDownload2Line />
-          </button>
-          <button style={{ 
-            background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '12px',
-            border: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 8px rgba(37, 99, 235, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.2)';
-          }}>
-            <RiTimeLine />
-            New Trade
-          </button>
-        </div>
-      </div>
+            February 12, 2024
+          </span>
+        }
+        actions={
+          <>
+            <button
+              onClick={handleGenerateTestTrades}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                backgroundColor: '#4B5563',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '8px 12px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              <RiTestTubeLine />
+              Generate Test Trades
+            </button>
+            <button
+              onClick={handleRefresh}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                backgroundColor: '#3B82F6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '8px 12px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              <RiRefreshLine className={isRefreshing ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+            <button
+              style={{ 
+                padding: '10px',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <RiDownload2Line />
+            </button>
+            <button 
+              style={{ 
+                background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                color: 'white',
+                padding: '10px 20px',
+                borderRadius: '12px',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 8px rgba(37, 99, 235, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.2)';
+              }}
+            >
+              <RiTimeLine />
+              New Trade
+            </button>
+          </>
+        }
+      />
 
       {/* Filters Section */}
       <div style={{ 

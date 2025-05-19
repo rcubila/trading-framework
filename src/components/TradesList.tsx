@@ -7,9 +7,12 @@ import { formatPnL } from '../utils/trading';
 interface TradesListProps {
   fetchTrades: (page: number, pageSize: number) => Promise<Trade[]>;
   initialPageSize?: number;
-  onTradeClick?: (trade: Trade) => void;
-  onDeleteClick?: (trade: Trade) => void;
-  refreshTrigger?: number;
+  onTradeClick: (trade: Trade) => void;
+  onDeleteClick: (trade: Trade) => void;
+  selectedTrades: Set<string>;
+  onSelectTrade: (tradeId: string) => void;
+  onSelectAll: (trades: Trade[]) => void;
+  refreshTrigger: number;
 }
 
 const ITEM_SIZE = 72; // Height of each trade row
@@ -25,7 +28,7 @@ const TradeMenu = memo(({
   trade: Trade;
   onDeleteClick?: (trade: Trade) => void;
   onClose: () => void;
-  position: { top: number; right: number };
+  position: { top: number | string; right: number | string };
 }) => (
   <div 
     style={{
@@ -44,37 +47,7 @@ const TradeMenu = memo(({
     <button
       onClick={(e) => {
         e.stopPropagation();
-        // TODO: Implement edit functionality
-        onClose();
-      }}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '8px 16px',
-        width: '100%',
-        backgroundColor: 'transparent',
-        border: 'none',
-        color: 'white',
-        cursor: 'pointer',
-        fontSize: '14px',
-        textAlign: 'left',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'transparent';
-      }}
-    >
-      <RiEditLine size={16} />
-      Edit Trade
-    </button>
-    
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        // TODO: Implement duplicate functionality
+        navigator.clipboard.writeText(JSON.stringify(trade, null, 2));
         onClose();
       }}
       style={{
@@ -98,10 +71,8 @@ const TradeMenu = memo(({
       }}
     >
       <RiFileCopyLine size={16} />
-      Duplicate Trade
+      Copy Data
     </button>
-    
-    <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.1)', margin: '4px 0' }} />
     
     <button
       onClick={(e) => {
@@ -140,7 +111,17 @@ const TradeMenu = memo(({
 TradeMenu.displayName = 'TradeMenu';
 
 // Modify TradeContent to include menu functionality
-const TradeContent = memo(({ trade, onDeleteClick }: { trade: Trade; onDeleteClick?: (trade: Trade) => void }) => {
+const TradeContent = memo(({ 
+  trade, 
+  onDeleteClick,
+  selectedTrades,
+  onSelectTrade
+}: { 
+  trade: Trade; 
+  onDeleteClick?: (trade: Trade) => void;
+  selectedTrades: Set<string>;
+  onSelectTrade: (tradeId: string) => void;
+}) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuButtonRef = useRef<HTMLDivElement>(null);
 
@@ -160,11 +141,27 @@ const TradeContent = memo(({ trade, onDeleteClick }: { trade: Trade; onDeleteCli
   return (
     <div style={{ 
       display: 'grid', 
-      gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 1fr 80px', 
+      gridTemplateColumns: '40px 1fr 1fr 1fr 1fr 1fr 1fr 1fr 80px', 
       alignItems: 'center',
       width: '100%',
       padding: '0 10px'
     }}>
+      <div>
+        <input
+          type="checkbox"
+          checked={selectedTrades.has(trade.id)}
+          onChange={(e) => {
+            e.stopPropagation();
+            onSelectTrade(trade.id);
+          }}
+          style={{
+            width: '18px',
+            height: '18px',
+            cursor: 'pointer',
+            accentColor: '#60a5fa'
+          }}
+        />
+      </div>
       <div>{trade.symbol}</div>
       <div>{new Date(trade.entry_date).toLocaleDateString()}</div>
       <div>{trade.type}</div>
@@ -196,81 +193,12 @@ const TradeContent = memo(({ trade, onDeleteClick }: { trade: Trade; onDeleteCli
           <RiMoreLine />
         </div>
         {showMenu && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            backgroundColor: '#1F2937',
-            border: '1px solid #374151',
-            borderRadius: '6px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            padding: '0.5rem',
-            zIndex: 10,
-            minWidth: '160px'
-          }}>
-            <div 
-              style={{
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                color: '#D1D5DB',
-                transition: 'background-color 0.2s'
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                navigator.clipboard.writeText(JSON.stringify(trade, null, 2));
-                setShowMenu(false);
-              }}
-            >
-              <RiFileCopyLine />
-              <span>Copy Data</span>
-            </div>
-            <div 
-              style={{
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                color: '#D1D5DB',
-                transition: 'background-color 0.2s'
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onDeleteClick) {
-                  onDeleteClick(trade);
-                }
-                setShowMenu(false);
-              }}
-            >
-              <RiDeleteBinLine />
-              <span>Delete</span>
-            </div>
-            <div 
-              style={{
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                color: '#D1D5DB',
-                transition: 'background-color 0.2s'
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                // Handle edit action
-                setShowMenu(false);
-              }}
-            >
-              <RiEditLine />
-              <span>Edit</span>
-            </div>
-          </div>
+          <TradeMenu 
+            trade={trade} 
+            onDeleteClick={onDeleteClick} 
+            onClose={() => setShowMenu(false)}
+            position={{ top: '100%', right: 0 }}
+          />
         )}
       </div>
     </div>
@@ -287,6 +215,8 @@ const Row = memo(({ index, style, data }: {
     trades: Trade[]; 
     onTradeClick?: (trade: Trade) => void;
     onDeleteClick?: (trade: Trade) => void;
+    selectedTrades: Set<string>;
+    onSelectTrade: (tradeId: string) => void;
   } 
 }) => {
   const trade = data.trades[index];
@@ -336,7 +266,7 @@ const Row = memo(({ index, style, data }: {
       }}
       onClick={() => data.onTradeClick?.(trade)}
     >
-      <TradeContent trade={trade} onDeleteClick={data.onDeleteClick} />
+      <TradeContent trade={trade} onDeleteClick={data.onDeleteClick} selectedTrades={data.selectedTrades} onSelectTrade={data.onSelectTrade} />
     </div>
   );
 });
@@ -380,18 +310,21 @@ const PageSizeSelector = memo(({
 
 PageSizeSelector.displayName = 'PageSizeSelector';
 
-export const TradesList = ({ 
-  fetchTrades, 
-  initialPageSize = 20, 
+export const TradesList = ({
+  fetchTrades,
+  initialPageSize = 10,
   onTradeClick,
   onDeleteClick,
-  refreshTrigger = 0
+  selectedTrades,
+  onSelectTrade,
+  onSelectAll,
+  refreshTrigger
 }: TradesListProps) => {
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
@@ -404,16 +337,17 @@ export const TradesList = ({
       loadingRef.current = true;
       setLoading(true);
       setError(null);
-      const newTrades = await fetchTrades(1, pageSize);
-      setTrades(newTrades);
-      setHasMore(newTrades.length >= pageSize);
+      const newTrades = await fetchTrades(page, pageSize);
+      setTrades(prev => page === 1 ? newTrades : [...prev, ...newTrades]);
+      setHasMore(newTrades.length === pageSize);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load trades');
+      console.error('Error loading trades:', err);
     } finally {
       setLoading(false);
       loadingRef.current = false;
     }
-  }, [fetchTrades, pageSize]);
+  }, [fetchTrades, page, pageSize, refreshTrigger]);
 
   useEffect(() => {
     // Don't clear trades immediately to avoid flickering
@@ -426,17 +360,54 @@ export const TradesList = ({
     loadingRef.current = false;
   }, []);
 
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      setPage(prev => prev + 1);
+    }
+  };
+
   return (
     <div style={{ 
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
       padding: '5px',
-      gap: '8px'
+      gap: '8px',
+      background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+      borderRadius: '16px',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+      overflow: 'hidden'
     }}>
-      <PageSizeSelector pageSize={pageSize} onPageSizeChange={handlePageSizeChange} />
-      
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 24px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        background: 'rgba(15, 23, 42, 0.2)',
+      }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <input
+            type="checkbox"
+            checked={trades.length > 0 && selectedTrades.size === trades.length}
+            onChange={() => onSelectAll(trades)}
+            style={{
+              width: '18px',
+              height: '18px',
+              cursor: 'pointer',
+              accentColor: '#60a5fa'
+            }}
+          />
+          <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Select All</span>
+        </div>
+        <PageSizeSelector pageSize={pageSize} onPageSizeChange={handlePageSizeChange} />
+      </div>
+
+      <div style={{ 
+        flex: 1, 
+        minHeight: 0,
+        padding: '0 24px'
+      }}>
         {error ? (
           <div style={{
             padding: '12px',
@@ -450,12 +421,37 @@ export const TradesList = ({
           </div>
         ) : (
           <>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '40px 1fr 1fr 1fr 1fr 1fr 1fr 1fr 80px',
+              padding: '12px 10px',
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontWeight: '500',
+              fontSize: '14px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+            }}>
+              <div></div>
+              <div>Symbol</div>
+              <div>Date</div>
+              <div>Type</div>
+              <div>Entry</div>
+              <div>Exit</div>
+              <div>P&L</div>
+              <div>Status</div>
+              <div></div>
+            </div>
             <List
               height={listHeight}
               itemCount={trades.length}
               itemSize={ITEM_SIZE}
               width="100%"
-              itemData={{ trades, onTradeClick, onDeleteClick }}
+              itemData={{ 
+                trades, 
+                onTradeClick, 
+                onDeleteClick,
+                selectedTrades,
+                onSelectTrade
+              }}
               style={{
                 overflowX: 'hidden'
               }}

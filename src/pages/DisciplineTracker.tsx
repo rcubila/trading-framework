@@ -25,6 +25,7 @@ import { useDiscipline } from '../context/DisciplineContext';
 import { DailyLog } from './discipline/DailyLog';
 import { ProgressInsights } from './discipline/ProgressInsights';
 import type { DailyCheckInData } from './discipline/DailyLog';
+import { PageHeader } from '../components/PageHeader';
 
 const ruleCategories = [
   'Entry',
@@ -274,7 +275,58 @@ export const DisciplineTracker: React.FC = () => {
   }, [dailyCheckIns]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div style={{ 
+      padding: '5px',
+      color: 'white',
+      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
+      minHeight: '100vh',
+      backdropFilter: 'blur(10px)'
+    }}>
+      <PageHeader 
+        title="Discipline Tracker"
+        subtitle="Track your trading discipline and progress"
+        actions={
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={() => setShowAddRule(true)}
+              style={{
+                padding: '5px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                color: '#60a5fa',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <RiAddLine />
+              New Rule
+            </button>
+            <button
+              onClick={() => setShowAddEntry(true)}
+              style={{
+                padding: '5px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                color: '#60a5fa',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <RiAddLine />
+              New Entry
+            </button>
+          </div>
+        }
+      />
+
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Trading Discipline Tracker</h1>
@@ -286,14 +338,6 @@ export const DisciplineTracker: React.FC = () => {
             >
               <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
               New Goal
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowAddEntry(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-              New Entry
             </button>
           </div>
         </div>

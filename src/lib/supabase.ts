@@ -28,6 +28,7 @@ export const tradesApi = {
       .from('trades')
       .update(trade)
       .eq('id', id)
+      .is('deleted_at', null)
       .select()
       .single();
     
@@ -38,8 +39,9 @@ export const tradesApi = {
   async deleteTrade(id: string) {
     const { error } = await supabase
       .from('trades')
-      .delete()
-      .eq('id', id);
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .is('deleted_at', null);
     
     if (error) throw error;
   },
@@ -49,6 +51,7 @@ export const tradesApi = {
       .from('trades')
       .select('*')
       .eq('user_id', userId)
+      .is('deleted_at', null)
       .order('entry_date', { ascending: false });
     
     if (error) throw error;
@@ -60,10 +63,48 @@ export const tradesApi = {
       .from('trades')
       .select('*')
       .eq('id', id)
+      .is('deleted_at', null)
       .single();
     
     if (error) throw error;
     return data;
+  },
+
+  // New function to get deleted trades
+  async getDeletedTrades(userId: string) {
+    const { data, error } = await supabase
+      .from('trades')
+      .select('*')
+      .eq('user_id', userId)
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // New function to restore a deleted trade
+  async restoreTrade(id: string) {
+    const { data, error } = await supabase
+      .from('trades')
+      .update({ deleted_at: null })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // New function to permanently delete a trade
+  async permanentDeleteTrade(id: string) {
+    const { error } = await supabase
+      .from('trades')
+      .delete()
+      .eq('id', id)
+      .not('deleted_at', 'is', null);
+    
+    if (error) throw error;
   }
 };
 
