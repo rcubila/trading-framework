@@ -188,16 +188,40 @@ const Dashboard = () => {
 
     // Calculate Risk-Reward Ratio
     const validRiskRewardTrades = trades.filter(trade => {
+      // First try to use risk_reward if available
       const riskReward = Number(trade.risk_reward);
-      return !isNaN(riskReward) && riskReward > 0;
+      // If not available, calculate from risk and reward
+      const calculatedRR = trade.risk && trade.reward ? Number(trade.reward) / Number(trade.risk) : null;
+      
+      console.log(`Trade ${trade.symbol} Risk-Reward:`, {
+        risk_reward: trade.risk_reward,
+        risk: trade.risk,
+        reward: trade.reward,
+        calculated: calculatedRR
+      });
+      
+      return (!isNaN(riskReward) && riskReward > 0) || (calculatedRR !== null && calculatedRR > 0);
     });
     
     const riskReward = validRiskRewardTrades.length > 0
-      ? validRiskRewardTrades.reduce((sum, trade) => sum + Number(trade.risk_reward), 0) / validRiskRewardTrades.length
+      ? validRiskRewardTrades.reduce((sum, trade) => {
+          const rr = Number(trade.risk_reward);
+          if (!isNaN(rr) && rr > 0) return sum + rr;
+          // If risk_reward is not available, calculate from risk and reward
+          return sum + (Number(trade.reward) / Number(trade.risk));
+        }, 0) / validRiskRewardTrades.length
       : 0;
     
     console.log("=== RISK-REWARD CALCULATION ===");
+    console.log("Total trades:", trades.length);
     console.log("Total trades with valid RR:", validRiskRewardTrades.length);
+    console.log("Trades with valid RR:", validRiskRewardTrades.map(t => ({
+      symbol: t.symbol,
+      risk_reward: t.risk_reward,
+      risk: t.risk,
+      reward: t.reward,
+      calculated: t.risk && t.reward ? Number(t.reward) / Number(t.risk) : null
+    })));
     console.log("Average RR:", riskReward);
     
     setAvgRiskReward(riskReward);
