@@ -24,8 +24,10 @@ export const App = () => {
     trackPerformance();
   }, []);
 
+  const basePath = import.meta.env.VITE_BASE_PATH || '/';
+
   return (
-    <BrowserRouter basename="/trading-framework">
+    <BrowserRouter basename={basePath}>
       <AuthProvider>
         <DisciplineProvider>
           <Routes>
