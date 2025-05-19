@@ -181,9 +181,30 @@ const detectColumnType = (headers: string[], values: string[][]): { [key: string
 
 // Helper function to determine market and category
 const determineMarketAndCategory = (symbol: string, market?: string): { market: string; market_category: 'Equities' | 'Crypto' | 'Forex' | 'Futures' | 'Other' } => {
+  // First check for futures symbols (including variations)
+  const futuresSymbols = [
+    'ES', 'NQ', 'YM', 'RTY', 'CL', 'GC', 'SI', '6E', 'ZB', 'ZN',  // CME futures
+    'GER40', 'DE40', 'DAX', '.USTEC', 'NAS100',  // Index futures
+    'FGBL', 'FGBM', 'FGBS', 'FGBX',  // Euro-Bund futures
+    'STOXX50E', 'ESTX50',  // Euro Stoxx 50
+    'FTSE', 'UK100',  // FTSE 100
+    'NIKKEI', 'NK225'  // Nikkei 225
+  ];
+  
+  // Check for exact match or if symbol contains any of the futures symbols
+  if (futuresSymbols.some(fs => symbol === fs || symbol.includes(fs))) {
+    return { market: 'Futures', market_category: 'Futures' };
+  }
+
   // If market is provided, use it to determine category
   if (market) {
     const normalizedMarket = market.toLowerCase();
+    if (normalizedMarket.includes('future') || 
+        normalizedMarket.includes('eurex') || 
+        normalizedMarket.includes('cme') || 
+        normalizedMarket.includes('ice')) {
+      return { market: 'Futures', market_category: 'Futures' };
+    }
     if (normalizedMarket.includes('stock') || normalizedMarket.includes('equity') || normalizedMarket.includes('etf')) {
       return { market: 'Stocks', market_category: 'Equities' };
     }
@@ -193,9 +214,6 @@ const determineMarketAndCategory = (symbol: string, market?: string): { market: 
     if (normalizedMarket.includes('forex') || normalizedMarket.includes('fx')) {
       return { market: 'Spot Forex', market_category: 'Forex' };
     }
-    if (normalizedMarket.includes('future')) {
-      return { market: 'Futures', market_category: 'Futures' };
-    }
   }
 
   // Try to determine from symbol pattern
@@ -204,9 +222,6 @@ const determineMarketAndCategory = (symbol: string, market?: string): { market: 
   }
   if (symbol.includes('USDT') || symbol.includes('BTC') || symbol.includes('ETH')) {
     return { market: 'Spot Crypto', market_category: 'Crypto' };
-  }
-  if (['ES', 'NQ', 'YM', 'RTY', 'CL', 'GC', 'SI', '6E'].includes(symbol)) {
-    return { market: 'Futures', market_category: 'Futures' };
   }
   
   // Default to Stocks/Equities
