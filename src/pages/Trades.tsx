@@ -21,6 +21,8 @@ import {
   RiErrorWarningLine,
   RiInformationLine,
   RiDeleteBinLine,
+  RiUpload2Line,
+  RiEdit2Line,
 } from 'react-icons/ri';
 import { TradesList } from '../components/TradesList';
 import { TradeDetails } from '../components/TradeDetails';
@@ -855,6 +857,42 @@ const fetchTradesFromAPI = async (page: number, pageSize: number) => {
   }
 };
 
+// Add this function to create a test losing trade
+const createTestLosingTrade = async () => {
+  try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No user logged in');
+
+    // Create a losing trade with negative PnL
+    const losingTrade: Database['public']['Tables']['trades']['Insert'] = {
+      user_id: user.id,
+      market: 'Stocks',
+      market_category: 'Equities',
+      symbol: 'TSLA',
+      type: 'Long',
+      status: 'Closed',
+      entry_price: 200,
+      exit_price: 180,
+      quantity: 10,
+      entry_date: new Date().toISOString(),
+      exit_date: new Date().toISOString(),
+      pnl: -200, // Negative PnL
+      pnl_percentage: -10,
+      strategy: 'Test Losing Trade',
+      tags: ['test', 'losing']
+    };
+
+    // Insert the losing trade
+    await tradesApi.createTrade(losingTrade);
+    console.log('Created test losing trade with negative PnL');
+    return true;
+  } catch (error) {
+    console.error('Error creating test losing trade:', error);
+    return false;
+  }
+};
+
 export const Trades = () => {
   const [showAddTrade, setShowAddTrade] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
@@ -979,6 +1017,28 @@ export const Trades = () => {
     setSelectedTrade(trade);
     setShowTradeDetails(true);
   };
+
+  // Add this to render a button to create a test losing trade
+  const renderTestButton = () => (
+    <button
+      onClick={createTestLosingTrade}
+      style={{
+        padding: '8px 16px',
+        backgroundColor: '#ef4444',
+        color: 'white',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }}
+    >
+      <RiAddLine size={16} />
+      Add Test Losing Trade
+    </button>
+  );
 
   return (
     <div style={{ 
@@ -1156,7 +1216,7 @@ export const Trades = () => {
         {/* Table Header */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 80px',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 1fr 80px',
           padding: '16px 24px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
           gap: '16px',
@@ -1165,10 +1225,11 @@ export const Trades = () => {
           fontSize: '14px',
           background: 'rgba(15, 23, 42, 0.1)',
         }}>
-          <div>Market/Symbol</div>
-          <div>Date/Time</div>
+          <div>Symbol</div>
+          <div>Date</div>
           <div>Type</div>
-          <div>Entry/Exit</div>
+          <div>Entry</div>
+          <div>Exit</div>
           <div>P&L</div>
           <div>Status</div>
           <div></div>

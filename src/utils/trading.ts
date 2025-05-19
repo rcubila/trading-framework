@@ -28,17 +28,29 @@ export const formatPnL = (value: number, options: PnLFormatOptions = defaultPnLF
     percentage = false,
   } = options;
 
-  const formattedValue = value.toLocaleString(undefined, {
+  // Ensure we're working with the actual value with proper sign
+  const absValue = Math.abs(value);
+  const sign = value < 0 ? '-' : ''; // Only show negative sign
+
+  // Format the absolute value
+  const formattedAbsValue = absValue.toLocaleString(undefined, {
     minimumFractionDigits,
     maximumFractionDigits,
-    signDisplay,
+    signDisplay: 'never', // We handle the sign manually
   });
 
+  const result = currency ? `${sign}$${formattedAbsValue}` : `${sign}${formattedAbsValue}`;
+  
+  // For debugging
+  if (value < 0) {
+    console.log(`PNL Formatting: original=${value}, sign=${sign}, result=${result}`);
+  }
+  
   if (percentage) {
-    return `${formattedValue}%`;
+    return `${sign}${formattedAbsValue}%`;
   }
 
-  return currency ? `$${formattedValue}` : formattedValue;
+  return result;
 };
 
 /**
