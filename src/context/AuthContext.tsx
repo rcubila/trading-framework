@@ -64,10 +64,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setError(null);
       
+      const basePath = import.meta.env.VITE_BASE_PATH || '/';
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/trading-framework/auth/callback`
+          redirectTo: `${window.location.origin}${basePath}auth/callback`
         }
       });
 
