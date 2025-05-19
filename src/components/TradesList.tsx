@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { RiArrowUpLine, RiArrowDownLine, RiDeleteBinLine, RiMoreLine, RiEditLine, RiFileCopyLine } from 'react-icons/ri';
 import { FixedSizeList as List } from 'react-window';
 import type { Trade } from '../types/trade';
+import { formatPnL } from '../utils/trading';
 
 interface TradesListProps {
   fetchTrades: (page: number, pageSize: number) => Promise<Trade[]>;
@@ -215,7 +216,7 @@ const TradeContent = memo(({ trade, onDeleteClick }: { trade: Trade; onDeleteCli
         fontWeight: 'bold',
         color: (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
       }}>
-        ${Math.abs(trade.pnl || 0).toLocaleString()}
+        ${(trade.pnl || 0).toLocaleString()}
       </div>
 
       {/* Status */}
