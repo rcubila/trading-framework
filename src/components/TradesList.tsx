@@ -160,100 +160,117 @@ const TradeContent = memo(({ trade, onDeleteClick }: { trade: Trade; onDeleteCli
   return (
     <div style={{ 
       display: 'grid', 
-      gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 80px',
-      width: '100%',
-      gap: '16px',
+      gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 1fr 80px', 
       alignItems: 'center',
-      position: 'relative'
+      width: '100%',
+      padding: '0 10px'
     }}>
-      {/* Market/Symbol */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{
-          width: '24px',
-          height: '24px',
-          borderRadius: '6px',
-          backgroundColor: trade.type === 'Long' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: trade.type === 'Long' ? '#22c55e' : '#ef4444',
-        }}>
-          {trade.type === 'Long' ? <RiArrowUpLine size={14} /> : <RiArrowDownLine size={14} />}
-        </div>
-        <div>
-          <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{trade.symbol}</div>
-          <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>{trade.market}</div>
-        </div>
-      </div>
-
-      {/* Date/Time */}
-      <div>
-        <div style={{ fontSize: '14px' }}>{new Date(trade.entry_date).toLocaleDateString()}</div>
-        <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
-          {new Date(trade.entry_date).toLocaleTimeString()}
-        </div>
-      </div>
-
-      {/* Type */}
+      <div>{trade.symbol}</div>
+      <div>{new Date(trade.entry_date).toLocaleDateString()}</div>
+      <div>{trade.type}</div>
+      <div>${trade.entry_price}</div>
+      <div>${trade.exit_price || '-'}</div>
       <div style={{ 
-        fontSize: '14px',
-        color: trade.type === 'Long' ? '#22c55e' : '#ef4444'
+        color: (trade.pnl || 0) > 0 ? '#34D399' : (trade.pnl || 0) < 0 ? '#F87171' : 'inherit',
+        fontWeight: 'bold'
       }}>
-        {trade.type}
+        {formatPnL(trade.pnl || 0)}
       </div>
-
-      {/* Entry/Exit */}
-      <div>
-        <div style={{ fontSize: '14px' }}>${trade.entry_price.toFixed(2)}</div>
-        <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
-          {trade.exit_price ? `$${trade.exit_price.toFixed(2)}` : 'Open'}
-        </div>
-      </div>
-
-      {/* P&L */}
-      <div style={{
-        fontSize: '14px',
-        fontWeight: 'bold',
-        color: (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
-      }}>
-        ${(trade.pnl || 0).toLocaleString()}
-      </div>
-
-      {/* Status */}
-      <div style={{
-        fontSize: '14px',
-        color: trade.status === 'Open' ? '#f59e0b' : '#22c55e'
-      }}>
-        {trade.status}
-      </div>
-
-      {/* Actions */}
-      <div 
-        ref={menuButtonRef}
-        style={{ 
-          textAlign: 'right',
-          cursor: 'pointer',
-          position: 'relative'
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowMenu(!showMenu);
-        }}
-      >
-        <RiMoreLine 
-          size={20} 
+      <div>{trade.status}</div>
+      <div style={{ position: 'relative' }}>
+        <div 
+          ref={menuButtonRef}
           style={{ 
-            color: showMenu ? 'white' : 'rgba(255, 255, 255, 0.6)',
-            transition: 'color 0.2s ease'
-          }} 
-        />
+            cursor: 'pointer', 
+            padding: '5px',
+            borderRadius: '4px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowMenu(!showMenu);
+          }}
+        >
+          <RiMoreLine />
+        </div>
         {showMenu && (
-          <TradeMenu
-            trade={trade}
-            onDeleteClick={onDeleteClick}
-            onClose={() => setShowMenu(false)}
-            position={{ top: 24, right: 0 }}
-          />
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            right: 0,
+            backgroundColor: '#1F2937',
+            border: '1px solid #374151',
+            borderRadius: '6px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            padding: '0.5rem',
+            zIndex: 10,
+            minWidth: '160px'
+          }}>
+            <div 
+              style={{
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 12px',
+                borderRadius: '4px',
+                color: '#D1D5DB',
+                transition: 'background-color 0.2s'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(JSON.stringify(trade, null, 2));
+                setShowMenu(false);
+              }}
+            >
+              <RiFileCopyLine />
+              <span>Copy Data</span>
+            </div>
+            <div 
+              style={{
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 12px',
+                borderRadius: '4px',
+                color: '#D1D5DB',
+                transition: 'background-color 0.2s'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onDeleteClick) {
+                  onDeleteClick(trade);
+                }
+                setShowMenu(false);
+              }}
+            >
+              <RiDeleteBinLine />
+              <span>Delete</span>
+            </div>
+            <div 
+              style={{
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 12px',
+                borderRadius: '4px',
+                color: '#D1D5DB',
+                transition: 'background-color 0.2s'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                // Handle edit action
+                setShowMenu(false);
+              }}
+            >
+              <RiEditLine />
+              <span>Edit</span>
+            </div>
+          </div>
         )}
       </div>
     </div>

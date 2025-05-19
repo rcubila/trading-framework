@@ -19,6 +19,7 @@ import {
   RiSettings4Line,
   RiDownload2Line,
   RiRefreshLine,
+  RiTestTubeLine,
 } from 'react-icons/ri';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Chart, Line, Bar, Doughnut } from 'react-chartjs-2';
@@ -26,6 +27,7 @@ import { supabase } from '../lib/supabase';
 import { TradingCalendar } from '../components/TradingCalendar';
 import type { Trade as CalendarTrade } from '../components/TradingCalendar';
 import type { Trade as DBTrade } from '../types/trade';
+import { generateTestTrades } from '../utils/testTrades';
 
 ChartJS.register(
   CategoryScale,
@@ -72,6 +74,10 @@ const Dashboard = () => {
     if (!holdingTimes.length) return '0m';
     
     const avgMinutes = holdingTimes.reduce((sum, time) => sum + time, 0) / holdingTimes.length;
+    console.log("=== HOLDING TIME CALCULATION ===");
+    console.log("Total trades with exit dates:", holdingTimes.length);
+    console.log("Average minutes:", avgMinutes);
+    
     if (avgMinutes < 60) return `${Math.round(avgMinutes)}m`;
     if (avgMinutes < 1440) return `${Math.round(avgMinutes / 60)}h`;
     return `${Math.round(avgMinutes / 1440)}d`;
@@ -133,6 +139,7 @@ const Dashboard = () => {
   const [bestDayWinRate, setBestDayWinRate] = useState(0);
   const [expectancy, setExpectancy] = useState(0);
   const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
+  const [allTrades, setAllTrades] = useState<Trade[]>([]); // Add state for all trades
   const [selectedRange, setSelectedRange] = useState('1M');
   const [hoveredMetric, setHoveredMetric] = useState<string | null>(null);
   const [selectedChartType, setSelectedChartType] = useState('line');
@@ -142,26 +149,56 @@ const Dashboard = () => {
   const [isLoadingTrades, setIsLoadingTrades] = useState(true);
 
   useEffect(() => {
-    if (recentTrades.length > 0) {
-      calculateMetrics(recentTrades);
+    if (allTrades.length > 0) {
+      calculateMetrics(allTrades);
     }
-  }, [recentTrades]);
+  }, [allTrades]);
 
   const calculateMetrics = (trades: Trade[]) => {
     if (!trades.length) return;
 
+    console.log("CALCULATING METRICS - All Trades:", trades.map(t => ({
+      symbol: t.symbol,
+      pnl: t.pnl,
+      date: t.entry_date
+    })));
+
     // Calculate Total P&L
-    const pnl = trades.reduce((sum, trade) => sum + (trade.pnl || 0), 0);
+    const pnl = trades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0);
     setTotalPnL(pnl);
 
-    // Calculate Win Rate
-    const winningTrades = trades.filter(trade => (trade.pnl || 0) > 0);
-    const losingTrades = trades.filter(trade => (trade.pnl || 0) < 0);
-    const rate = (winningTrades.length / trades.length) * 100;
-    setWinRate(rate);
+    // Calculate Win Rate with detailed logging
+    const totalTrades = trades.length;
+    const winningTrades = trades.filter(trade => {
+      const pnl = Number(trade.pnl);
+      console.log(`Trade ${trade.symbol} PnL:`, pnl);
+      return pnl > 0;
+    });
+    const totalWinningTrades = winningTrades.length;
+    
+    console.log("=== WIN RATE CALCULATION ===");
+    console.log("Total Trades:", totalTrades);
+    console.log("Total Winning Trades:", totalWinningTrades);
+    console.log("Calculation:", totalWinningTrades, "/", totalTrades, "=", (totalWinningTrades / totalTrades));
+    console.log("Win Rate:", (totalWinningTrades / totalTrades) * 100, "%");
+    
+    const winRate = totalTrades > 0 ? (totalWinningTrades / totalTrades) * 100 : 0;
+    setWinRate(winRate);
 
     // Calculate Risk-Reward Ratio
-    const riskReward = trades.reduce((sum, trade) => sum + (trade.risk_reward || 0), 0) / trades.length;
+    const validRiskRewardTrades = trades.filter(trade => {
+      const rr = Number(trade.risk_reward);
+      return !isNaN(rr) && rr > 0;
+    });
+    
+    const riskReward = validRiskRewardTrades.length > 0
+      ? validRiskRewardTrades.reduce((sum, trade) => sum + Number(trade.risk_reward), 0) / validRiskRewardTrades.length
+      : 0;
+    
+    console.log("=== RISK-REWARD CALCULATION ===");
+    console.log("Total trades with valid RR:", validRiskRewardTrades.length);
+    console.log("Average RR:", riskReward);
+    
     setAvgRiskReward(riskReward);
 
     // Calculate Average Holding Time
@@ -173,14 +210,27 @@ const Dashboard = () => {
     setMaxDrawdown(drawdown);
 
     // Calculate Expectancy
+    const losingTrades = trades.filter(trade => (Number(trade.pnl) || 0) <= 0);
+    
     const avgWin = winningTrades.length > 0 
-      ? winningTrades.reduce((sum, t) => sum + (t.pnl || 0), 0) / winningTrades.length 
+      ? winningTrades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0) / winningTrades.length 
       : 0;
-    const avgLoss = losingTrades.length > 0
-      ? Math.abs(losingTrades.reduce((sum, t) => sum + (t.pnl || 0), 0) / losingTrades.length)
+    
+    const avgLoss = losingTrades.length > 0 
+      ? Math.abs(losingTrades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0)) / losingTrades.length 
       : 0;
-    const exp = (rate / 100 * avgWin) - ((100 - rate) / 100 * avgLoss);
-    setExpectancy(exp);
+    
+    const expectancy = (winRate / 100 * avgWin) - ((1 - winRate / 100) * avgLoss);
+    
+    console.log("=== EXPECTANCY CALCULATION ===");
+    console.log("Total Trades:", trades.length);
+    console.log("Winning Trades:", winningTrades.length);
+    console.log("Average Win:", avgWin);
+    console.log("Average Loss:", avgLoss);
+    console.log("Win Rate:", winRate);
+    console.log("Expectancy:", expectancy);
+    
+    setExpectancy(expectancy);
 
     // Calculate Best Trading Day
     const dayStats = calculateBestTradingDay(trades);
@@ -193,6 +243,81 @@ const Dashboard = () => {
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
+  const fetchData = async () => {
+    try {
+      setIsLoadingTrades(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch all trades for metrics calculation
+      const { data: tradesData, error: tradesError } = await supabase
+        .from('trades')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('entry_date', { ascending: false });
+
+      if (tradesError) throw tradesError;
+      
+      // Process all trades
+      if (tradesData) {
+        const processedTrades = tradesData.map(trade => {
+          const pnl = trade.pnl !== null ? Number(trade.pnl) : 0;
+          console.log(`Processing trade ${trade.symbol}:`, { pnl, original: trade.pnl });
+          return {
+            ...trade,
+            pnl
+          };
+        });
+        
+        // Store all trades and calculate metrics
+        setAllTrades(processedTrades);
+        calculateMetrics(processedTrades);
+        
+        // Set calendar trades
+        setCalendarTrades(processedTrades.map(trade => {
+          const date = new Date(trade.entry_date);
+          const localDate = date.toLocaleDateString('en-CA');
+          return {
+            id: trade.id,
+            date: localDate,
+            symbol: trade.symbol,
+            type: trade.type,
+            result: (trade.pnl || 0) > 0 ? 'Win' : 'Loss',
+            profit: trade.pnl || 0,
+            volume: trade.quantity,
+            entry: trade.entry_price,
+            exit: trade.exit_price || trade.entry_price
+          };
+        }));
+
+        // Set recent trades (last 10 trades) - ONLY for display
+        setRecentTrades(processedTrades.slice(0, 10));
+      }
+
+    } catch (error) {
+      console.error('Error fetching trades:', error);
+    } finally {
+      setIsLoadingTrades(false);
+    }
+  };
+
+  const handleGenerateTestTrades = async () => {
+    try {
+      setIsRefreshing(true);
+      await generateTestTrades();
+      // Re-fetch data to include the new test trades
+      await fetchData();
+    } catch (error) {
+      console.error('Error generating test trades:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const renderChart = () => {
     switch (selectedChartType) {
       case 'bar':
@@ -202,80 +327,13 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoadingTrades(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        // Fetch all trades for metrics calculation
-        const { data: allTrades, error: allTradesError } = await supabase
-          .from('trades')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('entry_date', { ascending: false });
-
-        if (allTradesError) throw allTradesError;
-        
-        // Calculate metrics from all trades
-        if (allTrades) {
-          calculateMetrics(allTrades);
-          setCalendarTrades(allTrades.map(trade => {
-            // Convert UTC date to local date for calendar display
-            const date = new Date(trade.entry_date);
-            // Format as YYYY-MM-DD in local time
-            const localDate = date.toLocaleDateString('en-CA'); // en-CA gives YYYY-MM-DD format
-            return {
-              id: trade.id,
-              date: localDate,
-              symbol: trade.symbol,
-              type: trade.type,
-              result: trade.pnl && trade.pnl > 0 ? 'Win' : 'Loss',
-              profit: trade.pnl || 0,
-              volume: trade.quantity,
-              entry: trade.entry_price,
-              exit: trade.exit_price || trade.entry_price
-            };
-          }));
-        }
-
-        // Fetch recent trades (last 24 hours)
-        const now = new Date();
-        const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        
-        // Format dates in UTC ISO format
-        const recentStartDate = twentyFourHoursAgo.toISOString();
-        const recentEndDate = now.toISOString();
-
-        const { data: recentTradesData, error: recentError } = await supabase
-          .from('trades')
-          .select('*')
-          .eq('user_id', user.id)
-          .gte('entry_date', recentStartDate)
-          .lte('entry_date', recentEndDate)
-          .order('entry_date', { ascending: false })
-          .limit(4);
-
-        if (recentError) throw recentError;
-        setRecentTrades(recentTradesData || []);
-
-      } catch (error) {
-        console.error('Error fetching trades:', error);
-      } finally {
-        setIsLoadingTrades(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  // Performance data using allTrades
   const performanceData = {
-    labels: recentTrades.map((trade: Trade) => new Date(trade.entry_date).toLocaleDateString()),
+    labels: allTrades.map((trade: Trade) => new Date(trade.entry_date).toLocaleDateString()),
     datasets: [
       {
         label: 'Account Balance',
-        data: recentTrades.reduce((acc: number[], trade: Trade, index: number) => {
+        data: allTrades.reduce((acc: number[], trade: Trade, index: number) => {
           const balance = index === 0 
             ? initialBalance + (trade.pnl || 0)
             : acc[index - 1] + (trade.pnl || 0);
@@ -297,8 +355,9 @@ const Dashboard = () => {
     ],
   };
 
+  // Profit distribution data using allTrades
   const profitDistributionData = {
-    labels: recentTrades.reduce((acc: string[], trade: Trade) => {
+    labels: allTrades.reduce((acc: string[], trade: Trade) => {
       const pnl = trade.pnl || 0;
       const bucket = Math.floor(pnl / 100) * 100;
       if (!acc.includes(`$${bucket}`)) {
@@ -308,7 +367,7 @@ const Dashboard = () => {
     }, []),
     datasets: [{
       label: 'Number of Trades',
-      data: recentTrades.reduce((acc: { bucket: string; count: number }[], trade: Trade) => {
+      data: allTrades.reduce((acc: { bucket: string; count: number }[], trade: Trade) => {
         const pnl = trade.pnl || 0;
         const bucket = Math.floor(pnl / 100) * 100;
         const index = acc.findIndex(item => item.bucket === `$${bucket}`);
@@ -321,14 +380,15 @@ const Dashboard = () => {
       }, [])
         .sort((a, b) => parseInt(a.bucket.slice(1)) - parseInt(b.bucket.slice(1)))
         .map(item => item.count),
-      backgroundColor: recentTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
-      borderColor: recentTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444'),
+      backgroundColor: allTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
+      borderColor: allTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444'),
       borderWidth: 2,
     }]
   };
 
+  // R-Multiple data using allTrades
   const rMultipleData = {
-    labels: recentTrades.map((trade: Trade) => {
+    labels: allTrades.map((trade: Trade) => {
       const rr = trade.risk_reward || 0;
       if (rr <= -3) return '≤-3R';
       if (rr >= 3) return '≥3R';
@@ -336,9 +396,9 @@ const Dashboard = () => {
     }),
     datasets: [{
       label: 'R-Multiple Distribution',
-      data: recentTrades.map((trade: Trade) => trade.risk_reward || 0),
-      backgroundColor: recentTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
-      borderColor: recentTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444'),
+      data: allTrades.map((trade: Trade) => trade.risk_reward || 0),
+      backgroundColor: allTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
+      borderColor: allTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444'),
       borderWidth: 2,
     }]
   };
@@ -436,8 +496,9 @@ const Dashboard = () => {
     cutout: '75%',
   };
 
+  // Strategy performance data using allTrades
   const strategyPerformanceData = {
-    labels: recentTrades.reduce((acc: string[], trade: Trade) => {
+    labels: allTrades.reduce((acc: string[], trade: Trade) => {
       const strategy = trade.strategy || 'Unknown';
       if (!acc.includes(strategy)) {
         acc.push(strategy);
@@ -448,7 +509,7 @@ const Dashboard = () => {
       {
         type: 'bar' as const,
         label: 'Win Rate %',
-        data: recentTrades.reduce((acc: { strategy: string; wins: number; total: number }[], trade: Trade) => {
+        data: allTrades.reduce((acc: { strategy: string; wins: number; total: number }[], trade: Trade) => {
           const strategy = trade.strategy || 'Unknown';
           const index = acc.findIndex(item => item.strategy === strategy);
           if (index === -1) {
@@ -471,7 +532,7 @@ const Dashboard = () => {
       {
         type: 'line' as const,
         label: 'Total P&L',
-        data: recentTrades.reduce((acc: { strategy: string; pnl: number }[], trade: Trade) => {
+        data: allTrades.reduce((acc: { strategy: string; pnl: number }[], trade: Trade) => {
           const strategy = trade.strategy || 'Unknown';
           const index = acc.findIndex(item => item.strategy === strategy);
           if (index === -1) {
@@ -489,8 +550,9 @@ const Dashboard = () => {
     ]
   };
 
+  // Market performance data using allTrades
   const marketPerformanceData = {
-    labels: recentTrades.reduce((acc: string[], trade: Trade) => {
+    labels: allTrades.reduce((acc: string[], trade: Trade) => {
       const market = trade.market || 'Unknown';
       if (!acc.includes(market)) {
         acc.push(market);
@@ -501,7 +563,7 @@ const Dashboard = () => {
       {
         type: 'bar' as const,
         label: 'Number of Trades',
-        data: recentTrades.reduce((acc: { market: string; count: number }[], trade: Trade) => {
+        data: allTrades.reduce((acc: { market: string; count: number }[], trade: Trade) => {
           const market = trade.market || 'Unknown';
           const index = acc.findIndex(item => item.market === market);
           if (index === -1) {
@@ -518,7 +580,7 @@ const Dashboard = () => {
       {
         type: 'line' as const,
         label: 'Average P&L',
-        data: recentTrades.reduce((acc: { market: string; pnl: number; count: number }[], trade: Trade) => {
+        data: allTrades.reduce((acc: { market: string; pnl: number; count: number }[], trade: Trade) => {
           const market = trade.market || 'Unknown';
           const index = acc.findIndex(item => item.market === market);
           if (index === -1) {
@@ -622,7 +684,7 @@ const Dashboard = () => {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const data = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => ({ count: 0, pnl: 0 })));
 
-    recentTrades.forEach((trade: Trade) => {
+    allTrades.forEach((trade: Trade) => {
       const entryDate = new Date(trade.entry_date);
       const day = entryDate.getDay();
       const hour = entryDate.getHours();
@@ -649,19 +711,19 @@ const Dashboard = () => {
       checklistAdherence: 0,
     };
 
-    if (!recentTrades.length) return metrics;
+    if (!allTrades.length) return metrics;
 
     // Calculate Discipline Compliance Rate
-    const compliantTrades = recentTrades.filter(trade => 
+    const compliantTrades = allTrades.filter(trade => 
       trade.followed_plan && 
       trade.had_setup && 
       trade.respected_stops
     ).length;
-    metrics.disciplineRate = (compliantTrades / recentTrades.length) * 100;
+    metrics.disciplineRate = (compliantTrades / allTrades.length) * 100;
 
     // Calculate Emotion vs P/L Correlation
-    const emotionScores = recentTrades.map(trade => trade.emotion_score || 0);
-    const pnlValues = recentTrades.map(trade => trade.pnl || 0);
+    const emotionScores = allTrades.map(trade => trade.emotion_score || 0);
+    const pnlValues = allTrades.map(trade => trade.pnl || 0);
     
     if (emotionScores.length > 1) {
       const emotionMean = emotionScores.reduce((a, b) => a + b) / emotionScores.length;
@@ -682,9 +744,9 @@ const Dashboard = () => {
     }
 
     // Calculate Checklist/Plan Adherence
-    const checklistItems = recentTrades.reduce((sum, trade) => 
+    const checklistItems = allTrades.reduce((sum, trade) => 
       sum + (trade.checklist_completed || 0), 0);
-    metrics.checklistAdherence = (checklistItems / (recentTrades.length * 10)) * 100;
+    metrics.checklistAdherence = (checklistItems / (allTrades.length * 10)) * 100;
 
     return metrics;
   };
@@ -735,29 +797,40 @@ const Dashboard = () => {
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
-            onClick={handleRefresh}
-            style={{ 
-              padding: '10px',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              color: '#94a3b8',
-              cursor: 'pointer',
+            onClick={handleGenerateTestTrades}
+            style={{
               display: 'flex',
               alignItems: 'center',
-              transition: 'all 0.2s ease',
-              transform: isRefreshing ? 'rotate(180deg)' : 'rotate(0)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-              e.currentTarget.style.transform = 'translateY(0)';
+              gap: '4px',
+              backgroundColor: '#4B5563',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '8px 12px',
+              cursor: 'pointer',
+              fontSize: '14px'
             }}
           >
-            <RiRefreshLine />
+            <RiTestTubeLine />
+            Generate Test Trades
+          </button>
+          <button
+            onClick={handleRefresh}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#3B82F6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '8px 12px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            <RiRefreshLine className={isRefreshing ? 'animate-spin' : ''} />
+            Refresh
           </button>
           <button
             style={{ 
@@ -1165,7 +1238,7 @@ const Dashboard = () => {
             fontWeight: 'bold',
             color: 'white'
           }}>
-            {recentTrades.length}
+            {allTrades.length}
           </div>
         </div>
       </div>
