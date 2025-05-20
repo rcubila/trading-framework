@@ -84,19 +84,29 @@ export const UIRecommendationsPage = () => {
             <h2 className="text-xl font-semibold text-white mb-4">Animation Recommendations</h2>
             <ul className="space-y-4">
               <RecommendationItem 
-                title="Transition Effects"
-                description="Add smooth transitions between routes and components."
+                title="Page Transitions"
+                description="Implement smooth page transitions using AnimatedRoutes component with fade and slide effects."
                 status="implemented"
               />
               <RecommendationItem 
-                title="Micro-interactions"
-                description="Add subtle animations to improve user feedback."
+                title="Interactive Elements"
+                description="Add hover and click animations to buttons and cards using AnimatedButton and AnimatedCard components."
                 status="pending"
               />
               <RecommendationItem 
-                title="Loading Animations"
-                description="Create engaging loading animations."
+                title="Data Loading States"
+                description="Implement skeleton loading animations for data fetching operations using LoadingSpinner component."
                 status="in-progress"
+              />
+              <RecommendationItem 
+                title="Micro-interactions"
+                description="Add subtle feedback animations for user actions like form submissions and notifications."
+                status="pending"
+              />
+              <RecommendationItem 
+                title="Chart Animations"
+                description="Enhance TradeChart with smooth data transitions and interactive hover effects."
+                status="pending"
               />
             </ul>
           </div>
