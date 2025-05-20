@@ -17,6 +17,7 @@ import { DisciplineProvider } from './context/DisciplineContext';
 import { AuthCallback } from './components/AuthCallback';
 import { useEffect } from 'react';
 import { trackPerformance } from './utils/performance';
+import PlayBook from './pages/PlayBook';
 
 export const App = () => {
   useEffect(() => {
@@ -48,6 +49,7 @@ export const App = () => {
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
               <Route path="ui-recommendations" element={<UIRecommendationsPage />} />
+              <Route path="playbook" element={<PlayBook />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
