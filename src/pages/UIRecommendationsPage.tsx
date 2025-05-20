@@ -1,7 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
+import { uiRecommendationsService } from '../services/uiRecommendationsService';
+import type { UIRecommendation } from '../services/uiRecommendationsService';
 
 export const UIRecommendationsPage = () => {
+  const [recommendations, setRecommendations] = useState<UIRecommendation[]>([]);
+
+  useEffect(() => {
+    loadRecommendations();
+  }, []);
+
+  const loadRecommendations = async () => {
+    try {
+      const data = await uiRecommendationsService.getRecommendations();
+      setRecommendations(data);
+    } catch (error) {
+      console.error('Error loading recommendations:', error);
+    }
+  };
+
+  const handleStatusUpdate = async (id: string, status: UIRecommendation['status']) => {
+    try {
+      await uiRecommendationsService.updateRecommendationStatus(id, status);
+      await loadRecommendations(); // Reload to get updated data
+    } catch (error) {
+      console.error('Error updating recommendation status:', error);
+    }
+  };
+
+  const getRecommendationsByCategory = (category: UIRecommendation['category']) => {
+    return recommendations.filter(rec => rec.category === category);
+  };
+
   return (
     <div style={{ 
       padding: '5px',
@@ -20,94 +50,73 @@ export const UIRecommendationsPage = () => {
           <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
             <h2 className="text-xl font-semibold text-white mb-4">Visual Improvements</h2>
             <ul className="space-y-4">
-              <RecommendationItem 
-                title="Consistent Spacing"
-                description="Use consistent margin and padding throughout the application."
-                status="implemented"
-              />
-              <RecommendationItem 
-                title="Color Contrast"
-                description="Improve contrast ratios for better accessibility."
-                status="pending"
-              />
-              <RecommendationItem 
-                title="Loading States"
-                description="Add skeleton loaders for all data fetching operations."
-                status="in-progress"
-              />
+              {getRecommendationsByCategory('visual').map(rec => (
+                <RecommendationItem 
+                  key={rec.id}
+                  title={rec.title}
+                  description={rec.description}
+                  status={rec.status}
+                  onStatusChange={(status) => handleStatusUpdate(rec.id, status)}
+                />
+              ))}
             </ul>
           </div>
 
           <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
             <h2 className="text-xl font-semibold text-white mb-4">Interaction Improvements</h2>
             <ul className="space-y-4">
-              <RecommendationItem 
-                title="Error Messages"
-                description="Provide clear error messages for all form submissions."
-                status="implemented"
-              />
-              <RecommendationItem 
-                title="Keyboard Navigation"
-                description="Ensure all interactive elements are keyboard accessible."
-                status="pending"
-              />
-              <RecommendationItem 
-                title="Responsive Behavior"
-                description="Optimize layouts for mobile and tablet devices."
-                status="in-progress"
-              />
+              {getRecommendationsByCategory('interaction').map(rec => (
+                <RecommendationItem 
+                  key={rec.id}
+                  title={rec.title}
+                  description={rec.description}
+                  status={rec.status}
+                  onStatusChange={(status) => handleStatusUpdate(rec.id, status)}
+                />
+              ))}
             </ul>
           </div>
 
           <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
             <h2 className="text-xl font-semibold text-white mb-4">Performance Optimizations</h2>
             <ul className="space-y-4">
-              <RecommendationItem 
-                title="Image Optimization"
-                description="Optimize all images for faster loading times."
-                status="implemented"
-              />
-              <RecommendationItem 
-                title="Code Splitting"
-                description="Implement code splitting for faster initial load."
-                status="pending"
-              />
-              <RecommendationItem 
-                title="Caching Strategy"
-                description="Implement proper caching for API responses."
-                status="in-progress"
-              />
+              {getRecommendationsByCategory('performance').map(rec => (
+                <RecommendationItem 
+                  key={rec.id}
+                  title={rec.title}
+                  description={rec.description}
+                  status={rec.status}
+                  onStatusChange={(status) => handleStatusUpdate(rec.id, status)}
+                />
+              ))}
             </ul>
           </div>
 
           <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
-            <h2 className="text-xl font-semibold text-white mb-4">Animation Recommendations</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-white">Animation Recommendations</h2>
+              <button
+                onClick={async () => {
+                  const animationRecs = getRecommendationsByCategory('animation');
+                  for (const rec of animationRecs) {
+                    await handleStatusUpdate(rec.id, 'implemented');
+                  }
+                }}
+                className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              >
+                Mark All Implemented
+              </button>
+            </div>
             <ul className="space-y-4">
-              <RecommendationItem 
-                title="Page Transitions"
-                description="Implement smooth page transitions using AnimatedRoutes component with fade and slide effects."
-                status="implemented"
-              />
-              <RecommendationItem 
-                title="Interactive Elements"
-                description="Add hover and click animations to buttons and cards using AnimatedButton and AnimatedCard components."
-                status="pending"
-              />
-              <RecommendationItem 
-                title="Data Loading States"
-                description="Implement skeleton loading animations for data fetching operations using LoadingSpinner component."
-                status="in-progress"
-              />
-              <RecommendationItem 
-                title="Micro-interactions"
-                description="Add subtle feedback animations for user actions like form submissions and notifications."
-                status="pending"
-              />
-              <RecommendationItem 
-                title="Chart Animations"
-                description="Enhance TradeChart with smooth data transitions and interactive hover effects."
-                status="pending"
-              />
+              {getRecommendationsByCategory('animation').map(rec => (
+                <RecommendationItem 
+                  key={rec.id}
+                  title={rec.title}
+                  description={rec.description}
+                  status={rec.status}
+                  onStatusChange={(status) => handleStatusUpdate(rec.id, status)}
+                />
+              ))}
             </ul>
           </div>
         </div>
@@ -120,9 +129,10 @@ interface RecommendationItemProps {
   title: string;
   description: string;
   status: 'implemented' | 'pending' | 'in-progress';
+  onStatusChange: (status: 'implemented' | 'pending' | 'in-progress') => void;
 }
 
-const RecommendationItem = ({ title, description, status }: RecommendationItemProps) => {
+const RecommendationItem = ({ title, description, status, onStatusChange }: RecommendationItemProps) => {
   const getStatusBadge = () => {
     switch (status) {
       case 'implemented':
@@ -141,7 +151,18 @@ const RecommendationItem = ({ title, description, status }: RecommendationItemPr
       <div className="flex-1">
         <div className="flex items-center justify-between">
           <h3 className="font-medium text-white">{title}</h3>
-          {getStatusBadge()}
+          <div className="flex items-center space-x-2">
+            {getStatusBadge()}
+            <select
+              value={status}
+              onChange={(e) => onStatusChange(e.target.value as 'implemented' | 'pending' | 'in-progress')}
+              className="ml-2 bg-gray-700 text-white text-xs rounded px-2 py-1 border border-gray-600"
+            >
+              <option value="implemented">Implemented</option>
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+            </select>
+          </div>
         </div>
         <p className="text-gray-400 text-sm mt-1">{description}</p>
       </div>

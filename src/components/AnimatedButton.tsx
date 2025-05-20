@@ -1,109 +1,161 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { AnimatedElement } from './AnimatedElement';
 
-interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface AnimatedButtonProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
+  loading?: boolean;
+  onClick?: () => void;
+  className?: string;
+  contentClassName?: string;
   icon?: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'danger';
-  isLoading?: boolean;
+  iconPosition?: 'left' | 'right';
+  animation?: 'fadeIn' | 'slideInUp' | 'scaleIn' | 'bounce';
+  onHover?: () => void;
+  onLeave?: () => void;
 }
 
 export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
   children,
-  icon,
   variant = 'primary',
-  isLoading = false,
-  ...props
+  size = 'md',
+  disabled = false,
+  loading = false,
+  onClick,
+  className = '',
+  contentClassName = '',
+  icon,
+  iconPosition = 'left',
+  animation = 'fadeIn',
+  onHover,
+  onLeave,
 }) => {
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'primary':
-        return {
-          background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-          color: 'white',
-          border: 'none',
-        };
-      case 'secondary':
-        return {
-          background: 'rgba(59, 130, 246, 0.1)',
-          color: '#60a5fa',
-          border: '1px solid rgba(59, 130, 246, 0.2)',
-        };
-      case 'danger':
-        return {
-          background: 'rgba(239, 68, 68, 0.1)',
-          color: '#ef4444',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
-        };
+  const [isHovered, setIsHovered] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
+
+  const handleMouseEnter = () => {
+    if (!disabled && !loading) {
+      setIsHovered(true);
+      onHover?.();
     }
   };
 
+  const handleMouseLeave = () => {
+    if (!disabled && !loading) {
+      setIsHovered(false);
+      setIsPressed(false);
+      onLeave?.();
+    }
+  };
+
+  const handleMouseDown = () => {
+    if (!disabled && !loading) {
+      setIsPressed(true);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (!disabled && !loading) {
+      setIsPressed(false);
+    }
+  };
+
+  const handleClick = () => {
+    if (!disabled && !loading) {
+      onClick?.();
+    }
+  };
+
+  const getVariantClasses = () => {
+    switch (variant) {
+      case 'primary':
+        return 'bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-primary focus:ring-offset-2';
+      case 'secondary':
+        return 'bg-secondary text-white hover:bg-secondary-dark focus:ring-2 focus:ring-secondary focus:ring-offset-2';
+      case 'outline':
+        return 'border-2 border-primary text-primary hover:bg-primary/10 focus:ring-2 focus:ring-primary focus:ring-offset-2';
+      case 'ghost':
+        return 'text-primary hover:bg-primary/10 focus:ring-2 focus:ring-primary focus:ring-offset-2';
+      default:
+        return '';
+    }
+  };
+
+  const getSizeClasses = () => {
+    switch (size) {
+      case 'sm':
+        return 'px-3 py-1.5 text-sm';
+      case 'md':
+        return 'px-4 py-2 text-base';
+      case 'lg':
+        return 'px-6 py-3 text-lg';
+      default:
+        return '';
+    }
+  };
+
+  const getButtonClasses = () => {
+    const baseClasses = 'inline-flex items-center justify-center rounded-md font-medium transition-all duration-300';
+    const stateClasses = disabled
+      ? 'opacity-50 cursor-not-allowed'
+      : loading
+      ? 'opacity-75 cursor-wait'
+      : 'cursor-pointer';
+    const variantClasses = getVariantClasses();
+    const sizeClasses = getSizeClasses();
+
+    return `${baseClasses} ${stateClasses} ${variantClasses} ${sizeClasses} ${className}`;
+  };
+
+  const getAnimationStyle = () => {
+    if (disabled || loading) return {};
+
+    const baseStyle = {
+      transform: 'scale(1)',
+      transition: 'all 300ms ease-in-out',
+    };
+
+    if (isHovered) {
+      baseStyle.transform = 'scale(1.05)';
+    }
+
+    if (isPressed) {
+      baseStyle.transform = 'scale(0.95)';
+    }
+
+    return baseStyle;
+  };
+
   return (
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      style={{
-        padding: '8px 16px',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        transition: 'all 0.2s ease',
-        ...getVariantStyles(),
-        ...props.style,
-      }}
-      onMouseEnter={(e) => {
-        if (variant === 'secondary') {
-          e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (variant === 'secondary') {
-          e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-          e.currentTarget.style.boxShadow = 'none';
-        }
-      }}
-      disabled={isLoading || props.disabled}
-      {...props}
+    <div
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onClick={handleClick}
     >
-      {isLoading ? (
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        >
-          <svg
-            className="animate-spin"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeOpacity="0.25"
-            />
-            <path
-              d="M12 2a10 10 0 0 1 10 10"
-              stroke="currentColor"
-              strokeLinecap="round"
-            />
-          </svg>
-        </motion.div>
-      ) : icon ? (
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          {icon}
-        </motion.div>
-      ) : null}
-      {children}
-    </motion.button>
+      <AnimatedElement
+        show={true}
+        animation={animation}
+        className={getButtonClasses()}
+        style={getAnimationStyle()}
+      >
+        {loading ? (
+          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <>
+            {icon && iconPosition === 'left' && (
+              <span className="mr-2">{icon}</span>
+            )}
+            <span className={contentClassName}>{children}</span>
+            {icon && iconPosition === 'right' && (
+              <span className="ml-2">{icon}</span>
+            )}
+          </>
+        )}
+      </AnimatedElement>
+    </div>
   );
 }; 

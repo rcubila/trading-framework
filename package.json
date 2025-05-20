@@ -12,6 +12,7 @@
     "test:trades": "tsx src/scripts/testTrades.ts"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
     "@headlessui/react": "^2.2.3",
     "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.49.4",

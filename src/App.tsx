@@ -11,12 +11,15 @@ import Login from './pages/Login';
 import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
 import { UIRecommendationsPage } from './pages/UIRecommendationsPage';
+import { PlayBook } from './pages/PlayBook';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { DisciplineProvider } from './context/DisciplineContext';
 import { AuthCallback } from './components/AuthCallback';
 import { useEffect } from 'react';
 import { trackPerformance } from './utils/performance';
+import { AnimatedPage } from './components/AnimatedPage';
+import { AnimationDemo } from './pages/AnimationDemo';
 
 export const App = () => {
   useEffect(() => {
@@ -40,15 +43,29 @@ export const App = () => {
             }>
               <Route index element={<Dashboard />} />
               <Route path="trades" element={<Trades />} />
-              <Route path="analytics" element={<Analytics />} />
+              <Route path="analytics" element={
+                <AnimatedPage>
+                  <Analytics />
+                </AnimatedPage>
+              } />
               <Route path="journal" element={<Journal />} />
               <Route path="strategy" element={<Strategy />} />
+              <Route path="playbook" element={
+                <AnimatedPage>
+                  <PlayBook />
+                </AnimatedPage>
+              } />
               <Route path="discipline" element={<DisciplineTracker />} />
               <Route path="import" element={<ImportTrades />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
               <Route path="ui-recommendations" element={<UIRecommendationsPage />} />
             </Route>
+            <Route path="/animation-demo" element={
+              <AnimatedPage>
+                <AnimationDemo />
+              </AnimatedPage>
+            } />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </DisciplineProvider>
