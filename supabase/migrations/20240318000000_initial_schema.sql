@@ -5,50 +5,37 @@ CREATE TYPE market_category AS ENUM ('Equities', 'Crypto', 'Forex', 'Futures', '
 
 -- Create profiles table
 CREATE TABLE public.profiles (
-    id UUID PRIMARY KEY,
+    id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     full_name TEXT,
     avatar_url TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    subscription_tier TEXT DEFAULT 'free',
-    subscription_status TEXT DEFAULT 'active',
-    subscription_end_date TIMESTAMPTZ,
-    preferences JSONB DEFAULT '{}'::jsonb
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
 -- Create trades table
 CREATE TABLE public.trades (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID NOT NULL,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
     market TEXT NOT NULL,
     market_category market_category NOT NULL,
     symbol TEXT NOT NULL,
     type trade_type NOT NULL,
-    status trade_status NOT NULL DEFAULT 'Open',
-    entry_price DECIMAL(18,8) NOT NULL,
-    exit_price DECIMAL(18,8),
-    quantity DECIMAL(18,8) NOT NULL,
-    entry_date TIMESTAMPTZ NOT NULL,
-    exit_date TIMESTAMPTZ,
-    pnl DECIMAL(18,2),
-    pnl_percentage DECIMAL(8,4),
-    risk DECIMAL(18,2),
-    reward DECIMAL(18,2),
+    status trade_status NOT NULL,
+    entry_price DECIMAL(10,2) NOT NULL,
+    exit_price DECIMAL(10,2),
+    quantity INTEGER NOT NULL,
+    entry_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    exit_date TIMESTAMP WITH TIME ZONE,
+    pnl DECIMAL(10,2),
+    pnl_percentage DECIMAL(5,2),
+    risk DECIMAL(10,2),
+    reward DECIMAL(10,2),
     strategy TEXT,
     tags TEXT[],
     notes TEXT,
-    leverage DECIMAL(10,2),
-    stop_loss DECIMAL(18,8),
-    take_profit DECIMAL(18,8),
-    commission DECIMAL(18,2),
-    fees DECIMAL(18,2),
-    slippage DECIMAL(18,8),
-    exchange TEXT,
-    timeframe TEXT,
-    setup_type TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
 -- Create strategies table
@@ -125,10 +112,11 @@ CREATE TABLE public.performance_metrics (
     market_category market_category,
     timeframe TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (user_id, date)
 );
 
--- Enable Row Level Security (RLS)
+-- Create RLS policies
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trades ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.strategies ENABLE ROW LEVEL SECURITY;
@@ -137,18 +125,28 @@ ALTER TABLE public.tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.discipline_tracker ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.performance_metrics ENABLE ROW LEVEL SECURITY;
 
--- Create RLS Policies
--- Profiles: Users can only read and update their own profile
+-- Profiles policies
 CREATE POLICY "Users can view own profile" ON public.profiles
     FOR SELECT USING (auth.uid() = id);
+
 CREATE POLICY "Users can update own profile" ON public.profiles
     FOR UPDATE USING (auth.uid() = id);
+
 CREATE POLICY "Users can insert own profile" ON public.profiles
     FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Trades: Users can CRUD their own trades
-CREATE POLICY "Users can CRUD own trades" ON public.trades
-    FOR ALL USING (auth.uid() = user_id);
+-- Trades policies
+CREATE POLICY "Users can view own trades" ON public.trades
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own trades" ON public.trades
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own trades" ON public.trades
+    FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own trades" ON public.trades
+    FOR DELETE USING (auth.uid() = user_id);
 
 -- Strategies: Users can CRUD their own strategies
 CREATE POLICY "Users can CRUD own strategies" ON public.strategies
@@ -169,6 +167,26 @@ CREATE POLICY "Users can CRUD own discipline entries" ON public.discipline_track
 -- Performance Metrics: Users can CRUD their own metrics
 CREATE POLICY "Users can CRUD own performance metrics" ON public.performance_metrics
     FOR ALL USING (auth.uid() = user_id);
+
+-- Create function to handle user creation
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, email, full_name, avatar_url)
+    VALUES (
+        NEW.id,
+        NEW.email,
+        NEW.raw_user_meta_data->>'full_name',
+        NEW.raw_user_meta_data->>'avatar_url'
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create trigger for new user creation
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Create functions for automatic timestamp updates
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -224,79 +242,38 @@ CREATE INDEX performance_metrics_user_id_date_idx ON public.performance_metrics(
 -- Begin transaction
 BEGIN;
 
--- Insert a sample trade
-INSERT INTO public.trades (
-    user_id,
-    market,
-    market_category,
-    symbol,
-    type,
-    status,
-    entry_price,
-    exit_price,
-    quantity,
-    entry_date,
-    exit_date,
-    pnl,
-    pnl_percentage,
-    risk,
-    reward,
-    strategy,
-    tags,
-    notes
-) VALUES (
-    auth.uid(), -- This will automatically use your authenticated user ID
-    'NYSE',
-    'Equities',
-    'AAPL',
-    'Long',
-    'Closed',
-    175.50,
-    180.25,
-    100,
-    NOW() - interval '2 days',
-    NOW() - interval '1 day',
-    475.00, -- (180.25 - 175.50) * 100
-    2.71, -- ((180.25 - 175.50) / 175.50) * 100
-    200.00,
-    600.00,
-    'Breakout',
-    ARRAY['momentum', 'tech'],
-    'Strong breakout above resistance with good volume'
-);
-
 -- Update or insert performance metrics for today
-INSERT INTO public.performance_metrics (
-    user_id,
-    date,
-    total_trades,
-    winning_trades,
-    losing_trades,
-    win_rate,
-    profit_factor,
-    average_win,
-    largest_win,
-    net_profit,
-    market_category
-) VALUES (
-    auth.uid(),
-    CURRENT_DATE,
-    1,
-    1,
-    0,
-    100.00,
-    NULL, -- No losses yet
-    475.00,
-    475.00,
-    475.00,
-    'Equities'
-)
-ON CONFLICT (user_id, date) DO UPDATE SET
-    total_trades = performance_metrics.total_trades + 1,
-    winning_trades = performance_metrics.winning_trades + 1,
-    net_profit = performance_metrics.net_profit + 475.00,
-    average_win = (performance_metrics.average_win * performance_metrics.winning_trades + 475.00) / (performance_metrics.winning_trades + 1),
-    largest_win = GREATEST(performance_metrics.largest_win, 475.00);
+-- INSERT INTO public.performance_metrics (
+--     user_id,
+--     date,
+--     total_trades,
+--     winning_trades,
+--     losing_trades,
+--     win_rate,
+--     profit_factor,
+--     average_win,
+--     largest_win,
+--     net_profit,
+--     market_category
+-- ) VALUES (
+--     auth.uid(),
+--     CURRENT_DATE,
+--     1,
+--     1,
+--     0,
+--     100.00,
+--     NULL, -- No losses yet
+--     475.00,
+--     475.00,
+--     475.00,
+--     'Equities'
+-- )
+-- ON CONFLICT (user_id, date) DO UPDATE SET
+--     total_trades = performance_metrics.total_trades + 1,
+--     winning_trades = performance_metrics.winning_trades + 1,
+--     net_profit = performance_metrics.net_profit + 475.00,
+--     average_win = (performance_metrics.average_win * performance_metrics.winning_trades + 475.00) / (performance_metrics.winning_trades + 1),
+--     largest_win = GREATEST(performance_metrics.largest_win, 475.00);
 
 COMMIT;
 
