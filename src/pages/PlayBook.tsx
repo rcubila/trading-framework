@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { PageHeader } from '../components/PageHeader';
+import { useAuth } from '../context/AuthContext';
 
 interface Trade {
   id: string;
@@ -152,8 +153,47 @@ const mockAssets: AssetPlaybook[] = [
   }
 ];
 
+const fetchStrategiesForPlaybook = async (playbookId: string) => {
+  try {
+    const { data: strategies, error } = await supabase
+      .from('strategies')
+      .select('*')
+      .eq('asset_name', playbookId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return strategies.map(strategy => ({
+      id: strategy.id,
+      title: strategy.name,
+      description: strategy.description || '',
+      type: strategy.type || '',
+      tags: strategy.rules || [],
+      notes: '',
+      checklist: [],
+      trades: [],
+      performance: {
+        totalTrades: strategy.performance_total_trades || 0,
+        winRate: strategy.performance_win_rate || 0,
+        averageR: strategy.performance_average_r || 0,
+        profitFactor: strategy.performance_profit_factor || 0,
+        expectancy: strategy.performance_expectancy || 0,
+        largestWin: strategy.performance_largest_win || 0,
+        largestLoss: strategy.performance_largest_loss || 0,
+        averageWin: strategy.performance_average_win || 0,
+        averageLoss: strategy.performance_average_loss || 0,
+        netPL: strategy.performance_net_pl || 0,
+      },
+    }));
+  } catch (error) {
+    console.error('Error fetching strategies:', error);
+    return [];
+  }
+};
+
 export const PlayBook: React.FC = () => {
-  const [assets, setAssets] = useState<AssetPlaybook[]>(mockAssets);
+  const { user } = useAuth();
+  const [assets, setAssets] = useState<AssetPlaybook[]>([]);
   const [selectedAsset, setSelectedAsset] = useState<AssetPlaybook | null>(null);
   const [selectedSetup, setSelectedSetup] = useState<PlaybookSetup | null>(null);
   const [activeTab, setActiveTab] = useState('Overview');
@@ -174,49 +214,139 @@ export const PlayBook: React.FC = () => {
   });
   const [newRuleInput, setNewRuleInput] = useState('');
 
-  const handleCreatePlaybook = () => {
-    setAssets([
-      ...assets,
-      {
-        id: Date.now().toString(),
-        asset: newPlaybook.asset,
+  // Fetch assets and their strategies when component mounts
+  useEffect(() => {
+    const fetchAssets = async () => {
+      try {
+        // Get unique asset names from strategies
+        const { data: strategies, error } = await supabase
+          .from('strategies')
+          .select('asset_name')
+          .not('asset_name', 'is', null)
+          .order('asset_name');
+
+        if (error) throw error;
+
+        // Get unique asset names
+        const uniqueAssets = [...new Set(strategies.map(s => s.asset_name))];
+
+        // Create asset objects with their strategies
+        const assetsData = await Promise.all(
+          uniqueAssets.map(async (assetName) => {
+            const strategies = await fetchStrategiesForPlaybook(assetName);
+            return {
+              id: assetName, // Using asset name as ID
+              asset: assetName,
+              description: `${assetName} trading strategies`,
+              strategies,
+              performance: {
+                totalTrades: strategies.reduce((sum, s) => sum + s.performance.totalTrades, 0),
+                winRate: strategies.reduce((sum, s) => sum + s.performance.winRate, 0) / strategies.length || 0,
+                averageR: strategies.reduce((sum, s) => sum + s.performance.averageR, 0) / strategies.length || 0,
+                profitFactor: strategies.reduce((sum, s) => sum + s.performance.profitFactor, 0) / strategies.length || 0,
+                expectancy: strategies.reduce((sum, s) => sum + s.performance.expectancy, 0) / strategies.length || 0,
+                netPL: strategies.reduce((sum, s) => sum + s.performance.netPL, 0),
+              },
+            };
+          })
+        );
+
+        setAssets(assetsData);
+      } catch (error) {
+        console.error('Error fetching assets:', error);
+      }
+    };
+
+    fetchAssets();
+  }, []); // Empty dependency array means this runs once when component mounts
+
+  const handleCreatePlaybook = async () => {
+    try {
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      console.log('Current user ID:', user.id);
+      console.log('Inserting playbook with data:', {
+        user_id: user.id,
+        name: newPlaybook.title,
         description: newPlaybook.description,
-        strategies: [
-          {
-            id: Date.now().toString(),
-            title: newPlaybook.title,
-            description: newPlaybook.description,
-            type: newPlaybook.type,
-            tags: newPlaybook.tags.split(',').map(t => t.trim()).filter(Boolean),
-            notes: '',
-            checklist: [],
-            trades: [],
-            performance: {
-              totalTrades: 0,
-              winRate: 0,
-              averageR: 0,
-              profitFactor: 0,
-              expectancy: 0,
-              largestWin: 0,
-              largestLoss: 0,
-              averageWin: 0,
-              averageLoss: 0,
-              netPL: 0,
-            },
-          },
-        ],
-        performance: {
-          totalTrades: 0,
-          winRate: 0,
-          averageR: 0,
-          profitFactor: 0,
-          expectancy: 0,
-          netPL: 0,
-        },
-      },
-    ]);
-    setShowCreateModal(false);
-    setNewPlaybook({ asset: '', title: '', type: '', tags: '', description: '' });
+        type: newPlaybook.type,
+        asset_name: newPlaybook.asset,
+        rules: newPlaybook.tags.split(',').map(t => t.trim()).filter(Boolean),
+        is_playbook: false
+      });
+
+      const { data, error } = await supabase
+        .from('strategies')
+        .insert({
+          user_id: user.id,
+          name: newPlaybook.title,
+          description: newPlaybook.description,
+          type: newPlaybook.type,
+          asset_name: newPlaybook.asset,
+          rules: newPlaybook.tags.split(',').map(t => t.trim()).filter(Boolean),
+          market_conditions: [],
+          timeframes: [],
+          risk_percentage: null,
+          reward_ratio: null,
+          is_playbook: false,
+          performance_total_trades: 0,
+          performance_win_rate: 0,
+          performance_average_r: 0,
+          performance_profit_factor: 0,
+          performance_expectancy: 0,
+          performance_largest_win: 0,
+          performance_largest_loss: 0,
+          performance_average_win: 0,
+          performance_average_loss: 0,
+          performance_net_pl: 0
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Playbook created successfully:', data);
+
+      // Refresh the assets list
+      const { data: strategies } = await supabase
+        .from('strategies')
+        .select('asset_name')
+        .not('asset_name', 'is', null)
+        .order('asset_name');
+
+      if (strategies) {
+        const uniqueAssets = [...new Set(strategies.map(s => s.asset_name))];
+        const assetsData = await Promise.all(
+          uniqueAssets.map(async (assetName) => {
+            const strategies = await fetchStrategiesForPlaybook(assetName);
+            return {
+              id: assetName,
+              asset: assetName,
+              description: `${assetName} trading strategies`,
+              strategies,
+              performance: {
+                totalTrades: strategies.reduce((sum, s) => sum + s.performance.totalTrades, 0),
+                winRate: strategies.reduce((sum, s) => sum + s.performance.winRate, 0) / strategies.length || 0,
+                averageR: strategies.reduce((sum, s) => sum + s.performance.averageR, 0) / strategies.length || 0,
+                profitFactor: strategies.reduce((sum, s) => sum + s.performance.profitFactor, 0) / strategies.length || 0,
+                expectancy: strategies.reduce((sum, s) => sum + s.performance.expectancy, 0) / strategies.length || 0,
+                netPL: strategies.reduce((sum, s) => sum + s.performance.netPL, 0),
+              },
+            };
+          })
+        );
+        setAssets(assetsData);
+      }
+
+      setShowCreateModal(false);
+      setNewPlaybook({ asset: '', title: '', type: '', tags: '', description: '' });
+    } catch (error) {
+      console.error('Error creating playbook:', error);
+    }
   };
 
   const handleDeletePlaybook = (id: string) => {
@@ -226,50 +356,68 @@ export const PlayBook: React.FC = () => {
     })));
   };
 
-  const handleCreateStrategy = () => {
+  const handleCreateStrategy = async () => {
     if (!selectedAsset) return;
     
-    const updatedAssets = assets.map(asset => {
-      if (asset.id === selectedAsset.id) {
-        return {
-          ...asset,
-          strategies: [
-            ...asset.strategies,
-            {
-              id: Date.now().toString(),
-              title: newStrategy.title,
-              description: newStrategy.description,
-              type: newStrategy.type,
-              tags: newStrategy.tags.split(',').map(t => t.trim()).filter(Boolean),
-              notes: '',
-              checklist: [],
-              trades: [],
-              performance: {
-                totalTrades: 0,
-                winRate: 0,
-                averageR: 0,
-                profitFactor: 0,
-                expectancy: 0,
-                largestWin: 0,
-                largestLoss: 0,
-                averageWin: 0,
-                averageLoss: 0,
-                netPL: 0,
-              },
-            },
-          ],
-        };
-      }
-      return asset;
-    });
+    try {
+      // Get the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error('No user found');
 
-    setAssets(updatedAssets);
-    const updatedSelectedAsset = updatedAssets.find(asset => asset.id === selectedAsset.id);
-    if (updatedSelectedAsset) {
+      // First, create the strategy without parent_id
+      const { data: strategy, error } = await supabase
+        .from('strategies')
+        .insert({
+          user_id: user.id,
+          name: newStrategy.title,
+          description: newStrategy.description,
+          type: newStrategy.type,
+          asset_name: selectedAsset.asset,
+          rules: newStrategy.tags.split(',').map(t => t.trim()).filter(Boolean),
+          market_conditions: [],
+          timeframes: [],
+          risk_percentage: null,
+          reward_ratio: null,
+          is_playbook: false,
+          performance_total_trades: 0,
+          performance_win_rate: 0,
+          performance_average_r: 0,
+          performance_profit_factor: 0,
+          performance_expectancy: 0,
+          performance_largest_win: 0,
+          performance_largest_loss: 0,
+          performance_average_win: 0,
+          performance_average_loss: 0,
+          performance_net_pl: 0
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Fetch the updated strategies for this playbook
+      const strategies = await fetchStrategiesForPlaybook(selectedAsset.asset);
+      
+      // Update the selected asset with the new strategies
+      const updatedSelectedAsset = {
+        ...selectedAsset,
+        strategies
+      };
+      
+      // Update the assets list with the new strategy
+      const updatedAssets = assets.map(asset => 
+        asset.id === selectedAsset.id ? updatedSelectedAsset : asset
+      );
+
+      setAssets(updatedAssets);
       setSelectedAsset(updatedSelectedAsset);
+      setShowCreateStrategyModal(false);
+      setNewStrategy({ title: '', type: '', tags: '', description: '' });
+    } catch (error) {
+      console.error('Error creating strategy:', error);
+      // You might want to show an error toast here
     }
-    setShowCreateStrategyModal(false);
-    setNewStrategy({ title: '', type: '', tags: '', description: '' });
   };
 
   return (
