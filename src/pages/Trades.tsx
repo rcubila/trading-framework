@@ -34,6 +34,7 @@ import { TradeDetails } from '../components/TradeDetails';
 import type { Trade } from '../types/trade';
 import { PageTitle } from '../components/PageTitle';
 import { PageHeader } from '../components/PageHeader';
+import styles from '../styles/Trades.module.css';
 
 interface MarketConfigType {
   symbolPattern: string;
@@ -301,7 +302,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
       <>
         {config.requiresLeverage && (
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
+            <label className={styles.formLabel}>
               Leverage
             </label>
             <input
@@ -322,7 +323,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
           </div>
         )}
         <div>
-          <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
+          <label className={styles.formLabel}>
             Exchange
           </label>
           <select
@@ -492,58 +493,33 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                 overflowY: 'auto',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h2 style={{ 
-                  fontSize: '24px', 
-                  fontWeight: 'bold',
-                  background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}>
+              <div className={styles.flexBetween}>
+                <h2 className={styles.stepTitle}>
                   {step === 1 ? 'Trade Details' : step === 2 ? 'Entry Information' : 'Additional Info'}
                 </h2>
                 <button
                   onClick={onClose}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '32px',
-                    height: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    color: 'white',
-                  }}
+                  className={styles.closeButton}
                 >
                   <RiCloseLine />
                 </button>
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px' }}>
+              <div className={styles.mb24}>
+                <div className={styles.progressBar}>
                   {[1, 2, 3].map((stepNumber) => (
                     <div
                       key={stepNumber}
-                      style={{
-                        flex: 1,
-                        height: '4px',
-                        background: stepNumber <= step ? 'linear-gradient(to right, #60a5fa, #a78bfa)' : 'rgba(255, 255, 255, 0.1)',
-                        marginRight: stepNumber < 3 ? '8px' : 0,
-                        borderRadius: '2px',
-                        transition: 'background 0.3s ease',
-                      }}
+                      className={`${styles.progressBarFill} ${stepNumber <= step ? styles.active : ''}`}
+                      style={{ width: stepNumber <= step ? '100%' : '0%' }}
                     />
                   ))}
                 </div>
 
                 {step === 1 && (
-                  <div style={{ display: 'grid', gap: '20px' }}>
+                  <div className={styles.grid}>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Market
-                      </label>
+                      <label className={styles.formLabel}>Market</label>
                       <select
                         value={tradeData.market}
                         onChange={(e) => {
@@ -552,15 +528,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                           handleInputChange('market', selected);
                           handleInputChange('market_category', category);
                         }}
-                        style={{
-                          width: '100%',
-                          padding: '12px',
-                          borderRadius: '12px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          border: `1px solid ${errors.market ? '#ef4444' : 'rgba(255, 255, 255, 0.1)'}`,
-                          color: 'white',
-                          fontSize: '14px',
-                        }}
+                        className={`${styles.formSelect} ${errors.market ? styles.error : ''}`}
                       >
                         <option value="">Select Market</option>
                         <optgroup label="Equities">
@@ -586,7 +554,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                         </optgroup>
                       </select>
                       {errors.market && (
-                        <div style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <div className={styles.errorMessage}>
                           <RiErrorWarningLine />
                           {errors.market}
                         </div>
@@ -599,35 +567,18 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                         animate={{ opacity: 1, y: 0 }}
                       >
                         <div>
-                          <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                            Symbol
-                          </label>
-                          <div style={{ position: 'relative' }}>
+                          <label className={styles.formLabel}>Symbol</label>
+                          <div className={styles.relative}>
                             <input
                               type="text"
                               value={tradeData.symbol}
                               onChange={(e) => handleInputChange('symbol', e.target.value.toUpperCase())}
                               placeholder={getSymbolPlaceholder()}
-                              style={{
-                                width: '100%',
-                                padding: '12px',
-                                borderRadius: '12px',
-                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                border: `1px solid ${errors.symbol ? '#ef4444' : 'rgba(255, 255, 255, 0.1)'}`,
-                                color: 'white',
-                                fontSize: '14px',
-                              }}
+                              className={`${styles.formInput} ${errors.symbol ? styles.error : ''}`}
                             />
                             {marketConfig[tradeData.market as keyof typeof marketConfig] && (
                               <div 
-                                style={{ 
-                                  position: 'absolute', 
-                                  right: '12px', 
-                                  top: '50%', 
-                                  transform: 'translateY(-50%)',
-                                  color: 'rgba(255, 255, 255, 0.5)',
-                                  cursor: 'help',
-                                }}
+                                className={styles.helperText}
                                 title={`Format: ${marketConfig[tradeData.market as keyof typeof marketConfig].symbolPattern}`}
                               >
                                 <RiInformationLine />
@@ -635,7 +586,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                             )}
                           </div>
                           {errors.symbol && (
-                            <div style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <div className={styles.errorMessage}>
                               <RiErrorWarningLine />
                               {errors.symbol}
                             </div>
@@ -648,24 +599,15 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                     {getMarketSpecificFields()}
 
                     <div>
-                      <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Trade Type
-                      </label>
-                      <div style={{ display: 'flex', gap: '12px' }}>
+                      <label className={styles.formLabel}>Trade Type</label>
+                      <div className={styles.marketTypeButtons}>
                         {['Long', 'Short'].map((type) => (
                           <button
                             key={type}
                             onClick={() => handleInputChange('type', type)}
-                            style={{
-                              flex: 1,
-                              padding: '12px',
-                              borderRadius: '12px',
-                              backgroundColor: tradeData.type === type ? 'rgba(96, 165, 250, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                              border: `1px solid ${tradeData.type === type ? '#60a5fa' : 'rgba(255, 255, 255, 0.1)'}`,
-                              color: tradeData.type === type ? '#60a5fa' : 'white',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease',
-                            }}
+                            className={`${styles.marketTypeButton} ${
+                              tradeData.type === type ? styles.marketTypeButtonActive : styles.marketTypeButtonInactive
+                            }`}
                           >
                             {type}
                           </button>
@@ -676,87 +618,47 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                 )}
 
                 {step === 2 && (
-                  <div style={{ display: 'grid', gap: '20px' }}>
+                  <div className={styles.grid}>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Entry Price
-                      </label>
+                      <label className={styles.formLabel}>Entry Price</label>
                       <input
                         type="number"
                         value={tradeData.entryPrice}
                         onChange={(e) => handleInputChange('entryPrice', e.target.value)}
                         placeholder="Enter entry price"
-                        style={{
-                          width: '100%',
-                          padding: '12px',
-                          borderRadius: '12px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: 'white',
-                          fontSize: '14px',
-                        }}
+                        className={styles.formInput}
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Quantity
-                      </label>
+                      <label className={styles.formLabel}>Quantity</label>
                       <input
                         type="number"
                         value={tradeData.quantity}
                         onChange={(e) => handleInputChange('quantity', e.target.value)}
                         placeholder="Enter quantity"
-                        style={{
-                          width: '100%',
-                          padding: '12px',
-                          borderRadius: '12px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: 'white',
-                          fontSize: '14px',
-                        }}
+                        className={styles.formInput}
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Entry Date & Time
-                      </label>
+                      <label className={styles.formLabel}>Entry Date & Time</label>
                       <input
                         type="datetime-local"
                         value={tradeData.entryDate}
                         onChange={(e) => handleInputChange('entryDate', e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '12px',
-                          borderRadius: '12px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: 'white',
-                          fontSize: '14px',
-                        }}
+                        className={styles.formInput}
                       />
                     </div>
                   </div>
                 )}
 
                 {step === 3 && (
-                  <div style={{ display: 'grid', gap: '20px' }}>
+                  <div className={styles.grid}>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Strategy
-                      </label>
+                      <label className={styles.formLabel}>Strategy</label>
                       <select
                         value={tradeData.strategy}
                         onChange={(e) => handleInputChange('strategy', e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '12px',
-                          borderRadius: '12px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: 'white',
-                          fontSize: '14px',
-                        }}
+                        className={styles.formSelect}
                       >
                         <option value="">Select Strategy</option>
                         <option value="Breakout">Breakout</option>
@@ -766,80 +668,42 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                       </select>
                     </div>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Risk/Reward
-                      </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <label className={styles.formLabel}>Risk/Reward</label>
+                      <div className={styles.grid2Col}>
                         <input
                           type="number"
                           value={tradeData.risk}
                           onChange={(e) => handleInputChange('risk', e.target.value)}
                           placeholder="Risk ($)"
-                          style={{
-                            width: '100%',
-                            padding: '12px',
-                            borderRadius: '12px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            color: 'white',
-                            fontSize: '14px',
-                          }}
+                          className={styles.formInput}
                         />
                         <input
                           type="number"
                           value={tradeData.reward}
                           onChange={(e) => handleInputChange('reward', e.target.value)}
                           placeholder="Reward ($)"
-                          style={{
-                            width: '100%',
-                            padding: '12px',
-                            borderRadius: '12px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            color: 'white',
-                            fontSize: '14px',
-                          }}
+                          className={styles.formInput}
                         />
                       </div>
                     </div>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Notes
-                      </label>
+                      <label className={styles.formLabel}>Notes</label>
                       <textarea
                         value={tradeData.notes}
                         onChange={(e) => handleInputChange('notes', e.target.value)}
                         placeholder="Add any notes about the trade..."
-                        style={{
-                          width: '100%',
-                          padding: '12px',
-                          borderRadius: '12px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: 'white',
-                          fontSize: '14px',
-                          minHeight: '100px',
-                          resize: 'vertical',
-                        }}
+                        className={styles.formTextarea}
                       />
                     </div>
                   </div>
                 )}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+              <div className={styles.stepNavigation}>
                 {step > 1 && (
                   <button
                     onClick={() => setStep(step - 1)}
-                    style={{
-                      padding: '12px 24px',
-                      borderRadius: '12px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      border: 'none',
-                      color: 'white',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                    }}
+                    className={`${styles.button} ${styles.buttonSecondary}`}
                   >
                     Back
                   </button>
@@ -853,17 +717,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                     }
                   }}
                   disabled={loading}
-                  style={{
-                    padding: '12px 24px',
-                    borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                    border: 'none',
-                    color: 'white',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    marginLeft: 'auto',
-                    transition: 'all 0.2s ease',
-                    opacity: loading ? 0.7 : 1,
-                  }}
+                  className={`${styles.button} ${styles.buttonPrimary} ${loading ? styles.buttonDisabled : ''}`}
                 >
                   {step === 3 ? (loading ? 'Adding...' : 'Add Trade') : 'Next'}
                 </button>
@@ -965,6 +819,10 @@ const handleFixGER40Trades = async () => {
 
 export const Trades = () => {
   const [showAddTrade, setShowAddTrade] = useState(false);
+  const [showFilters, setFiltersOpen] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
   const [showTradeDetails, setShowTradeDetails] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -974,7 +832,6 @@ export const Trades = () => {
   const [tradeToDelete, setTradeToDelete] = useState<Trade | null>(null);
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedTrades, setSelectedTrades] = useState<Set<string>>(new Set());
   const [showDeleteSelectedConfirm, setShowDeleteSelectedConfirm] = useState(false);
   const [isDeletingSelected, setIsDeletingSelected] = useState(false);
@@ -1018,18 +875,7 @@ export const Trades = () => {
 
       // Show success message
       const successMessage = document.createElement('div');
-      successMessage.style.position = 'fixed';
-      successMessage.style.top = '20px';
-      successMessage.style.right = '20px';
-      successMessage.style.padding = '16px 24px';
-      successMessage.style.background = 'rgba(34, 197, 94, 0.9)';
-      successMessage.style.color = 'white';
-      successMessage.style.borderRadius = '8px';
-      successMessage.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-      successMessage.style.zIndex = '9999';
-      successMessage.style.display = 'flex';
-      successMessage.style.alignItems = 'center';
-      successMessage.style.gap = '8px';
+      successMessage.className = styles.successMessage;
       successMessage.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Trade ${tradeToDelete.symbol} deleted successfully!`;
       document.body.appendChild(successMessage);
 
@@ -1064,18 +910,7 @@ export const Trades = () => {
 
       // Show success message
       const successMessage = document.createElement('div');
-      successMessage.style.position = 'fixed';
-      successMessage.style.top = '20px';
-      successMessage.style.right = '20px';
-      successMessage.style.padding = '16px 24px';
-      successMessage.style.background = 'rgba(34, 197, 94, 0.9)';
-      successMessage.style.color = 'white';
-      successMessage.style.borderRadius = '8px';
-      successMessage.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-      successMessage.style.zIndex = '9999';
-      successMessage.style.display = 'flex';
-      successMessage.style.alignItems = 'center';
-      successMessage.style.gap = '8px';
+      successMessage.className = styles.successMessage;
       successMessage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>All trades deleted successfully!';
       document.body.appendChild(successMessage);
 
@@ -1138,18 +973,7 @@ export const Trades = () => {
 
       // Show success message
       const successMessage = document.createElement('div');
-      successMessage.style.position = 'fixed';
-      successMessage.style.top = '20px';
-      successMessage.style.right = '20px';
-      successMessage.style.padding = '16px 24px';
-      successMessage.style.background = 'rgba(34, 197, 94, 0.9)';
-      successMessage.style.color = 'white';
-      successMessage.style.borderRadius = '8px';
-      successMessage.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-      successMessage.style.zIndex = '9999';
-      successMessage.style.display = 'flex';
-      successMessage.style.alignItems = 'center';
-      successMessage.style.gap = '8px';
+      successMessage.className = styles.successMessage;
       successMessage.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>${selectedTrades.size} trades deleted successfully!`;
       document.body.appendChild(successMessage);
 
@@ -1212,192 +1036,46 @@ export const Trades = () => {
   );
 
   return (
-    <div style={{ 
-      padding: '5px',
-      color: 'white',
-      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
-      minHeight: '100vh',
-      backdropFilter: 'blur(10px)'
-    }}>
-      <PageHeader 
+    <div className={styles.container}>
+      <PageHeader
         title="Trades"
         subtitle="Manage and analyze your trading history"
         actions={
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div className={styles.headerActions}>
             <button
+              className={`${styles.button} ${styles.buttonPrimary}`}
               onClick={() => setShowAddTrade(true)}
-              style={{
-                padding: '5px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                color: '#60a5fa',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.2s ease',
-              }}
             >
-              <RiAddLine />
-              Add Trade
+              <RiAddLine /> Add Trade
             </button>
             <button
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                padding: '5px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                color: '#60a5fa',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.2s ease',
-              }}
+              className={`${styles.button} ${styles.buttonSecondary}`}
+              onClick={() => setFiltersOpen(true)}
             >
-              <RiUpload2Line />
-              Import Trades
+              <RiFilterLine /> Filters
             </button>
             <button
-              onClick={() => setShowDeleteAllConfirm(true)}
-              style={{
-                padding: '5px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.2)',
-                color: '#ef4444',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.2s ease',
-              }}
+              className={`${styles.button} ${styles.buttonSecondary}`}
+              onClick={handleRefresh}
             >
-              <RiDeleteBinLine />
-              Delete All
+              <RiRefreshLine /> Refresh
+            </button>
+            <button
+              className={`${styles.button} ${styles.buttonSecondary}`}
+              onClick={() => setShowImportModal(true)}
+            >
+              <RiUploadLine /> Import
+            </button>
+            <button
+              className={`${styles.button} ${styles.buttonSecondary}`}
+              onClick={() => setShowExportModal(true)}
+            >
+              <RiDownloadLine /> Export
             </button>
           </div>
         }
       />
       <div className="trades-container">
-        <style>
-          {`
-            .trades-container {
-              padding: 24px;
-              max-width: 1200px;
-              margin: 0 auto;
-            }
-
-            .trades-list table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 16px;
-            }
-
-            .trades-list th,
-            .trades-list td {
-              padding: 12px;
-              text-align: left;
-              border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .trades-list th {
-              font-weight: 500;
-              color: rgba(255, 255, 255, 0.7);
-            }
-
-            .trades-list td {
-              color: white;
-            }
-
-            .trades-list tr:hover {
-              background: rgba(255, 255, 255, 0.05);
-            }
-
-            .trades-list input[type="checkbox"] {
-              width: 18px;
-              height: 18px;
-              cursor: pointer;
-            }
-
-            .modal-overlay {
-              position: fixed;
-              top: 0;
-              left: 0;
-              right: 0;
-              bottom: 0;
-              background: rgba(0, 0, 0, 0.7);
-              backdrop-filter: blur(5px);
-              z-index: 50;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-
-            .modal-content {
-              background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
-              border-radius: 20px;
-              padding: 32px;
-              width: 90%;
-              max-width: 400px;
-              border: 1px solid rgba(255, 255, 255, 0.1);
-              box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            }
-
-            .modal-content h2 {
-              margin-bottom: 16px;
-              font-size: 20px;
-              font-weight: bold;
-              color: white;
-            }
-
-            .modal-content p {
-              margin-bottom: 24px;
-              color: rgba(255, 255, 255, 0.8);
-            }
-
-            .modal-actions {
-              display: flex;
-              gap: 12px;
-              justify-content: flex-end;
-            }
-
-            .cancel-button {
-              padding: 8px 16px;
-              border-radius: 8px;
-              background: rgba(255, 255, 255, 0.1);
-              border: none;
-              color: white;
-              cursor: pointer;
-            }
-
-            .delete-button {
-              padding: 8px 16px;
-              border-radius: 8px;
-              background: rgba(239, 68, 68, 0.1);
-              border: 1px solid rgba(239, 68, 68, 0.2);
-              color: #ef4444;
-              cursor: pointer;
-            }
-
-            .cancel-button:hover {
-              background: rgba(255, 255, 255, 0.2);
-            }
-
-            .delete-button:hover {
-              background: rgba(239, 68, 68, 0.2);
-            }
-
-            .cancel-button:disabled,
-            .delete-button:disabled {
-              opacity: 0.5;
-              cursor: not-allowed;
-            }
-          `}
-        </style>
-
         <TradesList
           fetchTrades={handleFetchTrades}
           initialPageSize={10}
@@ -1433,99 +1111,45 @@ export const Trades = () => {
         </div>
         
         {/* Delete Confirmation Modals */}
-        {showDeleteConfirm && tradeToDelete && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(5px)',
-            zIndex: 50,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
-              borderRadius: '20px',
-              padding: '32px',
-              width: '90%',
-              maxWidth: '400px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-            }}>
-              <h3 style={{ marginBottom: '16px', fontSize: '20px', fontWeight: 'bold' }}>
-                Delete Trade
-              </h3>
-              <div style={{ marginBottom: '24px' }}>
-                <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '12px' }}>
-                  Are you sure you want to delete this trade?
-                </p>
-                <div style={{
-                  padding: '12px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '8px',
-                  marginTop: '12px',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Symbol:</span>
-                    <span style={{ fontWeight: '600' }}>{tradeToDelete.symbol}</span>
+        {showDeleteConfirm && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+              <h3 className={styles.modalTitle}>Delete Trade</h3>
+              <div className={styles.mb24}>
+                <p className={styles.modalText}>Are you sure you want to delete this trade?</p>
+                <div className={`${styles.modalInfoBox} ${styles.mt12}`}>
+                  <div className={styles.tradeDetailRow}>
+                    <span className={styles.tradeDetailLabel}>Symbol:</span>
+                    <span className={styles.tradeDetailValue}>{tradeToDelete.symbol}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Type:</span>
-                    <span style={{ 
-                      color: tradeToDelete.type === 'Long' ? '#22c55e' : '#ef4444',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}>
+                  <div className={styles.tradeDetailRow}>
+                    <span className={styles.tradeDetailLabel}>Type:</span>
+                    <span className={tradeToDelete.type === 'Long' ? styles.tradeDetailValueLong : styles.tradeDetailValueShort}>
                       {tradeToDelete.type === 'Long' ? <RiArrowUpLine /> : <RiArrowDownLine />}
                       {tradeToDelete.type}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>P&L:</span>
-                    <span style={{ 
-                      color: (tradeToDelete.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
-                      fontWeight: '600'
-                    }}>
-                      ${Math.abs(tradeToDelete.pnl || 0)}
+                  <div className={styles.tradeDetailRow}>
+                    <span className={styles.tradeDetailLabel}>P&L:</span>
+                    <span className={(tradeToDelete.pnl || 0) >= 0 ? styles.tradeDetailValueProfit : styles.tradeDetailValueLoss}>
+                      ${Math.abs(tradeToDelete.pnl || 0).toFixed(2)}
                     </span>
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <div className={styles.modalActions}>
                 <button
                   onClick={() => {
                     setShowDeleteConfirm(false);
                     setTradeToDelete(null);
                   }}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: 'none',
-                    color: 'white',
-                    cursor: 'pointer',
-                  }}
+                  className={`${styles.button} ${styles.buttonSecondary}`}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmDelete}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                    color: '#ef4444',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}
+                  className={`${styles.button} ${styles.buttonDanger}`}
                 >
                   <RiDeleteBinLine />
                   Delete Trade
@@ -1536,74 +1160,27 @@ export const Trades = () => {
         )}
 
         {showDeleteAllConfirm && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(5px)',
-            zIndex: 50,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
-              borderRadius: '20px',
-              padding: '32px',
-              width: '90%',
-              maxWidth: '400px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-            }}>
-              <h3 style={{ marginBottom: '16px', fontSize: '20px', fontWeight: 'bold' }}>
-                Delete All Trades
-              </h3>
-              <p style={{ marginBottom: '24px', color: 'rgba(255, 255, 255, 0.8)' }}>
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+              <h3 className={styles.modalTitle}>Delete All Trades</h3>
+              <p className={styles.modalText}>
                 Are you sure you want to delete all trades? This action cannot be undone.
               </p>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <div className={styles.modalActions}>
                 <button
                   onClick={() => setShowDeleteAllConfirm(false)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: 'none',
-                    color: 'white',
-                    cursor: 'pointer',
-                  }}
+                  className={`${styles.button} ${styles.buttonSecondary}`}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAllTrades}
                   disabled={isDeletingAll}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                    color: '#ef4444',
-                    cursor: isDeletingAll ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    opacity: isDeletingAll ? 0.7 : 1,
-                  }}
+                  className={`${styles.button} ${styles.buttonDanger} ${isDeletingAll ? styles.buttonDisabled : ''}`}
                 >
                   {isDeletingAll ? (
                     <>
-                      <div style={{
-                        width: '16px',
-                        height: '16px',
-                        border: '2px solid rgba(239, 68, 68, 0.3)',
-                        borderTop: '2px solid #ef4444',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                      }} />
+                      <div className={styles.spinner} />
                       Deleting...
                     </>
                   ) : (
@@ -1620,60 +1197,35 @@ export const Trades = () => {
 
         {/* Delete Selected Confirmation Modal */}
         {showDeleteSelectedConfirm && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(5px)',
-            zIndex: 50,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
-              borderRadius: '20px',
-              padding: '32px',
-              width: '90%',
-              maxWidth: '400px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-            }}>
-              <h3 style={{ marginBottom: '16px', fontSize: '20px', fontWeight: 'bold' }}>
-                Delete Selected Trades
-              </h3>
-              <p style={{ marginBottom: '24px', color: 'rgba(255, 255, 255, 0.8)' }}>
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+              <h3 className={styles.modalTitle}>Delete Selected Trades</h3>
+              <p className={styles.modalText}>
                 Are you sure you want to delete {selectedTrades.size} selected trades? This action cannot be undone.
               </p>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <div className={styles.modalActions}>
                 <button
                   onClick={() => setShowDeleteSelectedConfirm(false)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: 'none',
-                    color: 'white',
-                    cursor: 'pointer',
-                  }}
+                  className={`${styles.button} ${styles.buttonSecondary}`}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteSelectedTrades}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                    color: '#ef4444',
-                    cursor: 'pointer',
-                  }}
+                  disabled={isDeletingSelected}
+                  className={`${styles.button} ${styles.buttonDanger} ${isDeletingSelected ? styles.buttonDisabled : ''}`}
                 >
-                  {isDeletingSelected ? 'Deleting...' : 'Delete Selected'}
+                  {isDeletingSelected ? (
+                    <>
+                      <div className={styles.spinner} />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <RiDeleteBinLine />
+                      Delete Selected Trades
+                    </>
+                  )}
                 </button>
               </div>
             </div>

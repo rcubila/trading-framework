@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import styles from '../styles/Journal.module.css';
 import {
   RiCalendarLine,
   RiBarChartLine,
@@ -357,31 +358,12 @@ export const Journal = () => {
   };
 
   return (
-    <div style={{
-      padding: '5px',
-      color: 'white',
-      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
-      minHeight: '100vh',
-      backdropFilter: 'blur(10px)'
-    }}>
+    <div className={styles.container}>
       <PageHeader 
         title="Trading Journal"
         subtitle="Track, analyze, and improve your trading performance"
         actions={
-          <button
-            style={{
-              padding: '5px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-              color: '#60a5fa',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease',
-            }}
-          >
+          <button className={styles.actionButton}>
             <RiAddLine />
             New Entry
           </button>
@@ -389,31 +371,16 @@ export const Journal = () => {
       />
 
       {/* View Selector */}
-      <div style={{
-        display: 'flex',
-        gap: '12px',
-        marginBottom: '24px',
-        background: 'rgba(15, 23, 42, 0.4)',
-        padding: '12px',
-        borderRadius: '12px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-      }}>
+      <div className={styles.viewSelector}>
         {views.map((view) => (
           <button
             key={view.value}
             onClick={() => setSelectedView(view.value)}
-            style={{
-              padding: '10px 16px',
-              borderRadius: '8px',
-              backgroundColor: selectedView === view.value ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-              border: 'none',
-              color: selectedView === view.value ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease',
-            }}
+            className={
+              selectedView === view.value
+                ? `${styles.viewButton} ${styles.selected}`
+                : styles.viewButton
+            }
           >
             <view.icon />
             {view.label}
@@ -422,25 +389,16 @@ export const Journal = () => {
       </div>
 
       {/* Period Selector */}
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        marginBottom: '24px',
-      }}>
+      <div className={styles.periodSelector}>
         {periods.map((period) => (
           <button
             key={period.value}
             onClick={() => setSelectedPeriod(period.value)}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '8px',
-              backgroundColor: selectedPeriod === period.value ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: selectedPeriod === period.value ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-              cursor: 'pointer',
-              fontSize: '14px',
-              transition: 'all 0.2s ease',
-            }}
+            className={
+              selectedPeriod === period.value
+                ? `${styles.periodButton} ${styles.selected}`
+                : styles.periodButton
+            }
           >
             {period.label}
           </button>
@@ -448,60 +406,19 @@ export const Journal = () => {
       </div>
 
       {selectedView === 'entries' ? (
-        <div style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-          borderRadius: '16px',
-          padding: '24px',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
-        }}>
+        <div className={styles.journalContainer}>
           {/* Search and Filter Bar */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '24px',
-          }}>
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              alignItems: 'center',
-            }}>
-              <div style={{
-                position: 'relative',
-                width: '300px',
-              }}>
-                <RiSearchLine style={{
-                  position: 'absolute',
-                  left: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                }} />
+          <div className={styles.searchBar}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div className={styles.searchInput}>
+                <RiSearchLine className={styles.searchIcon} />
                 <input
                   type="text"
                   placeholder="Search trades..."
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px 10px 36px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: 'white',
-                    outline: 'none',
-                  }}
+                  className={styles.input}
                 />
               </div>
-              <button style={{
-                padding: '10px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'rgba(255, 255, 255, 0.6)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                cursor: 'pointer',
-              }}>
+              <button className={styles.filterButton}>
                 <RiFilterLine />
                 Filter
               </button>
@@ -509,73 +426,41 @@ export const Journal = () => {
           </div>
 
           {/* Journal Table */}
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: '14px',
-            }}>
-              <thead>
-                <tr style={{
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                }}>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', color: 'rgba(255, 255, 255, 0.6)' }}>Date</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', color: 'rgba(255, 255, 255, 0.6)' }}>Symbol</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', color: 'rgba(255, 255, 255, 0.6)' }}>Strategy</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', color: 'rgba(255, 255, 255, 0.6)' }}>Entry</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', color: 'rgba(255, 255, 255, 0.6)' }}>Exit</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', color: 'rgba(255, 255, 255, 0.6)' }}>Quantity</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', color: 'rgba(255, 255, 255, 0.6)' }}>P&L</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)' }}>Actions</th>
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead className={styles.tableHeader}>
+                <tr>
+                  <th className={styles.tableCell}>Date</th>
+                  <th className={styles.tableCell}>Symbol</th>
+                  <th className={styles.tableCell}>Strategy</th>
+                  <th className={`${styles.tableCell} ${styles.right}`}>Entry</th>
+                  <th className={`${styles.tableCell} ${styles.right}`}>Exit</th>
+                  <th className={`${styles.tableCell} ${styles.right}`}>Quantity</th>
+                  <th className={`${styles.tableCell} ${styles.right}`}>P&L</th>
+                  <th className={`${styles.tableCell} ${styles.center}`}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {trades.map((trade, index) => (
                   <tr
                     key={trade.id}
-                    style={{
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                      backgroundColor: index % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
-                    }}
+                    className={styles.tableRow}
                   >
-                    <td style={{ padding: '12px 16px' }}>{new Date(trade.entry_date).toLocaleDateString()}</td>
-                    <td style={{ padding: '12px 16px' }}>{trade.symbol}</td>
-                    <td style={{ padding: '12px 16px' }}>{trade.strategy}</td>
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>${trade.entry_price.toFixed(2)}</td>
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>${trade.exit_price.toFixed(2)}</td>
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>{trade.quantity}</td>
-                    <td style={{
-                      padding: '12px 16px',
-                      textAlign: 'right',
-                      color: trade.pnl >= 0 ? '#22c55e' : '#ef4444',
-                      fontWeight: '600',
-                    }}>
+                    <td className={styles.tableCell}>{new Date(trade.entry_date).toLocaleDateString()}</td>
+                    <td className={styles.tableCell}>{trade.symbol}</td>
+                    <td className={styles.tableCell}>{trade.strategy}</td>
+                    <td className={`${styles.tableCell} ${styles.right}`}>${trade.entry_price.toFixed(2)}</td>
+                    <td className={`${styles.tableCell} ${styles.right}`}>${trade.exit_price.toFixed(2)}</td>
+                    <td className={`${styles.tableCell} ${styles.right}`}>{trade.quantity}</td>
+                    <td className={`${styles.tableCell} ${styles.right} ${trade.pnl >= 0 ? styles.profit : styles.loss}`}>
                       ${trade.pnl.toFixed(2)}
                     </td>
-                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                      <div style={{
-                        display: 'flex',
-                        gap: '8px',
-                        justifyContent: 'center',
-                      }}>
-                        <button style={{
-                          padding: '6px',
-                          borderRadius: '6px',
-                          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                          border: 'none',
-                          color: '#60a5fa',
-                          cursor: 'pointer',
-                        }}>
+                    <td className={`${styles.tableCell} ${styles.center}`}>
+                      <div className={styles.actionButtons}>
+                        <button className={`${styles.actionButton} ${styles.viewButton}`}>
                           <RiSearchLine />
                         </button>
-                        <button style={{
-                          padding: '6px',
-                          borderRadius: '6px',
-                          backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                          border: 'none',
-                          color: '#22c55e',
-                          cursor: 'pointer',
-                        }}>
+                        <button className={`${styles.actionButton} ${styles.addButton}`}>
                           <RiAddLine />
                         </button>
                       </div>
@@ -587,49 +472,14 @@ export const Journal = () => {
           </div>
 
           {/* Pagination */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginTop: '24px',
-          }}>
-            <div style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+          <div className={styles.pagination}>
+            <div>
               Showing 1-10 of {trades.length} entries
             </div>
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-            }}>
-              <button style={{
-                padding: '8px 12px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'rgba(255, 255, 255, 0.6)',
-                cursor: 'pointer',
-              }}>
-                Previous
-              </button>
-              <button style={{
-                padding: '8px 12px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                border: 'none',
-                color: '#fff',
-                cursor: 'pointer',
-              }}>
-                1
-              </button>
-              <button style={{
-                padding: '8px 12px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'rgba(255, 255, 255, 0.6)',
-                cursor: 'pointer',
-              }}>
-                Next
-              </button>
+            <div>
+              <button className={styles.periodButton}>Previous</button>
+              <button className={`${styles.periodButton} ${styles.selected}`}>1</button>
+              <button className={styles.periodButton}>Next</button>
             </div>
           </div>
         </div>
@@ -637,104 +487,59 @@ export const Journal = () => {
         <>
           {/* Stats Overview */}
           {stats && (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '16px',
-              marginBottom: '24px',
-            }}>
+            <div className={styles.overviewGrid}>
               {/* Primary Metrics */}
-              <div style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                borderRadius: '16px',
-                padding: '20px',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '12px',
-                }}>
-                  <RiPieChart2Line style={{ color: '#60a5fa' }} />
-                  <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Performance</span>
+              <div className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <RiPieChart2Line className={styles.iconBlue} />
+                  <span className={styles.cardTitle}>Performance</span>
                 </div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                <div className={styles.cardValue}>
                   {stats.winRate.toFixed(1)}% Win Rate
                 </div>
-                <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.cardSub}>
                   {stats.totalTrades} trades • ${stats.averageWin.toFixed(2)} avg win
                 </div>
               </div>
 
               {/* Risk Metrics */}
-              <div style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                borderRadius: '16px',
-                padding: '20px',
-                border: '1px solid rgba(34, 197, 94, 0.2)',
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '12px',
-                }}>
-                  <RiScales3Line style={{ color: '#22c55e' }} />
-                  <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Risk Management</span>
+              <div className={`${styles.card} ${styles.cardRisk}`}>
+                <div className={styles.cardHeader}>
+                  <RiScales3Line className={styles.iconGreen} />
+                  <span className={styles.cardTitle}>Risk Management</span>
                 </div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                <div className={styles.cardValue}>
                   {stats.averageRRR.toFixed(2)}x R:R
                 </div>
-                <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.cardSub}>
                   {stats.maxDrawdownPercentage.toFixed(1)}% max DD • ${stats.averageRiskPerTrade.toFixed(2)} avg risk
                 </div>
               </div>
 
               {/* Consistency Metrics */}
-              <div style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                borderRadius: '16px',
-                padding: '20px',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '12px',
-                }}>
-                  <RiBarChartGroupedLine style={{ color: '#8b5cf6' }} />
-                  <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Consistency</span>
+              <div className={`${styles.card} ${styles.cardConsistency}`}>
+                <div className={styles.cardHeader}>
+                  <RiBarChartGroupedLine className={styles.iconPurple} />
+                  <span className={styles.cardTitle}>Consistency</span>
                 </div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                <div className={styles.cardValue}>
                   {stats.profitFactor.toFixed(2)} PF
                 </div>
-                <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.cardSub}>
                   {stats.consecutiveStats.maxWinStreak} win streak • {stats.sharpeRatio.toFixed(2)} Sharpe
                 </div>
               </div>
 
               {/* Time Analysis */}
-              <div style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                borderRadius: '16px',
-                padding: '20px',
-                border: '1px solid rgba(245, 158, 11, 0.2)',
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '12px',
-                }}>
-                  <RiTimeLine style={{ color: '#f59e0b' }} />
-                  <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Timing</span>
+              <div className={`${styles.card} ${styles.cardTime}`}>
+                <div className={styles.cardHeader}>
+                  <RiTimeLine className={styles.iconYellow} />
+                  <span className={styles.cardTitle}>Timing</span>
                 </div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                <div className={styles.cardValue}>
                   {stats.averageHoldingTime}
                 </div>
-                <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.cardSub}>
                   Best time: {stats.bestTimeOfDay}
                 </div>
               </div>
@@ -742,57 +547,21 @@ export const Journal = () => {
           )}
 
           {/* Detailed Analysis Section */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr',
-            gap: '24px',
-            marginBottom: '24px',
-          }}>
+          <div className={styles.analysisGrid}>
             {/* Left Column - Charts */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '24px',
-            }}>
+            <div className={styles.analysisLeft}>
               {/* Performance by Day */}
-              <div style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                borderRadius: '16px',
-                padding: '24px',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-              }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  marginBottom: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}>
+              <div className={styles.analysisCard}>
+                <h3 className={styles.analysisCardHeader}>
                   <RiCalendarCheckLine />
-                  Performance by Day
+                  <span className={styles.analysisCardTitle}>Performance by Day</span>
                 </h3>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                  gap: '12px',
-                }}>
+                <div className={styles.analysisDayGrid}>
                   {stats?.performanceByDayOfWeek.map((day) => (
-                    <div key={day.day} style={{
-                      padding: '12px',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    }}>
-                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px' }}>
-                        {day.day}
-                      </div>
-                      <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                        {day.winRate.toFixed(1)}%
-                      </div>
-                      <div style={{
-                        fontSize: '14px',
-                        color: day.pnl >= 0 ? '#22c55e' : '#ef4444',
-                      }}>
+                    <div key={day.day} className={styles.analysisDay}>
+                      <div className={styles.analysisDayLabel}>{day.day}</div>
+                      <div className={styles.analysisDayValue}>{day.winRate.toFixed(1)}%</div>
+                      <div className={day.pnl >= 0 ? styles.analysisDayProfit : styles.analysisDayLoss}>
                         ${day.pnl.toFixed(2)}
                       </div>
                     </div>
@@ -801,43 +570,17 @@ export const Journal = () => {
               </div>
 
               {/* Market Conditions Impact */}
-              <div style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                borderRadius: '16px',
-                padding: '24px',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-              }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  marginBottom: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}>
+              <div className={styles.analysisCard}>
+                <h3 className={styles.analysisCardHeader}>
                   <RiBarChartLine />
-                  Market Conditions Impact
+                  <span className={styles.analysisCardTitle}>Market Conditions Impact</span>
                 </h3>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                  gap: '12px',
-                }}>
+                <div className={styles.analysisConditionGrid}>
                   {stats?.marketConditionStats.map((condition) => (
-                    <div key={condition.condition} style={{
-                      padding: '12px',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    }}>
-                      <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px' }}>
-                        {condition.condition}
-                      </div>
-                      <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                        {condition.winRate.toFixed(1)}% WR
-                      </div>
-                      <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                        {condition.trades} trades
-                      </div>
+                    <div key={condition.condition} className={styles.analysisCondition}>
+                      <div className={styles.analysisConditionLabel}>{condition.condition}</div>
+                      <div className={styles.analysisConditionValue}>{condition.winRate.toFixed(1)}% WR</div>
+                      <div className={styles.analysisConditionSub}>{condition.trades} trades</div>
                     </div>
                   ))}
                 </div>
@@ -845,48 +588,21 @@ export const Journal = () => {
             </div>
 
             {/* Right Column */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '24px',
-            }}>
+            <div className={styles.analysisRight}>
               {/* Holding Time Distribution */}
-              <div style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                borderRadius: '16px',
-                padding: '24px',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-              }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  marginBottom: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}>
+              <div className={styles.analysisCard}>
+                <h3 className={styles.analysisCardHeader}>
                   <RiTimeLine />
-                  Holding Time Analysis
+                  <span className={styles.analysisCardTitle}>Holding Time Analysis</span>
                 </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
                   {stats?.timeStats.holdingTimeDistribution.map((time) => (
-                    <div key={time.duration} style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '12px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderRadius: '8px',
-                    }}>
+                    <div key={time.duration} className={styles.analysisTimeRow}>
                       <div>
-                        <div style={{ marginBottom: '4px' }}>{time.duration}</div>
-                        <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                          {time.trades} trades
-                        </div>
+                        <div className={styles.analysisTimeLabel}>{time.duration}</div>
+                        <div className={styles.analysisTimeSub}>{time.trades} trades</div>
                       </div>
-                      <div style={{ color: '#22c55e', fontWeight: 'bold' }}>
-                        {time.winRate.toFixed(1)}%
-                      </div>
+                      <div className={styles.analysisTimeWinRate}>{time.winRate.toFixed(1)}%</div>
                     </div>
                   ))}
                 </div>

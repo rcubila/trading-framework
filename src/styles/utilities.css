@@ -1,0 +1,72 @@
+/* Gradient Backgrounds */
+.gradient-primary {
+  background: var(--gradient-primary);
+}
+
+.gradient-secondary {
+  background: var(--gradient-secondary);
+}
+
+/* Card Styles */
+.card {
+  background: var(--color-background-paper);
+  border: 1px solid var(--color-background-secondary);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--color-primary);
+}
+
+/* Text Gradients */
+.text-gradient {
+  background: linear-gradient(to right, var(--color-primary), var(--color-primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Interactive Elements */
+.interactive-hover {
+  transition: all 0.2s ease;
+}
+
+.interactive-hover:hover {
+  background: var(--color-background-secondary);
+  border-color: var(--color-primary);
+}
+
+/* Status Indicators */
+.status-success {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.status-error {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.status-warning {
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.status-info {
+  color: var(--color-info);
+  border-color: var(--color-info);
+}
+
+/* Layout Containers */
+.page-container {
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+}
+
+.section-container {
+  background: var(--color-background-secondary);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+} 
