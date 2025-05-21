@@ -263,6 +263,10 @@ export const PlayBook: React.FC = () => {
     });
 
     setAssets(updatedAssets);
+    const updatedSelectedAsset = updatedAssets.find(asset => asset.id === selectedAsset.id);
+    if (updatedSelectedAsset) {
+      setSelectedAsset(updatedSelectedAsset);
+    }
     setShowCreateStrategyModal(false);
     setNewStrategy({ title: '', type: '', tags: '', description: '' });
   };
