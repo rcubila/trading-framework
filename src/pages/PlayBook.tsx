@@ -494,20 +494,17 @@ export const PlayBook: React.FC = () => {
         {selectedAsset && !selectedSetup && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setSelectedAsset(null)}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                >
-                  ← Back to Assets
-                </button>
-                <h2 className="text-2xl font-bold">{selectedAsset.asset} Strategies</h2>
-              </div>
               <button
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
                 onClick={() => setShowCreateStrategyModal(true)}
               >
                 + New Strategy
+              </button>
+              <button
+                onClick={() => setSelectedAsset(null)}
+                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition"
+              >
+                ← Back to Assets
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
