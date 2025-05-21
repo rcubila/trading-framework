@@ -1,0 +1,415 @@
+.container {
+  padding: 5px;
+  color: white;
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%);
+  min-height: 100vh;
+  backdrop-filter: blur(10px);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewSelector {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  background: rgba(15, 23, 42, 0.4);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.viewButton {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.viewButton.selected {
+  background: rgba(59, 130, 246, 0.15);
+  color: #fff;
+}
+
+.periodSelector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.periodButton {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.periodButton.selected {
+  background: rgba(59, 130, 246, 0.15);
+  color: #fff;
+}
+
+.journalContainer {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.searchBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.searchInput {
+  position: relative;
+  width: 300px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  outline: none;
+}
+
+.filterButton {
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tableHeader {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tableHeader th {
+  padding: 12px 16px;
+  text-align: left;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tableHeader th:last-child {
+  text-align: center;
+}
+
+.tableRow {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tableRow:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tableCell {
+  padding: 12px 16px;
+}
+
+.tableCell.right {
+  text-align: right;
+}
+
+.tableCell.center {
+  text-align: center;
+}
+
+.profit {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.loss {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.actionButton {
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.viewButton {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.addButton {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.card {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.cardRisk {
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.cardConsistency {
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.cardTime {
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cardTitle {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.cardValue {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.cardSub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.iconBlue {
+  color: #60a5fa;
+}
+.iconGreen {
+  color: #22c55e;
+}
+.iconPurple {
+  color: #8b5cf6;
+}
+.iconYellow {
+  color: #f59e0b;
+}
+
+.analysisGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.analysisLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.analysisRight {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.analysisCard {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.analysisCardHeader {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analysisCardTitle {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.analysisDayGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.analysisDay {
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.analysisDayLabel {
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 4px;
+}
+
+.analysisDayValue {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.analysisDayProfit {
+  font-size: 14px;
+  color: #22c55e;
+}
+
+.analysisDayLoss {
+  font-size: 14px;
+  color: #ef4444;
+}
+
+.analysisConditionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.analysisCondition {
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.analysisConditionLabel {
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 4px;
+}
+
+.analysisConditionValue {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.analysisConditionSub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.analysisTimeRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.analysisTimeLabel {
+  margin-bottom: 4px;
+}
+
+.analysisTimeSub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.analysisTimeWinRate {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.searchBarRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.searchFlex {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.paginationRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.paginationButton {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.paginationButton.selected {
+  background: rgba(59, 130, 246, 0.15);
+  border: none;
+  color: #fff;
+} 

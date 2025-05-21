@@ -1,0 +1,33 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+  background: rgba(15, 23, 42, 0.4);
+  padding: 2px 5px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 2px;
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+} 

@@ -1,0 +1,88 @@
+.button {
+  padding: 8px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Variants */
+.primary {
+  composes: button;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-text-primary);
+  border: none;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.primary:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.secondary {
+  composes: button;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--color-primary-light);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.secondary:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.danger {
+  composes: button;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* Loading state */
+.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.loadingSpinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Icon styles */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.icon:hover {
+  transform: scale(1.1);
+}
+
+.icon:active {
+  transform: scale(0.9);
+} 

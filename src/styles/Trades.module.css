@@ -1,0 +1,815 @@
+.container {
+  padding: 20px;
+  color: white;
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%);
+  min-height: 100vh;
+  backdrop-filter: blur(10px);
+}
+
+.headerActions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.actionButton {
+  padding: 5px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.actionButton.red {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* Add the following classes for migrated styles */
+.tradesContainer {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tradesListTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.tradesListTh,
+.tradesListTd {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tradesListTh {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.tradesListTd {
+  color: white;
+}
+
+.tradesListTrHover:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tradesListCheckbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalContent {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border-radius: 20px;
+  padding: 32px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.modalTitle {
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.modalText {
+  margin-bottom: 24px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancelButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.deleteButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.deleteButton:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.cancelButton:disabled,
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.adminButtons {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Form elements */
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.formInput {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+}
+
+.formInput.error {
+  border-color: #ef4444;
+}
+
+.formSelect {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+}
+
+.formTextarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+  min-height: 100px;
+  resize: vertical;
+}
+
+.errorMessage {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Modal styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalContent {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border-radius: 20px;
+  padding: 32px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modalTitle {
+  font-size: 24px;
+  font-weight: bold;
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.modalCloseButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+}
+
+.modalBody {
+  margin-bottom: 24px;
+}
+
+.modalInfoBox {
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.modalInfoRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.modalInfoLabel {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.modalInfoValue {
+  font-weight: 600;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Button styles */
+.button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.buttonPrimary {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  border: none;
+  color: white;
+}
+
+.buttonSecondary {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+}
+
+.buttonDanger {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.buttonDisabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  border-top: 2px solid #ef4444;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Test buttons */
+.testButtons {
+  display: flex;
+  gap: 12px;
+}
+
+.testButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+}
+
+.testButtonRed {
+  background-color: #ef4444;
+  color: white;
+}
+
+.testButtonBlue {
+  background-color: #0ea5e9;
+  color: white;
+}
+
+/* Market type buttons */
+.marketTypeButtons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.marketTypeButton {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.marketTypeButtonActive {
+  background: rgba(96, 165, 250, 0.2);
+  border: 1px solid #60a5fa;
+  color: #60a5fa;
+}
+
+.marketTypeButtonInactive {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Helper text */
+.helperText {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: help;
+}
+
+/* Tags input */
+.tagsInput {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(96, 165, 250, 0.1);
+  color: #60a5fa;
+  font-size: 12px;
+}
+
+.tagRemove {
+  cursor: pointer;
+  color: rgba(96, 165, 250, 0.6);
+}
+
+.tagRemove:hover {
+  color: #60a5fa;
+}
+
+/* Step navigation */
+.stepNavigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+/* Step title */
+.stepTitle {
+  font-size: 24px;
+  font-weight: bold;
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Close button */
+.closeButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+}
+
+/* Progress bar */
+.progressBar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin-bottom: 24px;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Trade card */
+.tradeCard {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.tradeCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tradeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tradeHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.tradeType {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tradeType.long {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.tradeType.short {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.tradeDetails {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tradeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.value {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.value.profit {
+  color: #22c55e;
+}
+
+.value.loss {
+  color: #ef4444;
+}
+
+.tradeActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Admin buttons */
+.adminButtons {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.adminButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adminButtonRed {
+  background-color: #ef4444;
+  color: white;
+}
+
+.adminButtonBlue {
+  background-color: #0ea5e9;
+  color: white;
+}
+
+/* Success message */
+.successMessage {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  background: rgba(34, 197, 94, 0.9);
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Grid layouts */
+.grid {
+  display: grid;
+  gap: 20px;
+}
+
+.grid2Col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Flex layouts */
+.flex {
+  display: flex;
+}
+
+.flexBetween {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flexEnd {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Spacing */
+.mb16 {
+  margin-bottom: 16px;
+}
+
+.mb24 {
+  margin-bottom: 24px;
+}
+
+.mb32 {
+  margin-bottom: 32px;
+}
+
+/* Typography */
+.title {
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.subtitle {
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Position */
+.relative {
+  position: relative;
+}
+
+/* Trade details */
+.tradeDetailRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.tradeDetailLabel {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tradeDetailValue {
+  font-weight: 600;
+}
+
+.tradeDetailValueLong {
+  color: #22c55e;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tradeDetailValueShort {
+  color: #ef4444;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tradeDetailValueProfit {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.tradeDetailValueLoss {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Spacing utilities */
+.mt12 {
+  margin-top: 12px;
+}
+
+.addTradeModalContent {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border-radius: 20px;
+  padding: 32px;
+  width: 90%;
+  max-width: 600px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.addTradeModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.addTradeModalTitle {
+  font-size: 24px;
+  font-weight: bold;
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.addTradeModalBody {
+  margin-bottom: 24px;
+}
+
+.stepperRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.stepperActive {
+  flex: 1;
+  height: 4px;
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  margin-right: 8px;
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.stepperInactive {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-right: 8px;
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.grid20gap {
+  display: grid;
+  gap: 20px;
+}
+
+.flex12gap {
+  display: flex;
+  gap: 12px;
+}
+
+.formInputError {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid #ef4444;
+  color: white;
+  font-size: 14px;
+}
+
+.relative {
+  position: relative;
+}
+
+.helperText {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: help;
+}
+
+.addTradeModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.helperTextSmall {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+} 

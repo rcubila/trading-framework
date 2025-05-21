@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+  background: rgba(15, 23, 42, 0.4);
+  padding: 2px 5px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-md);
+}
+
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  composes: text-gradient from '../styles/components.css';
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+} 

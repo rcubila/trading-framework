@@ -1,0 +1,31 @@
+:root {
+  /* Primary Colors */
+  --color-primary: #2563eb;
+  --color-primary-light: #3b82f6;
+  --color-primary-dark: #1d4ed8;
+
+  /* Secondary Colors */
+  --color-secondary: #10b981;
+  --color-secondary-light: #34d399;
+  --color-secondary-dark: #059669;
+
+  /* Background Colors */
+  --color-background-primary: #0f172a;
+  --color-background-secondary: #1e293b;
+  --color-background-paper: #334155;
+
+  /* Text Colors */
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-disabled: #64748b;
+
+  /* Status Colors */
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-success: #22c55e;
+  --color-info: #3b82f6;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%);
+  --gradient-secondary: linear-gradient(160deg, rgba(255, 255, 255, 0.3) 0%, rgba(248, 250, 252, 0.3) 100%);
+} 
