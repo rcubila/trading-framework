@@ -17,7 +17,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { importTradesFromCSV } from '../lib/csv-import';
 import { processTradeImages, testOpenAIAccess } from '../lib/image-import';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseAdmin, profilesApi } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
 interface FileWithPreview extends File {
@@ -87,37 +87,78 @@ export const ImportTrades = () => {
       setProgress(0);
       setErrors([]);
 
+      // Get current user first
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('Auth error:', userError);
+        throw new Error('Failed to get current user');
+      }
+      if (!user) throw new Error('No user logged in');
+
+      console.log('Current user:', user.id);
+
+      // Ensure profile exists
+      try {
+        await profilesApi.getProfile(user.id);
+      } catch (error: any) {
+        if (error.code === 'PGRST116') {
+          // Profile doesn't exist, create it
+          await profilesApi.createProfile({
+            id: user.id,
+            email: user.email || '',
+            full_name: user.user_metadata?.full_name || '',
+            avatar_url: user.user_metadata?.avatar_url || '',
+            updated_at: new Date().toISOString()
+          });
+        } else {
+          throw error;
+        }
+      }
+
       for (const file of files) {
         const reader = new FileReader();
         
         reader.onload = async (e) => {
           try {
+            console.log('Starting file import...');
             const text = e.target?.result as string;
+            console.log('File content:', text);
+            
             const { trades, errors: importErrors } = await importTradesFromCSV(text);
+            console.log('Import result:', { trades, errors: importErrors });
             
             if (importErrors.length > 0) {
-              setErrors(importErrors);
+              console.error('Import errors:', importErrors.map(err => `Row ${err.row}: ${err.message}`).join('\n'));
+              // Only show the first 5 errors to avoid overwhelming the UI
+              setErrors(importErrors.slice(0, 5));
               return;
             }
 
-            // Import trades to database
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('No user logged in');
+            if (trades.length === 0) {
+              console.error('No trades to import');
+              setErrors([{ row: 0, message: 'No valid trades found in the file' }]);
+              return;
+            }
 
-            // Convert trades to database format
+            // Convert trades to database format with user_id
             const dbTrades = trades.map(trade => ({
               user_id: user.id,
               ...trade
             }));
+            console.log('Prepared trades for database:', dbTrades);
 
             // Insert trades into database
-            const { error } = await supabase
+            const { error: insertError } = await supabase
               .from('trades')
               .insert(dbTrades);
 
-            if (error) throw error;
+            if (insertError) {
+              console.error('Database error:', insertError);
+              throw insertError;
+            }
 
-            // Show success message and navigate to trades page
+            console.log('Trades imported successfully');
+            // Show success message
             const successMessage = document.createElement('div');
             successMessage.style.position = 'fixed';
             successMessage.style.top = '20px';
@@ -140,7 +181,7 @@ export const ImportTrades = () => {
             }, 2000);
           } catch (error) {
             console.error('Import error:', error);
-            setErrors([{ row: 0, message: 'Failed to import file' }]);
+            setErrors([{ row: 0, message: error instanceof Error ? error.message : 'Failed to import file' }]);
           }
         };
 
@@ -150,7 +191,7 @@ export const ImportTrades = () => {
       await new Promise(resolve => setTimeout(resolve, 500));
     } catch (error) {
       console.error('Import error:', error);
-      setErrors([{ row: 0, message: 'Failed to import file' }]);
+      setErrors([{ row: 0, message: error instanceof Error ? error.message : 'Failed to import file' }]);
     } finally {
       setImporting(false);
       setProgress(0);

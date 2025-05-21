@@ -22,7 +22,7 @@ const uuidv4 = (): string => {
 };
 
 // Helper function to validate numbers
-const validateNumber = (value: string, fieldName: string): number => {
+const validateNumber = (value: string, fieldName: string, isInteger: boolean = false): number => {
   // Remove currency symbols, commas, and any quotes
   const cleanValue = value.replace(/[$,'"]/g, '');
   
@@ -34,23 +34,22 @@ const validateNumber = (value: string, fieldName: string): number => {
   if (isNaN(num)) {
     throw new Error(`Invalid ${fieldName}: ${value}. Must be a valid number.`);
   }
+  if (isInteger) {
+    // Round to nearest integer instead of requiring exact integer
+    return Math.round(num);
+  }
   return num;
 };
 
 // Helper function to validate dates
 const validateDate = (value: string, fieldName: string): string => {
-  // If value is empty, invalid, or epoch, use current date
-  if (!value || value.trim() === '' || value === '1970-01-01 00:00' || value.includes('1970-01-01')) {
-    return new Date().toISOString();
-  }
-
   // Remove any quotes
   const cleanValue = value.replace(/['"]/g, '').trim();
   
   // Try parsing different date formats
   let date: Date | null = null;
   
-  // Try DD/MM/YY HH:mm format (European)
+  // Try DD/MM/YY HH:mm format
   if (cleanValue.match(/^\d{2}\/\d{2}\/\d{2}\s+\d{2}:\d{2}$/)) {
     const [datePart, timePart] = cleanValue.split(' ');
     const [day, month, year] = datePart.split('/');
@@ -59,7 +58,7 @@ const validateDate = (value: string, fieldName: string): string => {
     const fullYear = parseInt(year) + 2000;
     date = new Date(fullYear, parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute));
   }
-  // Try DD.MM.YY HH:mm format (European)
+  // Try DD.MM.YY HH:mm format
   else if (cleanValue.match(/^\d{2}\.\d{2}\.\d{2}\s+\d{2}:\d{2}$/)) {
     const [datePart, timePart] = cleanValue.split(' ');
     const [day, month, year] = datePart.split('.');
@@ -67,36 +66,13 @@ const validateDate = (value: string, fieldName: string): string => {
     const fullYear = parseInt(year) + 2000;
     date = new Date(fullYear, parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute));
   }
-  // Try DD/MM/YYYY format (European)
-  else if (cleanValue.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-    const [day, month, year] = cleanValue.split('/');
-    date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-  }
-  // Try DD.MM.YYYY format (European)
-  else if (cleanValue.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
-    const [day, month, year] = cleanValue.split('.');
-    date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-  }
   // Try standard ISO format and other common formats
   else {
     date = new Date(cleanValue);
   }
 
   if (!date || isNaN(date.getTime())) {
-    // If date is invalid, use current date
-    return new Date().toISOString();
-  }
-
-  // Validate that the date is reasonable (not too far in the past or future)
-  const now = new Date();
-  const fiveYearsAgo = new Date();
-  fiveYearsAgo.setFullYear(now.getFullYear() - 5);
-  const fiveYearsFromNow = new Date();
-  fiveYearsFromNow.setFullYear(now.getFullYear() + 5);
-
-  if (date < fiveYearsAgo || date > fiveYearsFromNow) {
-    // If date is outside range, use current date
-    return new Date().toISOString();
+    throw new Error(`Invalid ${fieldName}: ${value}. Must be a valid date.`);
   }
 
   return date.toISOString();
@@ -119,14 +95,6 @@ const detectColumnType = (headers: string[], values: string[][]): { [key: string
     // Get all non-empty values for this column
     const columnValues = values.map(row => row[index]).filter(val => val && val.trim());
     if (columnValues.length === 0) return;
-
-    // Check for market patterns
-    const marketPattern = /(stocks?|crypto|forex|futures|equities|etfs?)/i;
-    const isMarketColumn = columnValues.some(val => marketPattern.test(val));
-    if (isMarketColumn) {
-      columnTypes[header] = 'market';
-      return;
-    }
 
     // Check for date patterns
     const datePattern = /^\d{2}[-.]\d{2}[-.]\d{2}|\d{4}-\d{2}-\d{2}|^\d{2}:\d{2}|\d{2}[-.]\d{2}[-.]\d{2}\s+\d{2}:\d{2}/;
@@ -179,55 +147,6 @@ const detectColumnType = (headers: string[], values: string[][]): { [key: string
   return columnTypes;
 };
 
-// Helper function to determine market and category
-const determineMarketAndCategory = (symbol: string, market?: string): { market: string; market_category: 'Equities' | 'Crypto' | 'Forex' | 'Futures' | 'Other' } => {
-  // First check for futures symbols (including variations)
-  const futuresSymbols = [
-    'ES', 'NQ', 'YM', 'RTY', 'CL', 'GC', 'SI', '6E', 'ZB', 'ZN',  // CME futures
-    'GER40', 'DE40', 'DAX', '.USTEC', 'NAS100',  // Index futures
-    'FGBL', 'FGBM', 'FGBS', 'FGBX',  // Euro-Bund futures
-    'STOXX50E', 'ESTX50',  // Euro Stoxx 50
-    'FTSE', 'UK100',  // FTSE 100
-    'NIKKEI', 'NK225'  // Nikkei 225
-  ];
-  
-  // Check for exact match or if symbol contains any of the futures symbols
-  if (futuresSymbols.some(fs => symbol === fs || symbol.includes(fs))) {
-    return { market: 'Futures', market_category: 'Futures' };
-  }
-
-  // If market is provided, use it to determine category
-  if (market) {
-    const normalizedMarket = market.toLowerCase();
-    if (normalizedMarket.includes('future') || 
-        normalizedMarket.includes('eurex') || 
-        normalizedMarket.includes('cme') || 
-        normalizedMarket.includes('ice')) {
-      return { market: 'Futures', market_category: 'Futures' };
-    }
-    if (normalizedMarket.includes('stock') || normalizedMarket.includes('equity') || normalizedMarket.includes('etf')) {
-      return { market: 'Stocks', market_category: 'Equities' };
-    }
-    if (normalizedMarket.includes('crypto') || normalizedMarket.includes('binance')) {
-      return { market: 'Spot Crypto', market_category: 'Crypto' };
-    }
-    if (normalizedMarket.includes('forex') || normalizedMarket.includes('fx')) {
-      return { market: 'Spot Forex', market_category: 'Forex' };
-    }
-  }
-
-  // Try to determine from symbol pattern
-  if (symbol.length === 6 && /^[A-Z]{6}$/.test(symbol)) {
-    return { market: 'Spot Forex', market_category: 'Forex' };
-  }
-  if (symbol.includes('USDT') || symbol.includes('BTC') || symbol.includes('ETH')) {
-    return { market: 'Spot Crypto', market_category: 'Crypto' };
-  }
-  
-  // Default to Stocks/Equities
-  return { market: 'Stocks', market_category: 'Equities' };
-};
-
 export const importTradesFromCSV = async (csvContent: string): Promise<ImportResult> => {
   const errors: ImportError[] = [];
   const trades: Trade[] = [];
@@ -241,12 +160,11 @@ export const importTradesFromCSV = async (csvContent: string): Promise<ImportRes
       .map(line => line.split(',').map(v => v.trim()));
 
     // Find required columns (case insensitive)
-    const dateColumn = headers.find(h => h.toLowerCase().includes('open') || h.toLowerCase().includes('date') || h.toLowerCase().includes('time'));
-    const symbolColumn = headers.find(h => h.toLowerCase().includes('symbol') || h.toLowerCase().includes('ticker'));
-    const priceColumn = headers.find(h => h.toLowerCase().includes('price') || h.toLowerCase().includes('entry'));
-    const volumeColumn = headers.find(h => h.toLowerCase().includes('volume') || h.toLowerCase().includes('size') || h.toLowerCase().includes('quantity'));
-    let actionColumn = headers.find(h => h.toLowerCase().includes('action') || h.toLowerCase().includes('type') || h.toLowerCase().includes('side'));
-    const marketColumn = headers.find(h => h.toLowerCase().includes('market') || h.toLowerCase().includes('asset'));
+    const dateColumn = headers.find(h => h.toLowerCase().includes('open') || h.toLowerCase().includes('date'));
+    const symbolColumn = headers.find(h => h.toLowerCase().includes('symbol'));
+    const priceColumn = headers.find(h => h.toLowerCase().includes('price'));
+    const volumeColumn = headers.find(h => h.toLowerCase().includes('volume'));
+    let actionColumn = headers.find(h => h.toLowerCase().includes('action') || h.toLowerCase().includes('type'));
 
     // If no explicit action column, look for a column containing buy/sell values
     if (!actionColumn) {
@@ -300,22 +218,16 @@ export const importTradesFromCSV = async (csvContent: string): Promise<ImportRes
           throw new Error('Required columns not found');
         }
 
-        const symbol = rowData[symbolColumn].toUpperCase();
-        const marketInfo = determineMarketAndCategory(
-          symbol,
-          marketColumn ? rowData[marketColumn] : undefined
-        );
-
         // Create trade object
         const trade: Trade = {
           id: uuidv4(),
-          symbol: symbol,
-          market: marketInfo.market,
-          market_category: marketInfo.market_category,
+          symbol: rowData[symbolColumn].toUpperCase(),
+          market_category: 'Equities',
+          market: 'Stocks',
           type: normalizedAction === 'buy' ? 'Long' : 'Short',
           status: 'Open', // Default to open
           entry_price: validateNumber(rowData[priceColumn], 'Price'),
-          quantity: validateNumber(rowData[volumeColumn], 'Volume'),
+          quantity: validateNumber(rowData[volumeColumn], 'Volume', true),
           entry_date: validateDate(rowData[dateColumn], 'Date'),
         };
 

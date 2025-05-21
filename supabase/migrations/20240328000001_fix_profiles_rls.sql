@@ -1,17 +1,3 @@
--- Add role field to profiles table if it doesn't exist
-DO $$ 
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 
-        FROM information_schema.columns 
-        WHERE table_schema = 'public' 
-        AND table_name = 'profiles' 
-        AND column_name = 'role'
-    ) THEN
-        ALTER TABLE public.profiles ADD COLUMN role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'));
-    END IF;
-END $$;
-
 -- Drop all existing policies
 DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
@@ -28,5 +14,6 @@ CREATE POLICY "Users can update own profile" ON public.profiles
 CREATE POLICY "Users can insert own profile" ON public.profiles
     FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Update your user to be an admin (replace with your user ID)
-UPDATE public.profiles SET role = 'admin' WHERE email = 'raulcubilaperez@gmail.com'; 
+-- Grant necessary permissions
+GRANT ALL ON public.profiles TO authenticated;
+GRANT USAGE ON SCHEMA public TO authenticated; 
