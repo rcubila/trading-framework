@@ -3,12 +3,22 @@ import type { Database } from './supabase-types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
+// Regular client with RLS
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+
+// Service role client that bypasses RLS
+export const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 // Helper functions for trades
 export const tradesApi = {
@@ -111,7 +121,7 @@ export const tradesApi = {
 // Helper functions for profiles
 export const profilesApi = {
   async getProfile(userId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -122,10 +132,21 @@ export const profilesApi = {
   },
 
   async updateProfile(userId: string, profile: Database['public']['Tables']['profiles']['Update']) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('profiles')
       .update(profile)
       .eq('id', userId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async createProfile(profile: Database['public']['Tables']['profiles']['Insert']) {
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .insert(profile)
       .select()
       .single();
     
