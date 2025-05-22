@@ -215,6 +215,10 @@ export const PlayBook: React.FC = () => {
     description: '',
   });
   const [newRuleInput, setNewRuleInput] = useState('');
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [assetToDelete, setAssetToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [strategyToDelete, setStrategyToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [showDeleteStrategyModal, setShowDeleteStrategyModal] = useState(false);
 
   // Fetch assets and their strategies when component mounts
   useEffect(() => {
@@ -351,11 +355,22 @@ export const PlayBook: React.FC = () => {
     }
   };
 
-  const handleDeletePlaybook = (id: string) => {
-    setAssets(assets.map(asset => ({
-      ...asset,
-      strategies: asset.strategies.filter(s => s.id !== id),
-    })));
+  const handleDeletePlaybook = async (id: string) => {
+    try {
+      // Delete all strategies associated with this asset
+      const { error: strategiesError } = await supabase
+        .from('strategies')
+        .delete()
+        .eq('asset_name', id);
+
+      if (strategiesError) throw strategiesError;
+
+      // Update local state
+      setAssets(assets.filter(asset => asset.id !== id));
+    } catch (error) {
+      console.error('Error deleting playbook:', error);
+      alert('Failed to delete playbook. Please try again.');
+    }
   };
 
   const handleCreateStrategy = async () => {
@@ -422,6 +437,60 @@ export const PlayBook: React.FC = () => {
     }
   };
 
+  const handleDeleteClick = (e: React.MouseEvent, asset: AssetPlaybook) => {
+    e.stopPropagation();
+    setAssetToDelete({ id: asset.id, name: asset.asset });
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (assetToDelete) {
+      await handleDeletePlaybook(assetToDelete.id);
+      setShowDeleteConfirmModal(false);
+      setAssetToDelete(null);
+    }
+  };
+
+  const handleDeleteStrategyClick = (e: React.MouseEvent, strategy: PlaybookSetup) => {
+    e.stopPropagation();
+    setStrategyToDelete({ id: strategy.id, name: strategy.title });
+    setShowDeleteStrategyModal(true);
+  };
+
+  const handleDeleteStrategyConfirm = async () => {
+    if (strategyToDelete && selectedAsset) {
+      try {
+        const { error } = await supabase
+          .from('strategies')
+          .delete()
+          .eq('id', strategyToDelete.id);
+
+        if (error) throw error;
+
+        // Fetch the updated strategies for this playbook
+        const strategies = await fetchStrategiesForPlaybook(selectedAsset.asset);
+        
+        // Update the selected asset with the new strategies
+        const updatedSelectedAsset = {
+          ...selectedAsset,
+          strategies
+        };
+        
+        // Update the assets list with the new strategy
+        const updatedAssets = assets.map(asset => 
+          asset.id === selectedAsset.id ? updatedSelectedAsset : asset
+        );
+
+        setAssets(updatedAssets);
+        setSelectedAsset(updatedSelectedAsset);
+        setShowDeleteStrategyModal(false);
+        setStrategyToDelete(null);
+      } catch (error) {
+        console.error('Error deleting strategy:', error);
+      }
+    }
+  };
+
   return (
     <div className={styles.container}>
       <PageHeader 
@@ -452,23 +521,9 @@ export const PlayBook: React.FC = () => {
                 <div className={styles.cardActions}>
                   <button
                     className={styles.deleteButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm(`Are you sure you want to delete ${asset.asset} and all its strategies?`)) {
-                        handleDeletePlaybook(asset.id);
-                      }
-                    }}
+                    onClick={(e) => handleDeleteClick(e, asset)}
                   >
                     Delete
-                  </button>
-                  <button
-                    className={styles.editButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // TODO: Implement edit functionality
-                    }}
-                  >
-                    Edit
                   </button>
                 </div>
                 <div className={styles.cardContent}>
@@ -532,6 +587,14 @@ export const PlayBook: React.FC = () => {
                   className={styles.card}
                   onClick={() => setSelectedSetup(strategy)}
                 >
+                  <div className={styles.cardActions}>
+                    <button
+                      className={styles.deleteButton}
+                      onClick={(e) => handleDeleteStrategyClick(e, strategy)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                   <div className={styles.cardContent}>
                     <h3 className={styles.cardTitle}>{strategy.title}</h3>
                     <p className={styles.cardDescription}>{strategy.description}</p>
@@ -926,6 +989,64 @@ export const PlayBook: React.FC = () => {
                     {selectedSetup.notes}
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirmModal && assetToDelete && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <h2 className={styles.modalTitle}>Delete Playbook</h2>
+              <p className={styles.modalText}>
+                Are you sure you want to delete {assetToDelete.name} and all its strategies? This action cannot be undone.
+              </p>
+              <div className={styles.formActions}>
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirmModal(false);
+                    setAssetToDelete(null);
+                  }}
+                  className={styles.cancelButton}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  className={styles.deleteButton}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Strategy Confirmation Modal */}
+        {showDeleteStrategyModal && strategyToDelete && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <h2 className={styles.modalTitle}>Delete Strategy</h2>
+              <p className={styles.modalText}>
+                Are you sure you want to delete the strategy "{strategyToDelete.name}"? This action cannot be undone.
+              </p>
+              <div className={styles.modalActions}>
+                <button
+                  className={styles.secondaryButton}
+                  onClick={() => {
+                    setShowDeleteStrategyModal(false);
+                    setStrategyToDelete(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className={styles.dangerButton}
+                  onClick={handleDeleteStrategyConfirm}
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>

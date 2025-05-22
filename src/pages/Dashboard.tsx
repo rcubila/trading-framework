@@ -62,6 +62,18 @@ interface Trade extends DBTrade {
   market: string;
 }
 
+interface Strategy {
+  id: string;
+  name: string;
+  asset: string;
+}
+
+interface SupabaseStrategy {
+  id: string;
+  name: string;
+  asset_name: string;
+}
+
 const Dashboard = () => {
   const calculateAverageHoldingTime = (trades: Trade[]) => {
     const holdingTimes = trades
@@ -148,6 +160,9 @@ const Dashboard = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [calendarTrades, setCalendarTrades] = useState<CalendarTrade[]>([]);
   const [isLoadingTrades, setIsLoadingTrades] = useState(true);
+  const [strategies, setStrategies] = useState<{ id: string; name: string; asset: string }[]>([]);
+  const [selectedStrategy, setSelectedStrategy] = useState('ALL');
+  const [groupedStrategies, setGroupedStrategies] = useState<Record<string, Strategy[]>>({});
 
   useEffect(() => {
     if (allTrades.length > 0) {
@@ -269,62 +284,51 @@ const Dashboard = () => {
   };
 
   const fetchData = async () => {
+    setIsLoadingTrades(true);
     try {
-      setIsLoadingTrades(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Fetch all trades for metrics calculation
-      const { data: tradesData, error: tradesError } = await supabase
+      const { data: trades, error } = await supabase
         .from('trades')
         .select('*')
-        .eq('user_id', user.id)
         .order('entry_date', { ascending: false });
 
-      if (tradesError) throw tradesError;
+      if (error) throw error;
+
+      // Filter trades based on selected strategy
+      const filteredTrades = selectedStrategy === 'ALL' 
+        ? trades 
+        : trades.filter(trade => trade.strategy_id === selectedStrategy);
+
+      setAllTrades(filteredTrades);
+      setRecentTrades(filteredTrades.slice(0, 5));
       
-      // Process all trades
-      if (tradesData) {
-        const processedTrades = tradesData.map(trade => {
-          const pnl = trade.pnl !== null ? Number(trade.pnl) : 0;
-          console.log(`Processing trade ${trade.symbol}:`, { pnl, original: trade.pnl });
-          return {
-            ...trade,
-            pnl
-          };
-        });
-        
-        // Store all trades and calculate metrics
-        setAllTrades(processedTrades);
-        calculateMetrics(processedTrades);
-        
-        // Set calendar trades
-        setCalendarTrades(processedTrades.map(trade => {
-          const date = new Date(trade.entry_date);
-          const localDate = date.toLocaleDateString('en-CA');
-          return {
-            id: trade.id,
-            date: localDate,
-            symbol: trade.symbol,
-            type: trade.type,
-            result: (trade.pnl || 0) > 0 ? 'Win' : 'Loss',
-            profit: trade.pnl || 0,
-            volume: trade.quantity,
-            entry: trade.entry_price,
-            exit: trade.exit_price || trade.entry_price
-          };
-        }));
-
-        // Set recent trades (last 10 trades) - ONLY for display
-        setRecentTrades(processedTrades.slice(0, 10));
-      }
-
+      // Update calendar trades
+      const calendarTradesData: CalendarTrade[] = filteredTrades.map(trade => {
+        const date = new Date(trade.entry_date);
+        const localDate = date.toLocaleDateString('en-CA');
+        return {
+          id: trade.id,
+          date: localDate,
+          symbol: trade.symbol,
+          type: trade.type,
+          result: (trade.pnl || 0) > 0 ? 'Win' : 'Loss',
+          profit: trade.pnl || 0,
+          volume: trade.quantity,
+          entry: trade.entry_price,
+          exit: trade.exit_price || trade.entry_price
+        };
+      });
+      setCalendarTrades(calendarTradesData);
     } catch (error) {
       console.error('Error fetching trades:', error);
     } finally {
       setIsLoadingTrades(false);
     }
   };
+
+  // Update fetchData when selectedStrategy changes
+  useEffect(() => {
+    fetchData();
+  }, [selectedStrategy]);
 
   const handleGenerateTestTrades = async () => {
     try {
@@ -338,10 +342,6 @@ const Dashboard = () => {
       setIsRefreshing(false);
     }
   };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const renderChart = () => {
     switch (selectedChartType) {
@@ -774,6 +774,40 @@ const Dashboard = () => {
 
   const disciplineMetrics = calculateDisciplineMetrics();
 
+  // Add this function to fetch strategies
+  const fetchStrategies = async () => {
+    try {
+      const { data: strategies, error } = await supabase
+        .from('strategies')
+        .select('id, name, asset_name')
+        .order('asset_name');
+
+      if (error) throw error;
+
+      // Group strategies by asset
+      const grouped = (strategies as SupabaseStrategy[]).reduce((acc, strategy) => {
+        const asset = strategy.asset_name;
+        if (!acc[asset]) {
+          acc[asset] = [];
+        }
+        acc[asset].push({
+          id: strategy.id,
+          name: strategy.name,
+          asset: strategy.asset_name
+        });
+        return acc;
+      }, {} as Record<string, Strategy[]>);
+
+      setGroupedStrategies(grouped);
+    } catch (error) {
+      console.error('Error fetching strategies:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStrategies();
+  }, []);
+
   return (
     <div style={{ 
       padding: '5px', 
@@ -917,19 +951,54 @@ const Dashboard = () => {
 
           {/* Strategy Filter */}
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <select style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              cursor: 'pointer'
-            }}>
-              <option value="ALL">All Strategies</option>
-              <option value="BREAKOUT">Breakout</option>
-              <option value="REVERSAL">Reversal</option>
-              <option value="TREND">Trend Following</option>
-            </select>
+            <div style={{ position: 'relative' }}>
+              <select 
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  cursor: 'pointer',
+                  minWidth: '200px',
+                  appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 8px center',
+                  backgroundSize: '16px',
+                  paddingRight: '32px'
+                }}
+                value={selectedStrategy}
+                onChange={(e) => setSelectedStrategy(e.target.value)}
+              >
+                <option value="ALL">All Strategies</option>
+                {Object.entries(groupedStrategies).map(([asset, strategies]) => (
+                  <optgroup 
+                    key={asset} 
+                    label={asset}
+                    style={{
+                      backgroundColor: 'rgba(31, 41, 55, 0.95)',
+                      color: 'white',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {strategies.map(strategy => (
+                      <option 
+                        key={strategy.id} 
+                        value={strategy.id}
+                        style={{
+                          paddingLeft: '16px',
+                          backgroundColor: 'rgba(31, 41, 55, 0.95)',
+                          color: 'rgba(255, 255, 255, 0.8)'
+                        }}
+                      >
+                        {strategy.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Symbol Filter */}
