@@ -15,14 +15,14 @@ import { HelpButton } from '../components/HelpButton';
 import React, { useState } from 'react';
 
 const navigation = [
-  { name: 'Dashboard', icon: RiDashboardLine, path: '/' },
-  { name: 'Trades', icon: RiExchangeLine, path: '/trades' },
-  { name: 'Analytics', icon: RiBarChartLine, path: '/analytics' },
-  { name: 'Journal', icon: RiBookReadLine, path: '/journal' },
-  { name: 'PlayBook', icon: RiBookLine, path: '/playbook' },
-  { name: 'Discipline Tracker', icon: RiMedalLine, path: '/discipline' },
-  { name: 'Import Trades', icon: RiDownloadLine, path: '/import' },
-  { name: 'UI Recommendations', icon: RiPaintBrushLine, path: '/ui-recommendations' },
+  { name: 'Dashboard', icon: RiDashboardLine, path: '/', color: '#60a5fa' },
+  { name: 'Trades', icon: RiExchangeLine, path: '/trades', color: '#34d399' },
+  { name: 'Analytics', icon: RiBarChartLine, path: '/analytics', color: '#f472b6' },
+  { name: 'Journal', icon: RiBookReadLine, path: '/journal', color: '#fbbf24' },
+  { name: 'PlayBook', icon: RiBookLine, path: '/playbook', color: '#a78bfa' },
+  { name: 'Discipline Tracker', icon: RiMedalLine, path: '/discipline', color: '#fb923c' },
+  { name: 'Import Trades', icon: RiDownloadLine, path: '/import', color: '#38bdf8' },
+  { name: 'UI Recommendations', icon: RiPaintBrushLine, path: '/ui-recommendations', color: '#f87171' },
 ];
 
 export const MainLayout = () => {
@@ -113,7 +113,7 @@ export const MainLayout = () => {
           </h1>
         </div>
         
-        <nav style={{ padding: '5px', flex: 1 }}>
+        <nav style={{ padding: '1rem', flex: 1 }}>
           {navigation.map((item) => (
             <Link
               key={item.name}
@@ -121,42 +121,48 @@ export const MainLayout = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '5px',
+                padding: '0.75rem 1rem',
                 color: location.pathname === item.path ? '#fff' : 'rgba(255, 255, 255, 0.6)',
                 backgroundColor: location.pathname === item.path 
                   ? 'rgba(59, 130, 246, 0.15)' 
-                  : 'transparent',
+                  : 'rgba(255, 255, 255, 0.03)',
                 textDecoration: 'none',
                 margin: '3px 0',
-                borderRadius: '10px',
-                transition: 'all 0.2s ease',
+                borderRadius: '12px',
+                transition: 'all 0.3s ease',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                border: `1px solid ${location.pathname === item.path ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)'}`,
               }}
               onMouseEnter={(e) => {
                 if (location.pathname !== item.path) {
                   e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
                   e.currentTarget.style.color = '#fff';
                   e.currentTarget.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (location.pathname !== item.path) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
                   e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
                   e.currentTarget.style.transform = 'translateX(0)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
                 }
               }}
             >
               <item.icon style={{ 
-                width: '18px', 
-                height: '18px',
-                marginRight: '5px',
-                transition: 'all 0.2s ease'
+                width: '20px', 
+                height: '20px',
+                marginRight: '12px',
+                color: location.pathname === item.path ? '#3b82f6' : item.color,
+                transition: 'all 0.3s ease',
+                transform: location.pathname === item.path ? 'scale(1.1)' : 'scale(1)'
               }} />
               <span style={{ 
-                fontSize: '13px',
-                fontWeight: location.pathname === item.path ? '600' : '400'
+                fontSize: '14px',
+                fontWeight: location.pathname === item.path ? '600' : '500',
+                letterSpacing: '0.3px'
               }}>
                 {item.name}
               </span>
@@ -170,7 +176,7 @@ export const MainLayout = () => {
                     height: '100%',
                     background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0) 100%)',
                     borderLeft: '3px solid #3b82f6',
-                    borderRadius: '10px',
+                    borderRadius: '12px',
                     zIndex: -1,
                   }}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
