@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 import { UserMenu } from '../components/UserMenu';
 import { HelpButton } from '../components/HelpButton';
 import React, { useState } from 'react';
+import styles from './MainLayout.module.css';
 
 const navigation = [
   { name: 'Dashboard', icon: RiDashboardLine, path: '/', color: '#60a5fa' },
@@ -28,112 +29,29 @@ const navigation = [
 export const MainLayout = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Responsive sidebar styles
-  const sidebarBase = {
-    width: '16rem',
-    minWidth: '4rem',
-    background: 'rgba(15, 23, 42, 0.6)',
-    backdropFilter: 'blur(10px)',
-    display: 'flex',
-    flexDirection: 'column' as 'column',
-    height: '100vh',
-    boxShadow: '2px 0 10px rgba(0, 0, 0, 0.1)',
-    zIndex: 50,
-    position: 'relative' as 'relative',
-    overflow: 'hidden',
-    transition: 'transform 0.3s ease',
-  };
-  const sidebarMobile = {
-    position: 'fixed' as 'fixed',
-    left: 0,
-    top: 0,
-    transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
-    width: '16rem',
-    minWidth: '4rem',
-    height: '100vh',
-    zIndex: 100,
-    background: 'rgba(15, 23, 42, 0.95)',
-    boxShadow: '2px 0 10px rgba(0,0,0,0.2)',
-    transition: 'transform 0.3s ease',
-    display: 'flex',
-    flexDirection: 'column' as 'column',
-    overflow: 'hidden',
-  };
-
-  // Media query for mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'row', background: 'linear-gradient(130deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)', backgroundAttachment: 'fixed' }}>
+    <div className={styles.container}>
       {/* Sidebar */}
-      <aside
-        style={isMobile ? sidebarMobile : sidebarBase}
-      >
+      <aside className={`${styles.sidebar} ${isMobile ? (sidebarOpen ? styles.sidebarMobileOpen : styles.sidebarMobile) : ''}`}>
         {/* Gradient border effect */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: '1px',
-          height: '100%',
-          background: 'linear-gradient(to bottom, transparent, rgba(96, 165, 250, 0.2), rgba(167, 139, 250, 0.2), transparent)',
-          boxShadow: '0 0 5px rgba(96, 165, 250, 0.1)',
-          zIndex: 1,
-          pointerEvents: 'none'
-        }} />
+        <div className={styles.sidebarBorder} />
         {/* Inner glow effect */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: '1px',
-          height: '100%',
-          background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.03))',
-          filter: 'blur(1px)',
-          zIndex: 0,
-          pointerEvents: 'none'
-        }} />
-        <div style={{ 
-          height: '60px', 
-          display: 'flex', 
-          alignItems: 'center',
-          padding: '0 5px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-        }}>
-          <h1 style={{ 
-            color: 'white', 
-            fontSize: '20px',
-            fontWeight: 'bold',
-            background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
+        <div className={styles.sidebarGlow} />
+        
+        <div className={styles.logo}>
+          <h1 className={styles.logoText}>
             Trading Framework
           </h1>
         </div>
         
-        <nav style={{ padding: '1rem', flex: 1 }}>
+        <nav className={styles.nav}>
           {navigation.map((item) => (
             <Link
               key={item.name}
               to={item.path}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0.75rem 1rem',
-                color: location.pathname === item.path ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                backgroundColor: location.pathname === item.path 
-                  ? 'rgba(59, 130, 246, 0.15)' 
-                  : 'rgba(255, 255, 255, 0.03)',
-                textDecoration: 'none',
-                margin: '3px 0',
-                borderRadius: '12px',
-                transition: 'all 0.3s ease',
-                position: 'relative',
-                overflow: 'hidden',
-                border: `1px solid ${location.pathname === item.path ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)'}`,
-              }}
+              className={`${styles.navLink} ${location.pathname === item.path ? styles.navLinkActive : ''}`}
               onMouseEnter={(e) => {
                 if (location.pathname !== item.path) {
                   e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
@@ -159,26 +77,13 @@ export const MainLayout = () => {
                 transition: 'all 0.3s ease',
                 transform: location.pathname === item.path ? 'scale(1.1)' : 'scale(1)'
               }} />
-              <span style={{ 
-                fontSize: '14px',
-                fontWeight: location.pathname === item.path ? '600' : '500',
-                letterSpacing: '0.3px'
-              }}>
+              <span className={`${styles.navText} ${location.pathname === item.path ? styles.navTextActive : ''}`}>
                 {item.name}
               </span>
               {location.pathname === item.path && (
                 <motion.div
                   layoutId="activeNav"
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    height: '100%',
-                    background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0) 100%)',
-                    borderLeft: '3px solid #3b82f6',
-                    borderRadius: '12px',
-                    zIndex: -1,
-                  }}
+                  className={styles.activeIndicator}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
@@ -186,59 +91,30 @@ export const MainLayout = () => {
           ))}
         </nav>
       </aside>
+
       {/* Sidebar overlay for mobile */}
       {isMobile && sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.4)',
-            zIndex: 99,
-          }}
+          className={styles.overlay}
         />
       )}
+
       {/* Main Content */}
-      <main style={{
-        flex: 1,
-        minHeight: '100vh',
-        background: 'rgba(15, 23, 42, 0.4)',
-        backdropFilter: 'blur(10px)',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
+      <main className={styles.main}>
         {/* Header with UserMenu and Hamburger */}
-        <header style={{
-          height: '60px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 24px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          background: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(10px)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 30,
-        }}>
+        <header className={styles.header}>
           {/* Hamburger for mobile */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            style={{
-              display: isMobile ? 'block' : 'none',
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              fontSize: '2rem',
-              cursor: 'pointer',
-            }}
+            className={styles.hamburger}
             aria-label="Open sidebar"
           >
             <span>&#9776;</span>
           </button>
           <UserMenu />
         </header>
-        <div style={{ flex: 1, padding: '24px' }}>
+        <div className={styles.content}>
           <Outlet />
         </div>
       </main>
