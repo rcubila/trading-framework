@@ -15,6 +15,7 @@ import {
 } from 'react-icons/ri';
 import { StrategyModal } from '../components/StrategyModal';
 import { PageHeader } from '../components/PageHeader';
+import styles from './Strategy.module.css';
 
 interface Strategy {
   id: string;
@@ -165,14 +166,19 @@ export const Strategy = () => {
     }));
   };
 
+  const getStatusClass = (status: string) => {
+    switch (status) {
+      case 'active':
+        return styles.statusActive;
+      case 'testing':
+        return styles.statusTesting;
+      default:
+        return styles.statusInactive;
+    }
+  };
+
   return (
-    <div style={{ 
-      padding: '5px',
-      color: 'white',
-      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
-      minHeight: '100vh',
-      backdropFilter: 'blur(10px)'
-    }}>
+    <div className={styles.container}>
       <PageHeader 
         title="Trading Strategies"
         subtitle="Manage and analyze your trading strategies"
@@ -182,18 +188,7 @@ export const Strategy = () => {
               setSelectedStrategy(null);
               setShowStrategyModal(true);
             }}
-            style={{
-              padding: '5px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-              color: '#60a5fa',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              transition: 'all 0.2s ease',
-            }}
+            className={styles.newStrategyButton}
           >
             <RiAddLine />
             New Strategy
@@ -202,137 +197,55 @@ export const Strategy = () => {
       />
 
       {/* Strategy Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
-        gap: '5px',
-        marginBottom: '5px' 
-      }}>
+      <div className={styles.grid}>
         {strategies.map((strategy) => (
-          <div
-            key={strategy.id}
-            style={{
-              backgroundColor: '#1e293b',
-              borderRadius: '12px',
-              padding: '5px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-              <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>{strategy.name}</h3>
-                <div style={{ 
-                  display: 'flex', 
-                  gap: '5px', 
-                  alignItems: 'center',
-                  color: '#94a3b8',
-                  fontSize: '14px'
-                }}>
-                  {strategy.type === 'hybrid' ? (
-                    <>
-                      <RiRobot2Line />
-                      <RiUserLine />
-                      <span>Hybrid</span>
-                    </>
-                  ) : strategy.type === 'algorithmic' ? (
-                    <>
-                      <RiRobot2Line />
-                      <span>Algorithmic</span>
-                    </>
-                  ) : (
-                    <>
-                      <RiUserLine />
-                      <span>Discretionary</span>
-                    </>
-                  )}
-                </div>
-              </div>
-              <div style={{
-                padding: '4px 8px',
-                borderRadius: '4px',
-                fontSize: '12px',
-                backgroundColor: strategy.status === 'active' ? 'rgba(34, 197, 94, 0.1)' : 
-                               strategy.status === 'testing' ? 'rgba(234, 179, 8, 0.1)' : 
-                               'rgba(239, 68, 68, 0.1)',
-                color: strategy.status === 'active' ? '#22c55e' :
-                       strategy.status === 'testing' ? '#eab308' :
-                       '#ef4444',
-              }}>
+          <div key={strategy.id} className={styles.strategyCard}>
+            <div className={styles.strategyHeader}>
+              <h3 className={styles.strategyTitle}>{strategy.name}</h3>
+              <div className={getStatusClass(strategy.status)}>
                 {strategy.status.charAt(0).toUpperCase() + strategy.status.slice(1)}
               </div>
             </div>
 
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(2, 1fr)', 
-              gap: '12px',
-              marginBottom: '16px'
-            }}>
+            <div className={styles.metricsGrid}>
               <div>
-                <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '2px' }}>Win Rate</div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{strategy.performance.winRate}</div>
+                <div className={styles.metricLabel}>Win Rate</div>
+                <div className={styles.metricValue}>{strategy.performance.winRate}</div>
               </div>
               <div>
-                <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '2px' }}>Profit Factor</div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{strategy.performance.profitFactor}</div>
+                <div className={styles.metricLabel}>Profit Factor</div>
+                <div className={styles.metricValue}>{strategy.performance.profitFactor}</div>
               </div>
               <div>
-                <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '2px' }}>Sharpe Ratio</div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{strategy.performance.sharpeRatio}</div>
+                <div className={styles.metricLabel}>Sharpe Ratio</div>
+                <div className={styles.metricValue}>{strategy.performance.sharpeRatio}</div>
               </div>
               <div>
-                <div style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '2px' }}>Max Drawdown</div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{strategy.performance.maxDrawdown}</div>
+                <div className={styles.metricLabel}>Max Drawdown</div>
+                <div className={styles.metricValue}>{strategy.performance.maxDrawdown}</div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            <div className={styles.actions}>
               <button 
                 onClick={() => handleEditStrategy(strategy)}
-                style={{
-                  padding: '8px',
-                  borderRadius: '6px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: 'none',
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
+                className={styles.editButton}
               >
                 <RiEditLine />
+                Edit
               </button>
               <button 
                 onClick={() => handleToggleStatus(strategy)}
-                style={{
-                  padding: '8px',
-                  borderRadius: '6px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: 'none',
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
+                className={styles.toggleButton}
               >
                 {strategy.status === 'active' ? <RiPauseLine /> : <RiPlayLine />}
               </button>
               <button 
                 onClick={() => handleDeleteStrategy(strategy.id)}
-                style={{
-                  padding: '8px',
-                  borderRadius: '6px',
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  border: 'none',
-                  color: '#ef4444',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
+                className={styles.deleteButton}
               >
                 <RiDeleteBinLine />
+                Delete
               </button>
             </div>
           </div>
@@ -340,12 +253,7 @@ export const Strategy = () => {
       </div>
 
       {/* Quick Actions */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '16px',
-        marginBottom: '24px',
-      }}>
+      <div className={styles.quickActions}>
         {[
           { icon: RiTestTubeLine, label: 'Backtest Strategy', color: '#2563eb' },
           { icon: RiFileChartLine, label: 'Performance Reports', color: '#22c55e' },
@@ -354,20 +262,9 @@ export const Strategy = () => {
         ].map((action, index) => (
           <button
             key={index}
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: `1px solid ${action.color}`,
-              borderRadius: '8px',
-              padding: '16px',
-              color: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              transition: 'all 0.2s ease',
-            }}
+            className={styles.quickActionButton}
           >
-            <action.icon style={{ color: action.color, fontSize: '20px' }} />
+            <action.icon className={styles.quickActionIcon} />
             <span>{action.label}</span>
           </button>
         ))}
