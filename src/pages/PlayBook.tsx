@@ -4,6 +4,7 @@ import { PageHeader } from '../components/PageHeader';
 import { useAuth } from '../context/AuthContext';
 import styles from './Playbook.module.css';
 import { AnimatedButton } from '../components/AnimatedButton';
+import { IconSelector } from '../components/IconSelector';
 
 interface Trade {
   id: string;
@@ -27,6 +28,7 @@ interface PlaybookSetup {
   notes: string;
   checklist: string[];
   trades: Trade[];
+  icon?: string;
   performance: {
     totalTrades: number;
     winRate: number;
@@ -45,6 +47,7 @@ interface AssetPlaybook {
   id: string;
   asset: string;
   description: string;
+  icon?: string;
   strategies: PlaybookSetup[];
   performance: {
     totalTrades: number;
@@ -174,6 +177,7 @@ const fetchStrategiesForPlaybook = async (playbookId: string) => {
       notes: '',
       checklist: [],
       trades: [],
+      icon: strategy.icon || undefined,
       performance: {
         totalTrades: strategy.performance_total_trades || 0,
         winRate: strategy.performance_win_rate || 0,
@@ -207,6 +211,7 @@ export const PlayBook: React.FC = () => {
     type: '',
     tags: '',
     description: '',
+    icon: '',
   });
   const [newStrategy, setNewStrategy] = useState({
     title: '',
@@ -268,9 +273,11 @@ export const PlayBook: React.FC = () => {
 
   const handleCreatePlaybook = async () => {
     try {
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
+      // Get the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error('No user found');
+
       console.log('Current user ID:', user.id);
       console.log('Inserting playbook with data:', {
         user_id: user.id,
@@ -349,9 +356,10 @@ export const PlayBook: React.FC = () => {
       }
 
       setShowCreateModal(false);
-      setNewPlaybook({ asset: '', title: '', type: '', tags: '', description: '' });
+      setNewPlaybook({ asset: '', title: '', type: '', tags: '', description: '', icon: '' });
     } catch (error) {
       console.error('Error creating playbook:', error);
+      alert('Failed to create playbook. Please try again.');
     }
   };
 
@@ -491,6 +499,46 @@ export const PlayBook: React.FC = () => {
     }
   };
 
+  const handleStrategyIconChange = async (strategyId: string, icon: string) => {
+    if (!selectedAsset) return;
+    
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error('No user found');
+
+      const { error } = await supabase
+        .from('strategies')
+        .update({
+          icon: icon,
+        })
+        .eq('id', strategyId);
+
+      if (error) throw error;
+
+      // Fetch the updated strategies for this playbook
+      const strategies = await fetchStrategiesForPlaybook(selectedAsset.asset);
+      
+      // Update the selected asset with the new strategies
+      const updatedSelectedAsset = {
+        ...selectedAsset,
+        strategies
+      };
+      
+      // Update the assets list with the new strategy
+      const updatedAssets = assets.map(asset => 
+        asset.id === selectedAsset.id ? updatedSelectedAsset : asset
+      );
+
+      setAssets(updatedAssets);
+      setSelectedAsset(updatedSelectedAsset);
+      setShowDeleteStrategyModal(false);
+      setStrategyToDelete(null);
+    } catch (error) {
+      console.error('Error changing strategy icon:', error);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <PageHeader 
@@ -527,7 +575,16 @@ export const PlayBook: React.FC = () => {
                   </button>
                 </div>
                 <div className={styles.cardContent}>
-                  <h3 className={styles.cardTitle}>{asset.asset}</h3>
+                  <div className={styles.cardHeader}>
+                    {asset.icon && (
+                      <img 
+                        src={asset.icon} 
+                        alt={`${asset.asset} icon`} 
+                        className={styles.cardIcon}
+                      />
+                    )}
+                    <h3 className={styles.cardTitle}>{asset.asset}</h3>
+                  </div>
                   <p className={styles.cardDescription}>{asset.description}</p>
                   <div className={styles.tagsContainer}>
                     {asset.strategies.map(strategy => (
@@ -596,14 +653,19 @@ export const PlayBook: React.FC = () => {
                     </button>
                   </div>
                   <div className={styles.cardContent}>
-                    <h3 className={styles.cardTitle}>{strategy.title}</h3>
+                    <div className={styles.cardHeader}>
+                      <div className={styles.strategyIcon}>
+                        <IconSelector
+                          selectedIcon={strategy.icon || 'trending-up'}
+                          onSelectIcon={(icon) => handleStrategyIconChange(strategy.id, icon)}
+                        />
+                      </div>
+                      <h3 className={styles.cardTitle}>{strategy.title}</h3>
+                    </div>
                     <p className={styles.cardDescription}>{strategy.description}</p>
                     <div className={styles.tagsContainer}>
-                      {strategy.tags.map(tag => (
-                        <span
-                          key={tag}
-                          className={styles.strategyTag}
-                        >
+                      {strategy.tags.map((tag, index) => (
+                        <span key={index} className={styles.tag}>
                           {tag}
                         </span>
                       ))}
@@ -614,7 +676,7 @@ export const PlayBook: React.FC = () => {
                         <div className={styles.performanceValueGreen}>{strategy.performance.winRate}%</div>
                       </div>
                       <div className={styles.performanceItem}>
-                        <span className={styles.performanceLabel}>Trades</span>
+                        <span className={styles.performanceLabel}>Total Trades</span>
                         <div className={styles.performanceValue}>{strategy.performance.totalTrades}</div>
                       </div>
                       <div className={styles.performanceItem}>
@@ -688,6 +750,13 @@ export const PlayBook: React.FC = () => {
                   placeholder="Describe your strategy..."
                 />
               </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Icon</label>
+                <IconSelector
+                  selectedIcon={newPlaybook.icon || 'trending-up'}
+                  onSelectIcon={(icon) => setNewPlaybook({ ...newPlaybook, icon })}
+                />
+              </div>
               <div className={styles.formActions}>
                 <button
                   onClick={() => setShowCreateModal(false)}
@@ -698,7 +767,8 @@ export const PlayBook: React.FC = () => {
                 <button
                   onClick={handleCreatePlaybook}
                   className={styles.primaryButton}
-                  disabled={!newPlaybook.asset.trim() || !newPlaybook.title.trim()}
+                  disabled={!newPlaybook.asset.trim()}
+                  title={!newPlaybook.asset.trim() ? "Please enter an asset name" : ""}
                 >
                   Create
                 </button>
