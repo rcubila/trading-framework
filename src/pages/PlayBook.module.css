@@ -1,12 +1,276 @@
+/* Main container styles */
 .container {
   padding: 5px;
+  color: white;
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%);
   min-height: 100vh;
   backdrop-filter: blur(10px);
 }
 
+.content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Button styles */
+.primaryButton {
+  padding: 0.5rem 1rem;
+  background-color: rgb(37, 99, 235);
+  color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.primaryButton:hover {
+  background-color: rgb(29, 78, 216);
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  padding: 0.5rem 1rem;
+  background-color: rgb(71, 85, 105);
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.secondaryButton:hover {
+  background-color: rgb(51, 65, 85);
+}
+
+.cancelButton {
+  padding: 0.5rem 1rem;
+  background-color: rgb(226, 232, 240);
+  color: rgb(51, 65, 85);
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: rgb(203, 213, 225);
+}
+
+/* Dark mode button styles */
+.container:global(.dark) .cancelButton {
+  background-color: rgb(51, 65, 85);
+  color: rgb(226, 232, 240);
+}
+
+.container:global(.dark) .cancelButton:hover {
+  background-color: rgb(71, 85, 105);
+}
+
+/* Grid layouts */
+.assetsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .assetsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .assetsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.strategiesGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .strategiesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .strategiesGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Card styles */
+.card {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.cardContent {
+  padding: 1.5rem;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.cardDescription {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1rem;
+}
+
+/* Tag styles */
+.tagsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.assetTag {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background: rgba(30, 41, 59, 0.4);
+  color: rgb(219, 234, 254);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.container:global(.dark) .assetTag {
+  background-color: rgb(30, 58, 138);
+  color: rgb(219, 234, 254);
+}
+
+.strategyTag {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background: rgba(30, 41, 59, 0.4);
+  color: rgb(203, 213, 225);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.container:global(.dark) .strategyTag {
+  background-color: rgb(51, 65, 85);
+  color: rgb(203, 213, 225);
+}
+
+/* Performance grid */
+.performanceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.performanceItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.performanceLabel {
+  color: rgb(148, 163, 184);
+}
+
+.performanceValue {
+  font-weight: 500;
+}
+
+.performanceValueGreen {
+  color: rgb(34, 197, 94);
+  font-weight: 500;
+}
+
+.performanceValueBlue {
+  color: rgb(59, 130, 246);
+  font-weight: 500;
+}
+
+.performanceValueRed {
+  color: rgb(239, 68, 68);
+  font-weight: 500;
+}
+
+/* Header styles */
+.strategyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+/* Modal styles */
 .modalOverlay {
   position: fixed;
   inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  width: 100%;
+  max-width: 28rem;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.container:global(.dark) .modal {
+  background-color: rgb(30, 41, 59);
+}
+
+.modalLarge {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  width: 100%;
+  max-width: 48rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.container:global(.dark) .modalLarge {
+  background-color: rgb(30, 41, 59);
+}
+
+.modalOverlayBlur {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -14,49 +278,377 @@
   z-index: 50;
 }
 
-.modalContent {
-  border-radius: 0.75rem;
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.modalLargeTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.modalSubtitle {
+  color: rgb(148, 163, 184);
+}
+
+/* Form styles */
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.formInput {
   width: 100%;
-  max-width: 48rem;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(15, 23, 42, 0.3);
+  color: white;
+}
+
+.container:global(.dark) .formInput {
+  border-color: rgb(71, 85, 105);
+  background-color: rgb(51, 65, 85);
+  color: white;
+}
+
+.formTextarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(15, 23, 42, 0.3);
+  color: white;
+  resize: vertical;
+}
+
+.container:global(.dark) .formTextarea {
+  border-color: rgb(71, 85, 105);
+  background-color: rgb(51, 65, 85);
+  color: white;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* Modal header */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.closeButton {
+  color: rgb(148, 163, 184);
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: rgb(51, 65, 85);
+}
+
+.container:global(.dark) .closeButton:hover {
+  color: white;
+}
+
+/* Tabs */
+.tabsContainer {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgb(226, 232, 240);
+}
+
+.container:global(.dark) .tabsContainer {
+  border-bottom-color: rgb(51, 65, 85);
+}
+
+.tab {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.tabActive {
+  border-bottom-color: rgb(59, 130, 246);
+  color: rgb(59, 130, 246);
+}
+
+.tabInactive {
+  color: rgb(100, 116, 139);
+}
+
+.tabInactive:hover {
+  color: rgb(96, 165, 250);
+}
+
+/* Tab content */
+.tabContent {
+  margin-top: 1rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: rgb(148, 163, 184);
+  margin-bottom: 0.25rem;
+}
+
+.statValue {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.statValueGreen {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(34, 197, 94);
+}
+
+.statValueRed {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(239, 68, 68);
+}
+
+/* Section styles */
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.sectionContent {
+  color: rgb(75, 85, 99);
+}
+
+.container:global(.dark) .sectionContent {
+  color: rgb(209, 213, 219);
+}
+
+/* Rules section */
+.rulesContainer {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rulesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.rulesHeaderText {
+  font-size: 0.875rem;
+  color: rgb(75, 85, 99);
+}
+
+.container:global(.dark) .rulesHeaderText {
+  color: rgb(156, 163, 175);
+}
+
+.rulesHeaderValue {
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .progressBar {
   width: 100%;
-  height: 0.5rem;
+  background-color: rgb(226, 232, 240);
   border-radius: 9999px;
+  height: 0.5rem;
+}
+
+.container:global(.dark) .progressBar {
+  background-color: rgb(51, 65, 85);
 }
 
 .progressBarFill {
+  background-color: rgb(34, 197, 94);
   height: 0.5rem;
   border-radius: 9999px;
-  width: 85%;
 }
 
-.darkModalContent {
-  background-color: rgb(30 41 59);
+.rulesFooter {
+  font-size: 0.875rem;
+  color: rgb(107, 114, 128);
+  margin-top: 0.5rem;
+}
+
+.container:global(.dark) .rulesFooter {
+  color: rgb(156, 163, 175);
+}
+
+/* Missed trades section */
+.missedTradesContainer {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.missedTradesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.missedTradesCount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(239, 68, 68);
+}
+
+.missedTradesLabel {
+  font-size: 0.875rem;
+  color: rgb(75, 85, 99);
+}
+
+.container:global(.dark) .missedTradesLabel {
+  color: rgb(156, 163, 175);
+}
+
+.missedTradesFooter {
+  font-size: 0.875rem;
+  color: rgb(107, 114, 128);
+  margin-top: 0.5rem;
+}
+
+.container:global(.dark) .missedTradesFooter {
+  color: rgb(156, 163, 175);
+}
+
+/* Rules list */
+.rulesList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ruleItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ruleInput {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
 }
 
-.darkProgressBar {
-  background-color: rgb(51 65 85);
+.deleteButton {
+  color: rgb(239, 68, 68);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: color 0.2s;
 }
 
-.strategyCard {
-  background-color: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  transition: all 0.2s ease-in-out;
+.deleteButton:hover {
+  color: rgb(185, 28, 28);
 }
 
-.darkStrategyCard {
-  background-color: rgb(30 41 59);
-  border-color: rgb(51 65 85);
+.addRuleContainer {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.addRuleInput {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
 }
 
-.strategyCard:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-} 
+.addButton {
+  padding: 0.5rem 0.75rem;
+  background-color: rgb(37, 99, 235);
+  color: white;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addButton:hover {
+  background-color: rgb(29, 78, 216);
+}
+
+.addButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Placeholder content */
+.placeholderContent {
+  color: rgb(71, 85, 105);
+}
+
+.container:global(.dark) .placeholderContent {
+  color: rgb(203, 213, 225);
+}
+
+.notesContent {
+  color: rgb(71, 85, 105);
+  white-space: pre-line;
+}
+
+.container:global(.dark) .notesContent {
+  color: rgb(203, 213, 225);
+}

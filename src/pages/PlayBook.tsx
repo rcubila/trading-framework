@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { PageHeader } from '../components/PageHeader';
 import { useAuth } from '../context/AuthContext';
+import styles from './Playbook.module.css';
 
 interface Trade {
   id: string;
@@ -421,20 +422,14 @@ export const PlayBook: React.FC = () => {
   };
 
   return (
-    <div style={{ 
-      padding: '5px',
-      color: 'white',
-      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
-      minHeight: '100vh',
-      backdropFilter: 'blur(10px)'
-    }}>
+    <div className={styles.container}>
       <PageHeader 
         title="PlayBook"
         subtitle="Manage and track your trading strategies"
         actions={
           !selectedAsset && (
             <button
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+              className={styles.primaryButton}
               onClick={() => setShowCreateModal(true)}
             >
               + New Playbook
@@ -443,45 +438,45 @@ export const PlayBook: React.FC = () => {
         }
       />
       
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className={styles.content}>
         {/* Asset View */}
         {!selectedAsset && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={styles.assetsGrid}>
             {assets.map(asset => (
               <div
                 key={asset.id}
-                className="bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700 cursor-pointer hover:shadow-lg transition relative"
+                className={styles.card}
                 onClick={() => setSelectedAsset(asset)}
               >
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">{asset.asset}</h3>
-                  <p className="text-sm text-slate-500 mb-4">{asset.description}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                <div className={styles.cardContent}>
+                  <h3 className={styles.cardTitle}>{asset.asset}</h3>
+                  <p className={styles.cardDescription}>{asset.description}</p>
+                  <div className={styles.tagsContainer}>
                     {asset.strategies.map(strategy => (
                       <span
                         key={strategy.id}
-                        className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-full"
+                        className={styles.assetTag}
                       >
                         {strategy.title}
                       </span>
                     ))}
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-slate-400">Win Rate</span>
-                      <div className="text-green-500 font-medium">{asset.performance.winRate}%</div>
+                  <div className={styles.performanceGrid}>
+                    <div className={styles.performanceItem}>
+                      <span className={styles.performanceLabel}>Win Rate</span>
+                      <div className={styles.performanceValueGreen}>{asset.performance.winRate}%</div>
                     </div>
-                    <div>
-                      <span className="text-slate-400">Total Trades</span>
-                      <div className="font-medium">{asset.performance.totalTrades}</div>
+                    <div className={styles.performanceItem}>
+                      <span className={styles.performanceLabel}>Total Trades</span>
+                      <div className={styles.performanceValue}>{asset.performance.totalTrades}</div>
                     </div>
-                    <div>
-                      <span className="text-slate-400">Avg R</span>
-                      <div className="text-blue-500 font-medium">{asset.performance.averageR.toFixed(2)}R</div>
+                    <div className={styles.performanceItem}>
+                      <span className={styles.performanceLabel}>Avg R</span>
+                      <div className={styles.performanceValueBlue}>{asset.performance.averageR.toFixed(2)}R</div>
                     </div>
-                    <div>
-                      <span className="text-slate-400">Net P&L</span>
-                      <div className="text-green-500 font-medium">${asset.performance.netPL.toLocaleString()}</div>
+                    <div className={styles.performanceItem}>
+                      <span className={styles.performanceLabel}>Net P&L</span>
+                      <div className={styles.performanceValueGreen}>${asset.performance.netPL.toLocaleString()}</div>
                     </div>
                   </div>
                 </div>
@@ -493,56 +488,56 @@ export const PlayBook: React.FC = () => {
         {/* Strategy View */}
         {selectedAsset && !selectedSetup && (
           <div>
-            <div className="flex items-center justify-between mb-6">
+            <div className={styles.strategyHeader}>
               <button
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                className={styles.primaryButton}
                 onClick={() => setShowCreateStrategyModal(true)}
               >
                 + New Strategy
               </button>
               <button
                 onClick={() => setSelectedAsset(null)}
-                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition"
+                className={styles.secondaryButton}
               >
                 ← Back to Assets
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={styles.strategiesGrid}>
               {selectedAsset.strategies.map(strategy => (
                 <div
                   key={strategy.id}
-                  className="bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700 cursor-pointer hover:shadow-lg transition relative"
+                  className={styles.card}
                   onClick={() => setSelectedSetup(strategy)}
                 >
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold mb-2">{strategy.title}</h3>
-                    <p className="text-sm text-slate-500 mb-4">{strategy.description}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
+                  <div className={styles.cardContent}>
+                    <h3 className={styles.cardTitle}>{strategy.title}</h3>
+                    <p className={styles.cardDescription}>{strategy.description}</p>
+                    <div className={styles.tagsContainer}>
                       {strategy.tags.map(tag => (
                         <span
                           key={tag}
-                          className="px-2 py-1 text-xs bg-slate-100 dark:bg-slate-700 rounded-full text-slate-600 dark:text-slate-300"
+                          className={styles.strategyTag}
                         >
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-slate-400">Win Rate</span>
-                        <div className="text-green-500 font-medium">{strategy.performance.winRate}%</div>
+                    <div className={styles.performanceGrid}>
+                      <div className={styles.performanceItem}>
+                        <span className={styles.performanceLabel}>Win Rate</span>
+                        <div className={styles.performanceValueGreen}>{strategy.performance.winRate}%</div>
                       </div>
-                      <div>
-                        <span className="text-slate-400">Trades</span>
-                        <div className="font-medium">{strategy.performance.totalTrades}</div>
+                      <div className={styles.performanceItem}>
+                        <span className={styles.performanceLabel}>Trades</span>
+                        <div className={styles.performanceValue}>{strategy.performance.totalTrades}</div>
                       </div>
-                      <div>
-                        <span className="text-slate-400">Avg R</span>
-                        <div className="text-blue-500 font-medium">{strategy.performance.averageR.toFixed(2)}R</div>
+                      <div className={styles.performanceItem}>
+                        <span className={styles.performanceLabel}>Avg R</span>
+                        <div className={styles.performanceValueBlue}>{strategy.performance.averageR.toFixed(2)}R</div>
                       </div>
-                      <div>
-                        <span className="text-slate-400">Net P&L</span>
-                        <div className="text-green-500 font-medium">${strategy.performance.netPL.toLocaleString()}</div>
+                      <div className={styles.performanceItem}>
+                        <span className={styles.performanceLabel}>Net P&L</span>
+                        <div className={styles.performanceValueGreen}>${strategy.performance.netPL.toLocaleString()}</div>
                       </div>
                     </div>
                   </div>
@@ -554,71 +549,69 @@ export const PlayBook: React.FC = () => {
 
         {/* Create Playbook Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md p-8">
-              <h2 className="text-xl font-bold mb-4">New Playbook</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Asset</label>
-                  <input
-                    type="text"
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 bg-slate-50 dark:bg-slate-700"
-                    value={newPlaybook.asset}
-                    onChange={e => setNewPlaybook({ ...newPlaybook, asset: e.target.value })}
-                    placeholder="e.g., GER40, GOLD, etc."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Strategy Title</label>
-                  <input
-                    type="text"
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 bg-slate-50 dark:bg-slate-700"
-                    value={newPlaybook.title}
-                    onChange={e => setNewPlaybook({ ...newPlaybook, title: e.target.value })}
-                    placeholder="e.g., Morning Breakout, Range Trading"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Type</label>
-                  <input
-                    type="text"
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 bg-slate-50 dark:bg-slate-700"
-                    value={newPlaybook.type}
-                    onChange={e => setNewPlaybook({ ...newPlaybook, type: e.target.value })}
-                    placeholder="e.g., Breakout, Range, Trend"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Tags (comma separated)</label>
-                  <input
-                    type="text"
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 bg-slate-50 dark:bg-slate-700"
-                    value={newPlaybook.tags}
-                    onChange={e => setNewPlaybook({ ...newPlaybook, tags: e.target.value })}
-                    placeholder="e.g., morning session, gap-up, range"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Description</label>
-                  <textarea
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 bg-slate-50 dark:bg-slate-700"
-                    rows={3}
-                    value={newPlaybook.description}
-                    onChange={e => setNewPlaybook({ ...newPlaybook, description: e.target.value })}
-                    placeholder="Describe your strategy..."
-                  />
-                </div>
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <h2 className={styles.modalTitle}>New Playbook</h2>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Asset</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={newPlaybook.asset}
+                  onChange={e => setNewPlaybook({ ...newPlaybook, asset: e.target.value })}
+                  placeholder="e.g., GER40, GOLD, etc."
+                />
               </div>
-              <div className="flex justify-end gap-3 mt-6">
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Strategy Title</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={newPlaybook.title}
+                  onChange={e => setNewPlaybook({ ...newPlaybook, title: e.target.value })}
+                  placeholder="e.g., Morning Breakout, Range Trading"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Type</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={newPlaybook.type}
+                  onChange={e => setNewPlaybook({ ...newPlaybook, type: e.target.value })}
+                  placeholder="e.g., Breakout, Range, Trend"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Tags (comma separated)</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={newPlaybook.tags}
+                  onChange={e => setNewPlaybook({ ...newPlaybook, tags: e.target.value })}
+                  placeholder="e.g., morning session, gap-up, range"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Description</label>
+                <textarea
+                  className={styles.formTextarea}
+                  rows={3}
+                  value={newPlaybook.description}
+                  onChange={e => setNewPlaybook({ ...newPlaybook, description: e.target.value })}
+                  placeholder="Describe your strategy..."
+                />
+              </div>
+              <div className={styles.formActions}>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600"
+                  className={styles.cancelButton}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreatePlaybook}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className={styles.primaryButton}
                   disabled={!newPlaybook.asset.trim() || !newPlaybook.title.trim()}
                 >
                   Create
@@ -630,61 +623,59 @@ export const PlayBook: React.FC = () => {
 
         {/* Create Strategy Modal */}
         {showCreateStrategyModal && selectedAsset && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md p-8">
-              <h2 className="text-xl font-bold mb-4">New Strategy for {selectedAsset.asset}</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Strategy Title</label>
-                  <input
-                    type="text"
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 bg-slate-50 dark:bg-slate-700"
-                    value={newStrategy.title}
-                    onChange={e => setNewStrategy({ ...newStrategy, title: e.target.value })}
-                    placeholder="e.g., Morning Breakout, Range Trading"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Type</label>
-                  <input
-                    type="text"
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 bg-slate-50 dark:bg-slate-700"
-                    value={newStrategy.type}
-                    onChange={e => setNewStrategy({ ...newStrategy, type: e.target.value })}
-                    placeholder="e.g., Breakout, Range, Trend"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Tags (comma separated)</label>
-                  <input
-                    type="text"
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 bg-slate-50 dark:bg-slate-700"
-                    value={newStrategy.tags}
-                    onChange={e => setNewStrategy({ ...newStrategy, tags: e.target.value })}
-                    placeholder="e.g., morning session, gap-up, range"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Description</label>
-                  <textarea
-                    className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2 bg-slate-50 dark:bg-slate-700"
-                    rows={3}
-                    value={newStrategy.description}
-                    onChange={e => setNewStrategy({ ...newStrategy, description: e.target.value })}
-                    placeholder="Describe your strategy..."
-                  />
-                </div>
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <h2 className={styles.modalTitle}>New Strategy for {selectedAsset.asset}</h2>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Strategy Title</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={newStrategy.title}
+                  onChange={e => setNewStrategy({ ...newStrategy, title: e.target.value })}
+                  placeholder="e.g., Morning Breakout, Range Trading"
+                />
               </div>
-              <div className="flex justify-end gap-3 mt-6">
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Type</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={newStrategy.type}
+                  onChange={e => setNewStrategy({ ...newStrategy, type: e.target.value })}
+                  placeholder="e.g., Breakout, Range, Trend"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Tags (comma separated)</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={newStrategy.tags}
+                  onChange={e => setNewStrategy({ ...newStrategy, tags: e.target.value })}
+                  placeholder="e.g., morning session, gap-up, range"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Description</label>
+                <textarea
+                  className={styles.formTextarea}
+                  rows={3}
+                  value={newStrategy.description}
+                  onChange={e => setNewStrategy({ ...newStrategy, description: e.target.value })}
+                  placeholder="Describe your strategy..."
+                />
+              </div>
+              <div className={styles.formActions}>
                 <button
                   onClick={() => setShowCreateStrategyModal(false)}
-                  className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600"
+                  className={styles.cancelButton}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreateStrategy}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className={styles.primaryButton}
                   disabled={!newStrategy.title.trim()}
                 >
                   Create Strategy
@@ -696,27 +687,31 @@ export const PlayBook: React.FC = () => {
 
         {/* Playbook Detail Modal */}
         {selectedSetup && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-8">
-              <div className="flex justify-between items-center mb-6">
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalLarge}>
+              <div className={styles.modalHeader}>
                 <div>
-                  <h2 className="text-2xl font-bold mb-1">{selectedSetup.title}</h2>
-                  <p className="text-slate-400">{selectedSetup.type}</p>
+                  <h2 className={styles.modalLargeTitle}>{selectedSetup.title}</h2>
+                  <p className={styles.modalSubtitle}>{selectedSetup.type}</p>
                 </div>
                 <button
                   onClick={() => setSelectedSetup(null)}
-                  className="text-slate-400 hover:text-slate-700 dark:hover:text-white text-2xl"
+                  className={styles.closeButton}
                   aria-label="Close"
                 >
                   &times;
                 </button>
               </div>
               {/* Tabs */}
-              <div className="flex gap-2 mb-4 border-b border-slate-200 dark:border-slate-700">
+              <div className={styles.tabsContainer}>
                 {['Overview', 'Playbook Rules', 'Executed Trades', 'Missed Trades', 'Notes'].map(tab => (
                   <button
                     key={tab}
-                    className={`px-4 py-2 font-medium border-b-2 transition-colors duration-200 ${activeTab === tab ? 'border-blue-500 text-blue-500' : 'border-transparent text-slate-500 hover:text-blue-400'}`}
+                    className={`${styles.tab} ${
+                      activeTab === tab
+                        ? styles.tabActive
+                        : styles.tabInactive
+                    }`}
                     onClick={() => setActiveTab(tab)}
                   >
                     {tab}
@@ -724,94 +719,104 @@ export const PlayBook: React.FC = () => {
                 ))}
               </div>
               {/* Tab Content */}
-              <div>
+              <div className={styles.tabContent}>
                 {activeTab === 'Overview' && (
-                  <div className="space-y-6">
+                  <div>
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 mb-1">Net P&L</span>
-                        <span className="text-lg font-semibold text-green-500">${selectedSetup.performance.netPL.toLocaleString()}</span>
+                    <div className={styles.statsGrid}>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>Net P&L</span>
+                        <span className={styles.statValueGreen}>
+                          ${selectedSetup.performance.netPL.toLocaleString()}
+                        </span>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 mb-1">Trades</span>
-                        <span className="text-lg font-semibold">{selectedSetup.performance.totalTrades}</span>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>Trades</span>
+                        <span className={styles.statValue}>{selectedSetup.performance.totalTrades}</span>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 mb-1">Win Rate %</span>
-                        <span className="text-lg font-semibold">{selectedSetup.performance.winRate}%</span>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>Win Rate %</span>
+                        <span className={styles.statValue}>{selectedSetup.performance.winRate}%</span>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 mb-1">Profit Factor</span>
-                        <span className="text-lg font-semibold">{selectedSetup.performance.profitFactor.toFixed(2)}</span>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>Profit Factor</span>
+                        <span className={styles.statValue}>{selectedSetup.performance.profitFactor.toFixed(2)}</span>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 mb-1">Expectancy</span>
-                        <span className="text-lg font-semibold">{selectedSetup.performance.expectancy.toFixed(2)}</span>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>Expectancy</span>
+                        <span className={styles.statValue}>{selectedSetup.performance.expectancy.toFixed(2)}</span>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 mb-1">Average Winner</span>
-                        <span className="text-lg font-semibold">${selectedSetup.performance.averageWin.toLocaleString()}</span>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>Average Winner</span>
+                        <span className={styles.statValueGreen}>
+                          ${selectedSetup.performance.averageWin.toLocaleString()}
+                        </span>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 mb-1">Average Loser</span>
-                        <span className="text-lg font-semibold text-red-500">-${Math.abs(selectedSetup.performance.averageLoss).toLocaleString()}</span>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>Average Loser</span>
+                        <span className={styles.statValueRed}>
+                          -${Math.abs(selectedSetup.performance.averageLoss).toLocaleString()}
+                        </span>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 mb-1">Largest Profit</span>
-                        <span className="text-lg font-semibold">${selectedSetup.performance.largestWin.toLocaleString()}</span>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>Largest Profit</span>
+                        <span className={styles.statValueGreen}>
+                          ${selectedSetup.performance.largestWin.toLocaleString()}
+                        </span>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 mb-1">Largest Loss</span>
-                        <span className="text-lg font-semibold text-red-500">-${Math.abs(selectedSetup.performance.largestLoss).toLocaleString()}</span>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>Largest Loss</span>
+                        <span className={styles.statValueRed}>
+                          -${Math.abs(selectedSetup.performance.largestLoss).toLocaleString()}
+                        </span>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 mb-1">Total R Multiple</span>
-                        <span className="text-lg font-semibold">{selectedSetup.performance.averageR.toFixed(2)}</span>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>Total R Multiple</span>
+                        <span className={styles.statValue}>{selectedSetup.performance.averageR.toFixed(2)}</span>
                       </div>
                     </div>
 
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">Description</h3>
-                      <p className="text-gray-600 dark:text-gray-300">{selectedSetup.description}</p>
+                    <div className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Description</h3>
+                      <p className={styles.sectionContent}>{selectedSetup.description}</p>
                     </div>
                     
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">Rules Followed</h3>
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">Rules Compliance</span>
-                          <span className="text-sm font-medium">85%</span>
+                    <div className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Rules Followed</h3>
+                      <div className={styles.rulesContainer}>
+                        <div className={styles.rulesHeader}>
+                          <span className={styles.rulesHeaderText}>Rules Compliance</span>
+                          <span className={styles.rulesHeaderValue}>85%</span>
                         </div>
-                        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                          <div className="bg-green-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                        <div className={styles.progressBar}>
+                          <div className={styles.progressBarFill}></div>
                         </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                        <p className={styles.rulesFooter}>
                           {selectedSetup.checklist.length} rules in total
                         </p>
                       </div>
                     </div>
 
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">Missed Trades</h3>
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-2xl font-bold text-red-500">3</span>
-                          <span className="text-sm text-gray-600 dark:text-gray-400">missed opportunities</span>
+                    <div className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Missed Trades</h3>
+                      <div className={styles.missedTradesContainer}>
+                        <div className={styles.missedTradesHeader}>
+                          <span className={styles.missedTradesCount}>3</span>
+                          <span className={styles.missedTradesLabel}>missed opportunities</span>
                         </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                        <p className={styles.missedTradesFooter}>
                           Last missed trade: 2 days ago
                         </p>
                       </div>
                     </div>
 
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">Tags</h3>
-                      <div className="flex flex-wrap gap-2">
+                    <div className={styles.section}>
+                      <h3 className={styles.sectionTitle}>Tags</h3>
+                      <div className={styles.tagsContainer}>
                         {selectedSetup.tags.map((tag, index) => (
                           <span
                             key={index}
-                            className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-full text-sm"
+                            className={styles.assetTag}
                           >
                             {tag}
                           </span>
@@ -821,13 +826,13 @@ export const PlayBook: React.FC = () => {
                   </div>
                 )}
                 {activeTab === 'Playbook Rules' && (
-                  <div className="space-y-4">
-                    <ul className="space-y-2">
+                  <div className={styles.section}>
+                    <ul className={styles.rulesList}>
                       {selectedSetup.checklist.map((rule, idx) => (
-                        <li key={idx} className="flex items-center gap-2">
+                        <li key={idx} className={styles.ruleItem}>
                           <input
                             type="text"
-                            className="flex-1 bg-slate-100 dark:bg-slate-700 rounded p-2"
+                            className={styles.ruleInput}
                             value={rule}
                             onChange={e => {
                               const updated = [...selectedSetup.checklist];
@@ -836,7 +841,7 @@ export const PlayBook: React.FC = () => {
                             }}
                           />
                           <button
-                            className="text-red-500 hover:text-red-700"
+                            className={styles.deleteButton}
                             onClick={() => {
                               const updated = selectedSetup.checklist.filter((_, i) => i !== idx);
                               setSelectedSetup({ ...selectedSetup, checklist: updated });
@@ -848,10 +853,10 @@ export const PlayBook: React.FC = () => {
                         </li>
                       ))}
                     </ul>
-                    <div className="flex gap-2 mt-2">
+                    <div className={styles.addRuleContainer}>
                       <input
                         type="text"
-                        className="flex-1 bg-slate-100 dark:bg-slate-700 rounded p-2"
+                        className={styles.addRuleInput}
                         placeholder="Add new rule..."
                         value={newRuleInput}
                         onChange={e => setNewRuleInput(e.target.value)}
@@ -866,7 +871,7 @@ export const PlayBook: React.FC = () => {
                         }}
                       />
                       <button
-                        className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        className={styles.addButton}
                         onClick={() => {
                           if (newRuleInput.trim()) {
                             setSelectedSetup({
@@ -884,13 +889,19 @@ export const PlayBook: React.FC = () => {
                   </div>
                 )}
                 {activeTab === 'Executed Trades' && (
-                  <div className="text-slate-600 dark:text-slate-300">[Executed Trades Table]</div>
+                  <div className={styles.placeholderContent}>
+                    [Executed Trades Table]
+                  </div>
                 )}
                 {activeTab === 'Missed Trades' && (
-                  <div className="text-slate-600 dark:text-slate-300">[Missed Trades Table]</div>
+                  <div className={styles.placeholderContent}>
+                    [Missed Trades Table]
+                  </div>
                 )}
                 {activeTab === 'Notes' && (
-                  <div className="text-slate-600 dark:text-slate-300 whitespace-pre-line">{selectedSetup.notes}</div>
+                  <div className={styles.notesContent}>
+                    {selectedSetup.notes}
+                  </div>
                 )}
               </div>
             </div>
