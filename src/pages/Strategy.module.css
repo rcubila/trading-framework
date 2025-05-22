@@ -1,0 +1,184 @@
+.container {
+  display: grid;
+  gap: 24px;
+  padding: 5px;
+  color: white;
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%);
+  min-height: 100vh;
+  backdrop-filter: blur(10px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.strategyCard {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.strategyHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.strategyTitle {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.strategyType {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.statusBadge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.statusActive {
+  composes: statusBadge;
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.statusTesting {
+  composes: statusBadge;
+  background-color: rgba(234, 179, 8, 0.1);
+  color: #eab308;
+}
+
+.statusInactive {
+  composes: statusBadge;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.metricLabel {
+  color: #94a3b8;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.metricValue {
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+}
+
+.description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.actionButton {
+  padding: 8px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.editButton {
+  composes: actionButton;
+}
+
+.editButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.toggleButton {
+  composes: actionButton;
+}
+
+.toggleButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.deleteButton {
+  composes: actionButton;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.deleteButton:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.quickActionButton {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  padding: 16px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.quickActionButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.quickActionIcon {
+  font-size: 20px;
+  color: var(--color-primary);
+}
+
+.newStrategyButton {
+  padding: 5px;
+  border-radius: 12px;
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.newStrategyButton:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+} 
