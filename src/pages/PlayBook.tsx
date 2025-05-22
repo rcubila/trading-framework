@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { PageHeader } from '../components/PageHeader';
 import { useAuth } from '../context/AuthContext';
 import styles from './Playbook.module.css';
+import { AnimatedButton } from '../components/AnimatedButton';
 
 interface Trade {
   id: string;
