@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { AnimatedButton } from '../components/AnimatedButton';
+import { FaGithub } from 'react-icons/fa';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -48,6 +50,11 @@ const Login = () => {
     } catch (err) {
       console.error('Google login failed:', err);
     }
+  };
+
+  const handleGithubLogin = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Implementation for GitHub login
   };
 
   return (
@@ -135,19 +142,14 @@ const Login = () => {
             </div>
 
             {/* Login Button */}
-            <button
+            <AnimatedButton
               type="submit"
-              disabled={loading}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-3 flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="primary"
+              className="w-full"
+              isLoading={loading}
             >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <>
-                  <span>Sign In</span>
-                </>
-              )}
-            </button>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </AnimatedButton>
           </form>
 
           {/* Divider */}
@@ -161,27 +163,28 @@ const Login = () => {
           </div>
 
           {/* Social Login Buttons */}
-          <div className="space-y-3">
+          <div className="mt-4 space-y-3">
             {/* Google Login Button */}
-            <button
+            <AnimatedButton
               type="button"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              className="w-full bg-white hover:bg-gray-100 text-gray-800 rounded-lg py-3 flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="secondary"
+              className="w-full"
+              onClick={(e) => handleGoogleLogin(e)}
+              icon={<FcGoogle className="w-5 h-5" />}
             >
-              <FcGoogle className="w-5 h-5" />
-              <span>Continue with Google</span>
-            </button>
+              Continue with Google
+            </AnimatedButton>
 
             {/* GitHub Login Button */}
-            <button
+            <AnimatedButton
               type="button"
-              disabled={loading}
-              className="w-full bg-gray-700 hover:bg-gray-600 text-white rounded-lg py-3 flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="secondary"
+              className="w-full"
+              onClick={(e) => handleGithubLogin(e)}
+              icon={<FaGithub className="w-5 h-5" />}
             >
-              <FiGithub className="w-5 h-5" />
-              <span>Continue with GitHub</span>
-            </button>
+              Continue with GitHub
+            </AnimatedButton>
           </div>
 
           {/* Sign Up Link */}

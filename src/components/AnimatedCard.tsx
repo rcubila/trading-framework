@@ -1,54 +1,37 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
+import styles from '../styles/AnimatedCard.module.css';
 
 interface AnimatedCardProps {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick?: () => void;
   className?: string;
   isInteractive?: boolean;
-  initialScale?: number;
-  hoverScale?: number;
-  tapScale?: number;
 }
 
-export const AnimatedCard: React.FC<AnimatedCardProps> = ({
+export const AnimatedCard = ({
   children,
   onClick,
   className = '',
-  isInteractive = false,
-  initialScale = 1,
-  hoverScale = 1.02,
-  tapScale = 0.98,
-}) => {
-  const baseStyles = {
-    background: 'rgba(255, 255, 255, 0.05)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '16px',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    padding: '20px',
-    transition: 'all 0.2s ease',
-  };
-
-  const interactiveStyles = isInteractive ? {
-    cursor: 'pointer',
-    '&:hover': {
-      background: 'rgba(255, 255, 255, 0.08)',
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-    },
-  } : {};
+  isInteractive = true,
+}: AnimatedCardProps) => {
+  const baseClasses = `${styles.card} ${className}`;
+  
+  if (!isInteractive) {
+    return <div className={baseClasses}>{children}</div>;
+  }
 
   return (
     <motion.div
-      initial={{ scale: initialScale, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      whileHover={isInteractive ? { scale: hoverScale } : undefined}
-      whileTap={isInteractive ? { scale: tapScale } : undefined}
-      style={{
-        ...baseStyles,
-        ...interactiveStyles,
-      }}
+      className={baseClasses}
       onClick={onClick}
-      className={className}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{
+        type: 'spring',
+        stiffness: 400,
+        damping: 17,
+      }}
     >
       {children}
     </motion.div>

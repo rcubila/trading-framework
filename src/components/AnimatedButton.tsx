@@ -1,77 +1,42 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import type { ReactNode, MouseEvent } from 'react';
+import styles from '../styles/AnimatedButton.module.css';
 
-interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  icon?: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'danger';
+interface AnimatedButtonProps {
+  children: ReactNode;
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+  variant?: 'primary' | 'secondary' | 'danger' | 'icon';
+  icon?: ReactNode;
   isLoading?: boolean;
+  disabled?: boolean;
+  className?: string;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
   children,
-  icon,
+  onClick,
   variant = 'primary',
+  icon,
   isLoading = false,
-  ...props
+  disabled = false,
+  className = '',
+  type = 'button',
 }) => {
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'primary':
-        return {
-          background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-          color: 'white',
-          border: 'none',
-        };
-      case 'secondary':
-        return {
-          background: 'rgba(59, 130, 246, 0.1)',
-          color: '#60a5fa',
-          border: '1px solid rgba(59, 130, 246, 0.2)',
-        };
-      case 'danger':
-        return {
-          background: 'rgba(239, 68, 68, 0.1)',
-          color: '#ef4444',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
-        };
-    }
-  };
-
   return (
     <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      style={{
-        padding: '8px 16px',
-        borderRadius: '12px',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        transition: 'all 0.2s ease',
-        ...getVariantStyles(),
-        ...props.style,
-      }}
-      onMouseEnter={(e) => {
-        if (variant === 'secondary') {
-          e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (variant === 'secondary') {
-          e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-          e.currentTarget.style.boxShadow = 'none';
-        }
-      }}
-      disabled={isLoading || props.disabled}
-      {...props}
+      type={type}
+      onClick={onClick}
+      disabled={disabled || isLoading}
+      className={`${styles.button} ${styles[variant]} ${className}`}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
     >
       {isLoading ? (
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        >
+        <div className={styles.loadingSpinner}>
           <svg
             className="animate-spin"
             width="16"
@@ -94,16 +59,13 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
               strokeLinecap="round"
             />
           </svg>
-        </motion.div>
-      ) : icon ? (
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          {icon}
-        </motion.div>
-      ) : null}
-      {children}
+        </div>
+      ) : (
+        <>
+          {icon && <span className={styles.icon}>{icon}</span>}
+          {children}
+        </>
+      )}
     </motion.button>
   );
 }; 

@@ -37,6 +37,7 @@ import {
 } from 'chart.js';
 import { supabase } from '../lib/supabase';
 import { PageHeader } from '../components/PageHeader';
+import { AnimatedButton } from '../components/AnimatedButton';
 
 ChartJS.register(
   CategoryScale,

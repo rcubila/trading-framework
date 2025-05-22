@@ -1,0 +1,25 @@
+.actionButton {
+  @apply w-full;
+}
+
+.viewButton {
+  @apply w-full;
+}
+
+.periodButton {
+  @apply w-full;
+}
+
+.filterButton {
+  @apply w-full;
+}
+
+.selected {
+  @apply bg-blue-500 text-white;
+}
+
+/* Remove old button styles that are no longer needed */
+/* .actionButton, .viewButton, .periodButton, .filterButton {
+  @apply px-4 py-2 rounded-lg font-medium text-sm;
+  @apply transition-all duration-200;
+} */ 
