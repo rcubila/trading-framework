@@ -449,6 +449,28 @@ export const PlayBook: React.FC = () => {
                 className={styles.card}
                 onClick={() => setSelectedAsset(asset)}
               >
+                <div className={styles.cardActions}>
+                  <button
+                    className={styles.deleteButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (window.confirm(`Are you sure you want to delete ${asset.asset} and all its strategies?`)) {
+                        handleDeletePlaybook(asset.id);
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
+                  <button
+                    className={styles.editButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // TODO: Implement edit functionality
+                    }}
+                  >
+                    Edit
+                  </button>
+                </div>
                 <div className={styles.cardContent}>
                   <h3 className={styles.cardTitle}>{asset.asset}</h3>
                   <p className={styles.cardDescription}>{asset.description}</p>
