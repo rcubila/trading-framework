@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Trade } from '../types/trade';
+import styles from './TradeChart.module.css';
 
 declare global {
   interface Window {
@@ -172,78 +173,28 @@ export const TradeChart = ({ trade, theme = 'dark' }: TradeChartProps) => {
   }, [trade.id, trade.symbol, trade.timeframe, theme, containerHeight]);
 
   return (
-    <div style={{
-      position: 'relative',
-      width: '100%',
-      height: containerHeight,
-      background: theme === 'dark' ? "#131722" : "#ffffff",
-      borderRadius: '12px',
-      overflow: 'hidden',
-    }}>
+    <div 
+      className={styles.container}
+      data-theme={theme}
+      style={{ '--container-height': containerHeight } as React.CSSProperties}
+    >
       <div 
         ref={containerRef}
-        style={{
-          height: containerHeight,
-          width: '100%',
-        }}
+        className={styles.chartContainer}
       />
       {isLoading && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: theme === 'dark' ? "#131722" : "#ffffff",
-          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
-          zIndex: 10,
-        }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '12px'
-          }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              border: `3px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
-              borderTop: `3px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'}`,
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-            }} />
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingContent}>
+            <div className={styles.spinner} />
             <div>Loading chart...</div>
           </div>
         </div>
       )}
       {error && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: theme === 'dark' ? "#131722" : "#ffffff",
-          color: theme === 'dark' ? '#ef4444' : '#dc2626',
-          zIndex: 10,
-        }}>
+        <div className={styles.errorOverlay}>
           {error}
         </div>
       )}
-      <style>
-        {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}
-      </style>
     </div>
   );
 }; 
