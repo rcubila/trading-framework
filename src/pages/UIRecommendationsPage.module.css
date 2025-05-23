@@ -1,0 +1,99 @@
+.container {
+  padding: 5px;
+  color: white;
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%);
+  min-height: 100vh;
+  backdrop-filter: blur(10px);
+}
+
+.content {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.card {
+  background: rgba(31, 41, 55, 0.6);
+  border: 1px solid rgba(75, 85, 99, 1);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.recommendationItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.recommendationContent {
+  flex: 1;
+}
+
+.recommendationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.recommendationTitle {
+  font-weight: 500;
+  color: white;
+}
+
+.recommendationDescription {
+  color: rgba(156, 163, 175, 1);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.badgeImplemented,
+.badgePending,
+.badgeInProgress {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+  border-width: 1px;
+}
+
+.badgeImplemented {
+  background-color: rgba(22, 163, 74, 0.3);
+  color: #4ade80;
+  border-color: #16a34a;
+}
+
+.badgePending {
+  background-color: rgba(234, 179, 8, 0.3);
+  color: #facc15;
+  border-color: #ca8a04;
+}
+
+.badgeInProgress {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  border-color: #2563eb;
+} 

@@ -920,15 +920,8 @@ const Dashboard = () => {
         <div className={styles.filterControls}>
           <div className={styles.filterControlsInner}>
             {/* Date Range Filter */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <select style={{
-                padding: '8px 12px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                cursor: 'pointer'
-              }}>
+            <div className={styles.filterGroup}>
+              <select className={styles.filterSelect}>
                 <option value="1D">Today</option>
                 <option value="1W">This Week</option>
                 <option value="1M">This Month</option>
@@ -940,24 +933,10 @@ const Dashboard = () => {
             </div>
 
             {/* Strategy Filter */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <div style={{ position: 'relative' }}>
+            <div className={styles.filterGroup}>
+              <div>
                 <select 
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: 'white',
-                    cursor: 'pointer',
-                    minWidth: '200px',
-                    appearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 8px center',
-                    backgroundSize: '16px',
-                    paddingRight: '32px'
-                  }}
+                  className={styles.filterSelectWide}
                   value={selectedStrategy}
                   onChange={(e) => setSelectedStrategy(e.target.value)}
                 >
@@ -966,21 +945,13 @@ const Dashboard = () => {
                     <optgroup 
                       key={asset} 
                       label={asset}
-                      style={{
-                        backgroundColor: 'rgba(31, 41, 55, 0.95)',
-                        color: 'white',
-                        fontWeight: 'bold'
-                      }}
+                      className={styles.filterOptionGroup}
                     >
                       {strategies.map(strategy => (
                         <option 
                           key={strategy.id} 
                           value={strategy.id}
-                          style={{
-                            paddingLeft: '16px',
-                            backgroundColor: 'rgba(31, 41, 55, 0.95)',
-                            color: 'rgba(255, 255, 255, 0.8)'
-                          }}
+                          className={styles.filterOption}
                         >
                           {strategy.name}
                         </option>
@@ -992,123 +963,39 @@ const Dashboard = () => {
             </div>
 
             {/* Symbol Filter */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div className={styles.filterGroup}>
               <input
                 type="text"
                 placeholder="Filter by symbol..."
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: 'white',
-                  width: '150px'
-                }}
+                className={styles.filterInput}
               />
             </div>
 
             {/* Trade Direction Filter */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <select style={{
-                padding: '8px 12px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                cursor: 'pointer'
-              }}>
-                <option value="ALL">All Directions</option>
-                <option value="LONG">Long Only</option>
-                <option value="SHORT">Short Only</option>
+            <div className={styles.filterGroup}>
+              <select className={styles.filterSelect}>
+                <option value="ALL">All Trades</option>
+                <option value="LONG">Long</option>
+                <option value="SHORT">Short</option>
               </select>
             </div>
-
-            {/* Session Filter */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <select style={{
-                padding: '8px 12px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                cursor: 'pointer'
-              }}>
-                <option value="ALL">All Sessions</option>
-                <option value="LONDON">London</option>
-                <option value="NY">New York</option>
-                <option value="ASIA">Asia</option>
-              </select>
-            </div>
-
-            {/* Tags Filter */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <select style={{
-                padding: '8px 12px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                cursor: 'pointer'
-              }}>
-                <option value="ALL">All Tags</option>
-                <option value="OVERTRADED">Overtraded</option>
-                <option value="NEWS">News-based</option>
-                <option value="DISCIPLINE_BREACH">Discipline Breach</option>
-              </select>
-            </div>
-
-            {/* Reset Filters Button */}
-            <button className={styles.filterButton}>
-              <Upload />
-              Reset Filters
-            </button>
           </div>
         </div>
 
         {/* Key Metrics Row */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '8px',
-          marginBottom: '16px'
-        }}>
+        <div className={styles.metricsGrid}>
           {/* Total Net P/L */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            padding: '12px',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              marginBottom: '4px'
-            }}>
-              <h3 style={{ 
-                fontSize: '12px', 
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontWeight: 'normal'
-              }}>
-                Total Net P/L
-              </h3>
-              <button style={{
-                padding: '2px 6px',
-                borderRadius: '4px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'rgba(255, 255, 255, 0.6)',
-                cursor: 'pointer',
-                fontSize: '11px'
-              }}>
+          <div className={styles.metricCard}>
+            <div className={styles.metricHeader}>
+              <h3 className={styles.metricTitle}>Total Net P/L</h3>
+              <button 
+                className={styles.metricToggle}
+                onClick={() => setShowPercentage(!showPercentage)}
+              >
                 {showPercentage ? '%' : '$'}
               </button>
             </div>
-            <div style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold',
-              color: totalPnL >= 0 ? '#22c55e' : '#ef4444'
-            }}>
+            <div className={`${styles.metricValue} ${totalPnL >= 0 ? styles.metricValuePositive : styles.metricValueNegative}`}>
               {showPercentage 
                 ? `${((totalPnL / initialBalance) * 100).toFixed(2)}%`
                 : `$${totalPnL.toFixed(2)}`
@@ -1117,239 +1004,85 @@ const Dashboard = () => {
           </div>
 
           {/* Win Rate */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            padding: '12px',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h3 style={{ 
-              fontSize: '12px', 
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontWeight: 'normal',
-              marginBottom: '4px'
-            }}>
-              Win Rate
-            </h3>
-            <div style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold',
-              color: winRate >= 50 ? '#22c55e' : '#ef4444'
-            }}>
+          <div className={styles.metricCard}>
+            <h3 className={styles.metricTitle}>Win Rate</h3>
+            <div className={`${styles.metricValue} ${winRate >= 50 ? styles.metricValuePositive : styles.metricValueNegative}`}>
               {winRate.toFixed(1)}%
             </div>
           </div>
 
           {/* Risk-Reward Ratio */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            padding: '12px',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h3 style={{ 
-              fontSize: '12px', 
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontWeight: 'normal',
-              marginBottom: '4px'
-            }}>
-              Avg Risk-Reward
-            </h3>
-            <div style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold',
-              color: avgRiskReward >= 2 ? '#22c55e' : '#f59e0b'
-            }}>
+          <div className={styles.metricCard}>
+            <h3 className={styles.metricTitle}>Avg Risk-Reward</h3>
+            <div className={`${styles.metricValue} ${avgRiskReward >= 2 ? styles.metricValuePositive : styles.metricValueNeutral}`}>
               {avgRiskReward.toFixed(2)}R
             </div>
           </div>
 
           {/* Expectancy */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            padding: '12px',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h3 style={{ 
-              fontSize: '12px', 
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontWeight: 'normal',
-              marginBottom: '4px'
-            }}>
-              Expectancy
-            </h3>
-            <div style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold',
-              color: expectancy >= 0 ? '#22c55e' : '#ef4444'
-            }}>
+          <div className={styles.metricCard}>
+            <h3 className={styles.metricTitle}>Expectancy</h3>
+            <div className={`${styles.metricValue} ${expectancy >= 0 ? styles.metricValuePositive : styles.metricValueNegative}`}>
               ${expectancy.toFixed(2)}
             </div>
           </div>
 
           {/* Average Holding Time */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            padding: '12px',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h3 style={{ 
-              fontSize: '12px', 
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontWeight: 'normal',
-              marginBottom: '4px'
-            }}>
-              Avg Holding Time
-            </h3>
-            <div style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold',
-              color: 'white'
-            }}>
+          <div className={styles.metricCard}>
+            <h3 className={styles.metricTitle}>Avg Holding Time</h3>
+            <div className={styles.metricValue}>
               {avgHoldingTime}
             </div>
           </div>
 
           {/* Max Drawdown */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            padding: '12px',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h3 style={{ 
-              fontSize: '12px', 
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontWeight: 'normal',
-              marginBottom: '4px'
-            }}>
-              Max Drawdown
-            </h3>
-            <div style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold',
-              color: maxDrawdown <= 20 ? '#22c55e' : '#ef4444'
-            }}>
+          <div className={styles.metricCard}>
+            <h3 className={styles.metricTitle}>Max Drawdown</h3>
+            <div className={`${styles.metricValue} ${maxDrawdown <= 20 ? styles.metricValuePositive : styles.metricValueNegative}`}>
               {maxDrawdown.toFixed(1)}%
             </div>
           </div>
 
           {/* Best Trading Day */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            padding: '12px',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h3 style={{ 
-              fontSize: '12px', 
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontWeight: 'normal',
-              marginBottom: '4px'
-            }}>
-              Best Trading Day
-            </h3>
-            <div style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold',
-              color: 'white'
-            }}>
+          <div className={styles.metricCard}>
+            <h3 className={styles.metricTitle}>Best Trading Day</h3>
+            <div className={styles.metricValue}>
               {bestDayOfWeek}
             </div>
-            <div style={{ 
-              fontSize: '11px', 
-              color: 'rgba(255, 255, 255, 0.6)'
-            }}>
+            <div className={styles.metricSubtitle}>
               {bestDayWinRate.toFixed(1)}% win rate
             </div>
           </div>
 
           {/* Number of Trades */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            padding: '12px',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h3 style={{ 
-              fontSize: '12px', 
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontWeight: 'normal',
-              marginBottom: '4px'
-            }}>
-              Number of Trades
-            </h3>
-            <div style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold',
-              color: 'white'
-            }}>
+          <div className={styles.metricCard}>
+            <h3 className={styles.metricTitle}>Number of Trades</h3>
+            <div className={styles.metricValue}>
               {allTrades.length}
             </div>
           </div>
         </div>
 
         {/* Main Content Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gap: '8px',
-          marginBottom: '16px'
-        }}>
+        <div className={styles.mainGrid}>
           {/* Left Column - Chart */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px'
-          }}>
+          <div className={styles.mainColumn}>
             {/* Performance Chart */}
-            <div style={{ 
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '12px',
-              padding: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                marginBottom: '12px' 
-              }}>
+            <div className={styles.chartSection}>
+              <div className={styles.chartHeader}>
                 <div>
-                  <h3 style={{ 
-                    fontSize: '14px', 
-                    fontWeight: 'bold',
-                    marginBottom: '2px',
-                    background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}>
+                  <h3 className={styles.chartTitle}>
                     Performance Overview
                   </h3>
-                  <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  <p className={styles.chartSubtitle}>
                     Account growth over time
                   </p>
                 </div>
-                <div style={{ display: 'flex', gap: '4px' }}>
+                <div className={styles.chartControls}>
                   {chartTypes.map((type) => (
                     <button
                       key={type.id}
-                      style={{
-                        padding: '6px 8px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        backgroundColor: selectedChartType === type.id ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-                        color: selectedChartType === type.id ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        fontSize: '12px'
-                      }}
+                      className={`${styles.chartTypeButton} ${selectedChartType === type.id ? styles.chartTypeButtonActive : ''}`}
                       onClick={() => setSelectedChartType(type.id)}
                     >
                       <type.icon />
@@ -1358,24 +1091,23 @@ const Dashboard = () => {
                   ))}
                 </div>
               </div>
-              <div style={{ height: '300px' }}>
+              <div className={styles.chartContainer}>
                 {renderChart()}
               </div>
             </div>
 
             {/* Trading Calendar */}
             {isLoadingTrades ? (
-              <div style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                borderRadius: '12px',
-                padding: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '300px'
-              }}>
-                <div style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Loading trades...</div>
+              <div className={styles.chartSection}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  minHeight: '300px',
+                  color: 'rgba(255, 255, 255, 0.6)' 
+                }}>
+                  Loading trades...
+                </div>
               </div>
             ) : (
               <TradingCalendar trades={calendarTrades} />
@@ -1383,49 +1115,19 @@ const Dashboard = () => {
           </div>
 
           {/* Right Column - Recent Trades & Quick Stats */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px'
-          }}>
+          <div className={styles.mainColumn}>
             {/* Recent Trades */}
-            <div style={{ 
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '12px',
-              padding: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              flex: 1
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                marginBottom: '12px' 
-              }}>
+            <div className={styles.chartSection}>
+              <div className={styles.chartHeader}>
                 <div>
-                  <h3 style={{ 
-                    fontSize: '14px', 
-                    fontWeight: 'bold',
-                    marginBottom: '2px',
-                    background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}>
+                  <h3 className={styles.chartTitle}>
                     Recent Trades
                   </h3>
-                  <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  <p className={styles.chartSubtitle}>
                     Last 24 hours
                   </p>
                 </div>
-                <button style={{
-                  padding: '6px',
-                  borderRadius: '6px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}>
+                <button className={styles.chartTypeButton}>
                   <Filter />
                 </button>
               </div>
@@ -1433,65 +1135,22 @@ const Dashboard = () => {
                 {isLoadingTrades ? (
                   // Loading skeleton
                   Array(4).fill(null).map((_, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '8px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                        borderRadius: '8px',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '8px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        }} />
+                    <div key={index} className={styles.loadingSkeleton}>
+                      <div className={styles.tradeInfo}>
+                        <div className={styles.skeletonIcon} />
                         <div>
-                          <div style={{ 
-                            width: '60px', 
-                            height: '12px', 
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            borderRadius: '4px',
-                            marginBottom: '6px'
-                          }} />
-                          <div style={{ 
-                            width: '90px', 
-                            height: '10px', 
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            borderRadius: '4px'
-                          }} />
+                          <div className={styles.skeletonText} />
+                          <div className={styles.skeletonSubtext} />
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ 
-                          width: '45px', 
-                          height: '12px', 
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          borderRadius: '4px',
-                          marginBottom: '6px'
-                        }} />
-                        <div style={{ 
-                          width: '60px', 
-                          height: '10px', 
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          borderRadius: '4px'
-                        }} />
+                      <div>
+                        <div className={styles.skeletonText} />
+                        <div className={styles.skeletonSubtext} />
                       </div>
                     </div>
                   ))
                 ) : recentTrades.length === 0 ? (
-                  <div style={{
-                    padding: '12px',
-                    textAlign: 'center',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                    borderRadius: '8px',
-                  }}>
+                  <div className={styles.noTrades}>
                     No trades in the last 24 hours
                   </div>
                 ) : (
@@ -1501,47 +1160,18 @@ const Dashboard = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '8px',
-                        backgroundColor: hoveredMetric === trade.id ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.02)',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                      }}
+                      className={`${styles.tradeItem} ${hoveredMetric === trade.id ? styles.tradeItemHovered : ''}`}
                       onMouseEnter={() => setHoveredMetric(trade.id)}
                       onMouseLeave={() => setHoveredMetric(null)}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '8px',
-                          backgroundColor: trade.type === 'Long' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: trade.type === 'Long' ? '#22c55e' : '#ef4444'
-                        }}>
+                      <div className={styles.tradeInfo}>
+                        <div className={`${styles.tradeIcon} ${trade.type === 'Long' ? styles.tradeIconLong : styles.tradeIconShort}`}>
                           {trade.type === 'Long' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
                         </div>
                         <div>
-                          <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '6px', 
-                            marginBottom: '2px' 
-                          }}>
-                            <span style={{ fontWeight: '600', fontSize: '13px' }}>{trade.symbol}</span>
-                            <span style={{ 
-                              fontSize: '11px', 
-                              color: 'rgba(255, 255, 255, 0.4)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}>
+                          <div className={styles.tradeHeader}>
+                            <span className={styles.tradeSymbol}>{trade.symbol}</span>
+                            <span className={styles.tradeDate}>
                               <Clock size={10} />
                               {new Date(trade.entry_date).toLocaleString('en-US', {
                                 month: 'short',
@@ -1552,21 +1182,16 @@ const Dashboard = () => {
                               })}
                             </span>
                           </div>
-                          <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                          <div className={styles.tradePrice}>
                             ${trade.entry_price} → ${trade.exit_price || 'Open'}
                           </div>
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ 
-                          color: (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
-                          fontWeight: '600',
-                          marginBottom: '2px',
-                          fontSize: '13px'
-                        }}>
+                      <div className={styles.tradePnl}>
+                        <div className={`${styles.tradePnlValue} ${(trade.pnl || 0) >= 0 ? styles.tradePnlValuePositive : styles.tradePnlValueNegative}`}>
                           ${Math.abs(trade.pnl || 0)}
                         </div>
-                        <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                        <div className={styles.tradeQuantity}>
                           {trade.quantity} shares
                         </div>
                       </div>
@@ -1579,54 +1204,26 @@ const Dashboard = () => {
         </div>
 
         {/* Strategy & Trade Type Breakdown */}
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '8px'
-          }}>
+        <div className={styles.strategyBreakdown}>
+          <div className={styles.strategyGrid}>
             {/* Performance by Strategy */}
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '12px',
-              padding: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.05)'
-            }}>
-              <h2 style={{ 
-                fontSize: '14px', 
-                fontWeight: 'bold',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
+            <div className={styles.strategyCard}>
+              <h2 className={styles.strategyCardTitle}>
                 <PieChart />
                 Performance by Strategy
               </h2>
-              <div style={{ height: '300px' }}>
+              <div className={styles.strategyChartContainer}>
                 <Chart type="bar" data={strategyPerformanceData} options={strategyChartOptions} />
               </div>
             </div>
 
             {/* Performance by Market */}
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '12px',
-              padding: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.05)'
-            }}>
-              <h2 style={{ 
-                fontSize: '14px', 
-                fontWeight: 'bold',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
+            <div className={styles.strategyCard}>
+              <h2 className={styles.strategyCardTitle}>
                 <BarChart2 />
                 Performance by Market
               </h2>
-              <div style={{ height: '300px' }}>
+              <div className={styles.strategyChartContainer}>
                 <Chart type="bar" data={marketPerformanceData} options={strategyChartOptions} />
               </div>
             </div>
@@ -1634,115 +1231,56 @@ const Dashboard = () => {
         </div>
 
         {/* Entry/Exit Timing Heatmap */}
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            borderRadius: '12px',
-            padding: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h2 style={{ 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              marginBottom: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
+        <div className={styles.heatmapSection}>
+          <div className={styles.heatmapCard}>
+            <h2 className={styles.heatmapTitle}>
               <PieChart />
               Entry/Exit Timing Heatmap
             </h2>
-            <div style={{ overflowX: 'auto' }}>
-              <div style={{ 
-                display: 'grid',
-                gridTemplateColumns: 'auto repeat(24, minmax(32px, 1fr))',
-                gap: '1px',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                padding: '1px',
-                borderRadius: '8px'
-              }}>
-                {/* Hours Header */}
-                <div style={{ padding: '6px', fontWeight: 'bold', textAlign: 'center', fontSize: '11px' }}></div>
-                {heatmapData.hours.map(hour => (
-                  <div
-                    key={hour}
-                    style={{
-                      padding: '6px',
-                      fontWeight: 'bold',
-                      textAlign: 'center',
-                      backgroundColor: 'rgba(30, 41, 59, 0.4)',
-                      fontSize: '11px'
-                    }}
-                  >
-                    {hour.toString().padStart(2, '0')}
-                  </div>
-                ))}
+            <div className={styles.heatmapGrid}>
+              {/* Hours Header */}
+              <div className={styles.heatmapHeader}></div>
+              {heatmapData.hours.map(hour => (
+                <div key={hour} className={styles.heatmapHourHeader}>
+                  {hour.toString().padStart(2, '0')}
+                </div>
+              ))}
 
-                {/* Days and Data */}
-                {heatmapData.days.map((day, dayIndex) => (
-                  <React.Fragment key={day}>
-                    <div style={{
-                      padding: '6px',
-                      fontWeight: 'bold',
-                      backgroundColor: 'rgba(30, 41, 59, 0.4)',
-                      whiteSpace: 'nowrap',
-                      fontSize: '11px'
-                    }}>
-                      {day}
-                    </div>
-                    {heatmapData.data[dayIndex].map((cell, hourIndex) => {
-                      const intensity = cell.count === 0 ? 0 : Math.min(Math.abs(cell.avgPnl) / 1000, 1);
-                      const color = cell.avgPnl >= 0 
-                        ? `rgba(34, 197, 94, ${intensity})`
-                        : `rgba(239, 68, 68, ${intensity})`;
-                      
-                      return (
-                        <div
-                          key={`${day}-${hourIndex}`}
-                          style={{
-                            padding: '6px',
-                            backgroundColor: cell.count === 0 ? 'rgba(30, 41, 59, 0.4)' : color,
-                            textAlign: 'center',
-                            fontSize: '11px',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                          }}
-                          title={`${day} ${hourIndex}:00
+              {/* Days and Data */}
+              {heatmapData.days.map((day, dayIndex) => (
+                <React.Fragment key={day}>
+                  <div className={styles.heatmapDayHeader}>
+                    {day}
+                  </div>
+                  {heatmapData.data[dayIndex].map((cell, hourIndex) => {
+                    const intensity = cell.count === 0 ? 0 : Math.min(Math.abs(cell.avgPnl) / 1000, 1);
+                    const color = cell.avgPnl >= 0 
+                      ? `rgba(34, 197, 94, ${intensity})`
+                      : `rgba(239, 68, 68, ${intensity})`;
+                    
+                    return (
+                      <div
+                        key={`${day}-${hourIndex}`}
+                        className={styles.heatmapCell}
+                        style={{ backgroundColor: cell.count === 0 ? 'rgba(30, 41, 59, 0.4)' : color }}
+                        title={`${day} ${hourIndex}:00
 Trades: ${cell.count}
 Avg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
-                        >
-                          {cell.count}
-                        </div>
-                      );
-                    })}
-                  </React.Fragment>
-                ))}
-              </div>
+                      >
+                        {cell.count}
+                      </div>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
             </div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '12px',
-              marginTop: '12px',
-              fontSize: '11px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  background: 'linear-gradient(to right, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 1))',
-                  borderRadius: '2px'
-                }}></div>
+            <div className={styles.heatmapLegend}>
+              <div className={styles.legendItem}>
+                <div className={`${styles.legendColor} ${styles.legendColorLoss}`}></div>
                 <span>Loss</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  background: 'linear-gradient(to right, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 1))',
-                  borderRadius: '2px'
-                }}></div>
+              <div className={styles.legendItem}>
+                <div className={`${styles.legendColor} ${styles.legendColorProfit}`}></div>
                 <span>Profit</span>
               </div>
             </div>
@@ -1750,44 +1288,16 @@ Avg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
         </div>
 
         {/* Behavioral & Discipline Metrics */}
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '8px'
-          }}>
+        <div className={styles.disciplineSection}>
+          <div className={styles.disciplineGrid}>
             {/* Discipline Compliance Rate */}
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '12px',
-              padding: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.05)'
-            }}>
-              <h2 style={{ 
-                fontSize: '14px', 
-                fontWeight: 'bold',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
+            <div className={styles.disciplineCard}>
+              <h2 className={styles.disciplineTitle}>
                 <Table />
                 Discipline Compliance
               </h2>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '12px'
-              }}>
-                <div style={{
-                  width: '100px',
-                  height: '100px',
-                  position: 'relative',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}>
+              <div className={styles.disciplineContent}>
+                <div className={styles.disciplineValue}>
                   <svg width="100" height="100" style={{ transform: 'rotate(-90deg)' }}>
                     <circle
                       cx="50"
@@ -1809,98 +1319,44 @@ Avg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
                       style={{ transition: 'stroke-dashoffset 0.5s ease' }}
                     />
                   </svg>
-                  <div style={{
-                    position: 'absolute',
-                    fontSize: '20px',
-                    fontWeight: 'bold'
-                  }}>
+                  <div className={styles.disciplineValueText}>
                     {disciplineMetrics.disciplineRate.toFixed(1)}%
                   </div>
                 </div>
-                <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
+                <div className={styles.disciplineDescription}>
                   Overall discipline compliance rate based on plan following, setup quality, and stop management
                 </div>
               </div>
             </div>
 
             {/* Emotion vs P/L Correlation */}
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '12px',
-              padding: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.05)'
-            }}>
-              <h2 style={{ 
-                fontSize: '14px', 
-                fontWeight: 'bold',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
+            <div className={styles.disciplineCard}>
+              <h2 className={styles.disciplineTitle}>
                 <LineChart />
                 Emotion vs P/L Correlation
               </h2>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '12px'
-              }}>
-                <div style={{
-                  width: '100px',
-                  height: '100px',
-                  position: 'relative',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}>
-                  <div style={{
-                    fontSize: '20px',
-                    fontWeight: 'bold',
-                    color: Math.abs(disciplineMetrics.emotionCorrelation) <= 0.3 ? '#22c55e' : '#ef4444'
+              <div className={styles.disciplineContent}>
+                <div className={styles.disciplineValue}>
+                  <div className={styles.disciplineValueText} style={{ 
+                    color: Math.abs(disciplineMetrics.emotionCorrelation) <= 0.3 ? '#22c55e' : '#ef4444' 
                   }}>
                     {disciplineMetrics.emotionCorrelation.toFixed(2)}
                   </div>
                 </div>
-                <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
+                <div className={styles.disciplineDescription}>
                   Correlation between emotional state and trading performance (-1 to 1)
                 </div>
               </div>
             </div>
 
             {/* Checklist Adherence */}
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '12px',
-              padding: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.05)'
-            }}>
-              <h2 style={{ 
-                fontSize: '14px', 
-                fontWeight: 'bold',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
+            <div className={styles.disciplineCard}>
+              <h2 className={styles.disciplineTitle}>
                 <Filter />
                 Checklist Adherence
               </h2>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '12px'
-              }}>
-                <div style={{
-                  width: '100px',
-                  height: '100px',
-                  position: 'relative',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}>
+              <div className={styles.disciplineContent}>
+                <div className={styles.disciplineValue}>
                   <svg width="100" height="100" style={{ transform: 'rotate(-90deg)' }}>
                     <circle
                       cx="50"
@@ -1922,15 +1378,11 @@ Avg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
                       style={{ transition: 'stroke-dashoffset 0.5s ease' }}
                     />
                   </svg>
-                  <div style={{
-                    position: 'absolute',
-                    fontSize: '20px',
-                    fontWeight: 'bold'
-                  }}>
+                  <div className={styles.disciplineValueText}>
                     {disciplineMetrics.checklistAdherence.toFixed(1)}%
                   </div>
                 </div>
-                <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
+                <div className={styles.disciplineDescription}>
                   Percentage of pre-trade checklist items completed across all trades
                 </div>
               </div>
