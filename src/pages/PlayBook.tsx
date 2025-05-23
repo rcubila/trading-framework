@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import styles from './Playbook.module.css';
 import { AnimatedButton } from '../components/AnimatedButton';
 import { IconSelector } from '../components/IconSelector';
+import { MoreVertical, Plus, Search } from 'lucide-react';
 
 interface Trade {
   id: string;
@@ -224,6 +225,7 @@ export const PlayBook: React.FC = () => {
   const [assetToDelete, setAssetToDelete] = useState<{ id: string; name: string } | null>(null);
   const [strategyToDelete, setStrategyToDelete] = useState<{ id: string; name: string } | null>(null);
   const [showDeleteStrategyModal, setShowDeleteStrategyModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch assets and their strategies when component mounts
   useEffect(() => {
@@ -539,21 +541,36 @@ export const PlayBook: React.FC = () => {
     }
   };
 
+  const headerActions = (
+    <div className={styles.headerActions}>
+      <div className={styles.filterGroup}>
+        <input
+          type="text"
+          placeholder="Search playbooks..."
+          className={styles.filterInput}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <button className={styles.actionButtonIcon}>
+          <Search size={18} />
+        </button>
+      </div>
+      <button className={styles.actionButtonGradient}>
+        <Plus size={18} />
+        New Playbook
+      </button>
+      <button className={styles.actionButtonIcon}>
+        <MoreVertical size={18} />
+      </button>
+    </div>
+  );
+
   return (
     <div className={styles.container}>
-      <PageHeader 
-        title="PlayBook"
-        subtitle="Manage and track your trading strategies"
-        actions={
-          !selectedAsset && (
-            <button
-              className={styles.primaryButton}
-              onClick={() => setShowCreateModal(true)}
-            >
-              + New Playbook
-            </button>
-          )
-        }
+      <PageHeader
+        title="Playbooks"
+        subtitle="Manage your trading playbooks and strategies"
+        actions={headerActions}
       />
       
       <div className={styles.content}>

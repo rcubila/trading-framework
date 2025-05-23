@@ -1,36 +1,166 @@
-.container {
+.pageHeader {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.headerContent {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2px;
-  background: rgba(15, 23, 42, 0.4);
-  padding: 2px 5px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: var(--shadow-md);
+  align-items: flex-start;
+  gap: 16px;
 }
 
-.titleContainer {
+.headerLeft {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
-.title {
-  composes: text-gradient from '../styles/components.css';
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 2px;
+.pageTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.subtitle {
-  color: var(--color-text-secondary);
+.pageSubtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
 }
 
-.actions {
+.pageSubtitle span {
   display: flex;
-  gap: 5px;
+  align-items: center;
+  gap: 6px;
+}
+
+.pageSubtitle svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actionButtonIcon {
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.actionButtonIcon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.filterSelectWide {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  min-width: 200px;
+}
+
+.filterInput {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  width: 200px;
+}
+
+.actionButtonGradient {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.actionButtonGradient:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.actionButtonGray {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.actionButtonGray:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.actionButtonBlue {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #3b82f6;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.actionButtonBlue:hover {
+  background: #2563eb;
+}
+
+.filterOptionGroup {
+  background: rgba(31, 41, 55, 0.95);
+  color: white;
+}
+
+.filterOption {
+  padding: 8px 12px;
+  background: rgba(31, 41, 55, 0.95);
+  color: rgba(255, 255, 255, 0.8);
 } 

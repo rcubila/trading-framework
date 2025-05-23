@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase, tradesApi } from '../lib/supabase';
 import { importTradesFromCSV } from '../lib/csv-import';

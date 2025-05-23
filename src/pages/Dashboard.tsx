@@ -1,26 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
-import {
-  RiExchangeDollarLine,
-  RiPieChartLine,
-  RiScales3Line,
-  RiLineChartLine,
-  RiTimeLine,
-  RiArrowDownLine,
-  RiExchangeLine,
-  RiCalendarCheckLine,
-  RiBarChartGroupedLine,
-  RiBarChartLine,
-  RiArrowUpLine,
-  RiFilterLine,
-  RiMoreLine,
-  RiPieChart2Line,
-  RiSettings4Line,
-  RiDownload2Line,
-  RiRefreshLine,
-  RiTestTubeLine,
-} from 'react-icons/ri';
+import { useNavigate } from 'react-router-dom';
+import { 
+  BarChart2, 
+  LineChart, 
+  PieChart, 
+  ArrowUpRight, 
+  ArrowDownRight,
+  TrendingUp,
+  Clock,
+  DollarSign,
+  Percent,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  ChevronRight,
+  Plus,
+  Download,
+  Upload,
+  Filter,
+  Search,
+  ChevronDown,
+  Table
+} from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Chart, Line, Bar, Doughnut } from 'react-chartjs-2';
 import { supabase } from '../lib/supabase';
@@ -29,6 +32,7 @@ import type { Trade as CalendarTrade } from '../components/TradingCalendar';
 import type { Trade as DBTrade } from '../types/trade';
 import { generateTestTrades } from '../utils/testTrades';
 import { PageHeader } from '../components/PageHeader';
+import styles from './Dashboard.module.css';
 
 ChartJS.register(
   CategoryScale,
@@ -45,8 +49,8 @@ ChartJS.register(
 const timeRanges = ['1D', '1W', '1M', '3M', '6M', '1Y', 'ALL'];
 
 const chartTypes = [
-  { id: 'line', icon: RiLineChartLine, label: 'Line' },
-  { id: 'bar', icon: RiBarChartLine, label: 'Bar' }
+  { id: 'line', icon: LineChart, label: 'Line' },
+  { id: 'bar', icon: BarChart2, label: 'Bar' }
 ];
 
 interface Trade extends DBTrade {
@@ -75,6 +79,8 @@ interface SupabaseStrategy {
 }
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
   const calculateAverageHoldingTime = (trades: Trade[]) => {
     const holdingTimes = trades
       .filter(t => t.exit_date && t.entry_date)
@@ -809,803 +815,826 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div style={{ 
-      padding: '5px', 
-      color: 'white',
-      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
-      minHeight: '100vh',
-      backdropFilter: 'blur(10px)',
-    }}>
-      <PageHeader 
-        title="Trading Dashboard"
-        subtitle={
-          <span>
-            <RiCalendarCheckLine />
-            February 12, 2024
-          </span>
-        }
-        actions={
-          <>
-            <button
-              onClick={handleGenerateTestTrades}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                backgroundColor: '#4B5563',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <PageHeader 
+          title="Trading Dashboard"
+          subtitle={
+            <span>
+              <Clock />
+              February 12, 2024
+            </span>
+          }
+          actions={
+            <>
+              <button
+                onClick={handleGenerateTestTrades}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  backgroundColor: '#4B5563',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                <Plus />
+                Generate Test Trades
+              </button>
+              <button
+                onClick={handleRefresh}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  backgroundColor: '#3B82F6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                <Upload className={isRefreshing ? 'animate-spin' : ''} />
+                Refresh
+              </button>
+              <button
+                style={{ 
+                  padding: '10px',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <Download />
+              </button>
+              <button 
+                style={{ 
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                  color: 'white',
+                  padding: '10px 20px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 8px rgba(37, 99, 235, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.2)';
+                }}
+              >
+                <Clock />
+                New Trade
+              </button>
+            </>
+          }
+        />
+
+        {/* Filters Section */}
+        <div className={styles.filterControls}>
+          <div className={styles.filterControlsInner}>
+            {/* Date Range Filter */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select style={{
                 padding: '8px 12px',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              <RiTestTubeLine />
-              Generate Test Trades
-            </button>
-            <button
-              onClick={handleRefresh}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                backgroundColor: '#3B82F6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '8px 12px',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              <RiRefreshLine className={isRefreshing ? 'animate-spin' : ''} />
-              Refresh
-            </button>
-            <button
-              style={{ 
-                padding: '10px',
-                borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '8px',
                 backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                color: '#94a3b8',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              <RiDownload2Line />
-            </button>
-            <button 
-              style={{ 
-                background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
                 color: 'white',
-                padding: '10px 20px',
-                borderRadius: '12px',
-                border: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 8px rgba(37, 99, 235, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.2)';
-              }}
-            >
-              <RiTimeLine />
-              New Trade
-            </button>
-          </>
-        }
-      />
+                cursor: 'pointer'
+              }}>
+                <option value="1D">Today</option>
+                <option value="1W">This Week</option>
+                <option value="1M">This Month</option>
+                <option value="3M">Last 3 Months</option>
+                <option value="6M">Last 6 Months</option>
+                <option value="1Y">This Year</option>
+                <option value="ALL">All Time</option>
+              </select>
+            </div>
 
-      {/* Filters Section */}
-      <div style={{ 
-        background: 'rgba(15, 23, 42, 0.4)',
-        padding: '16px',
-        borderRadius: '16px',
-        marginBottom: '24px',
-        border: '1px solid rgba(255, 255, 255, 0.05)'
-      }}>
-        <div style={{ 
-          display: 'flex', 
-          gap: '16px', 
-          flexWrap: 'wrap',
-          alignItems: 'center'
-        }}>
-          {/* Date Range Filter */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <select style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              cursor: 'pointer'
-            }}>
-              <option value="1D">Today</option>
-              <option value="1W">This Week</option>
-              <option value="1M">This Month</option>
-              <option value="3M">Last 3 Months</option>
-              <option value="6M">Last 6 Months</option>
-              <option value="1Y">This Year</option>
-              <option value="ALL">All Time</option>
-            </select>
-          </div>
+            {/* Strategy Filter */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div style={{ position: 'relative' }}>
+                <select 
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: 'white',
+                    cursor: 'pointer',
+                    minWidth: '200px',
+                    appearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 8px center',
+                    backgroundSize: '16px',
+                    paddingRight: '32px'
+                  }}
+                  value={selectedStrategy}
+                  onChange={(e) => setSelectedStrategy(e.target.value)}
+                >
+                  <option value="ALL">All Strategies</option>
+                  {Object.entries(groupedStrategies).map(([asset, strategies]) => (
+                    <optgroup 
+                      key={asset} 
+                      label={asset}
+                      style={{
+                        backgroundColor: 'rgba(31, 41, 55, 0.95)',
+                        color: 'white',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {strategies.map(strategy => (
+                        <option 
+                          key={strategy.id} 
+                          value={strategy.id}
+                          style={{
+                            paddingLeft: '16px',
+                            backgroundColor: 'rgba(31, 41, 55, 0.95)',
+                            color: 'rgba(255, 255, 255, 0.8)'
+                          }}
+                        >
+                          {strategy.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-          {/* Strategy Filter */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <div style={{ position: 'relative' }}>
-              <select 
+            {/* Symbol Filter */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder="Filter by symbol..."
                 style={{
                   padding: '8px 12px',
                   borderRadius: '8px',
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                   color: 'white',
-                  cursor: 'pointer',
-                  minWidth: '200px',
-                  appearance: 'none',
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 8px center',
-                  backgroundSize: '16px',
-                  paddingRight: '32px'
+                  width: '150px'
                 }}
-                value={selectedStrategy}
-                onChange={(e) => setSelectedStrategy(e.target.value)}
-              >
-                <option value="ALL">All Strategies</option>
-                {Object.entries(groupedStrategies).map(([asset, strategies]) => (
-                  <optgroup 
-                    key={asset} 
-                    label={asset}
-                    style={{
-                      backgroundColor: 'rgba(31, 41, 55, 0.95)',
-                      color: 'white',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    {strategies.map(strategy => (
-                      <option 
-                        key={strategy.id} 
-                        value={strategy.id}
-                        style={{
-                          paddingLeft: '16px',
-                          backgroundColor: 'rgba(31, 41, 55, 0.95)',
-                          color: 'rgba(255, 255, 255, 0.8)'
-                        }}
-                      >
-                        {strategy.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
+              />
             </div>
-          </div>
 
-          {/* Symbol Filter */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <input
-              type="text"
-              placeholder="Filter by symbol..."
-              style={{
+            {/* Trade Direction Filter */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select style={{
                 padding: '8px 12px',
                 borderRadius: '8px',
                 backgroundColor: 'rgba(255, 255, 255, 0.05)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 color: 'white',
-                width: '150px'
-              }}
-            />
-          </div>
+                cursor: 'pointer'
+              }}>
+                <option value="ALL">All Directions</option>
+                <option value="LONG">Long Only</option>
+                <option value="SHORT">Short Only</option>
+              </select>
+            </div>
 
-          {/* Trade Direction Filter */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <select style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              cursor: 'pointer'
-            }}>
-              <option value="ALL">All Directions</option>
-              <option value="LONG">Long Only</option>
-              <option value="SHORT">Short Only</option>
-            </select>
-          </div>
+            {/* Session Filter */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                cursor: 'pointer'
+              }}>
+                <option value="ALL">All Sessions</option>
+                <option value="LONDON">London</option>
+                <option value="NY">New York</option>
+                <option value="ASIA">Asia</option>
+              </select>
+            </div>
 
-          {/* Session Filter */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <select style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              cursor: 'pointer'
-            }}>
-              <option value="ALL">All Sessions</option>
-              <option value="LONDON">London</option>
-              <option value="NY">New York</option>
-              <option value="ASIA">Asia</option>
-            </select>
-          </div>
+            {/* Tags Filter */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                cursor: 'pointer'
+              }}>
+                <option value="ALL">All Tags</option>
+                <option value="OVERTRADED">Overtraded</option>
+                <option value="NEWS">News-based</option>
+                <option value="DISCIPLINE_BREACH">Discipline Breach</option>
+              </select>
+            </div>
 
-          {/* Tags Filter */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <select style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              cursor: 'pointer'
-            }}>
-              <option value="ALL">All Tags</option>
-              <option value="OVERTRADED">Overtraded</option>
-              <option value="NEWS">News-based</option>
-              <option value="DISCIPLINE_BREACH">Discipline Breach</option>
-            </select>
-          </div>
-
-          {/* Reset Filters Button */}
-          <button style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            color: 'white',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <RiRefreshLine />
-            Reset Filters
-          </button>
-        </div>
-      </div>
-
-      {/* Key Metrics Row */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: '8px',
-        marginBottom: '16px'
-      }}>
-        {/* Total Net P/L */}
-        <div style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-          padding: '12px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
-        }}>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            marginBottom: '4px'
-          }}>
-            <h3 style={{ 
-              fontSize: '12px', 
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontWeight: 'normal'
-            }}>
-              Total Net P/L
-            </h3>
-            <button style={{
-              padding: '2px 6px',
-              borderRadius: '4px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'rgba(255, 255, 255, 0.6)',
-              cursor: 'pointer',
-              fontSize: '11px'
-            }}>
-              {showPercentage ? '%' : '$'}
+            {/* Reset Filters Button */}
+            <button className={styles.filterButton}>
+              <Upload />
+              Reset Filters
             </button>
           </div>
-          <div style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold',
-            color: totalPnL >= 0 ? '#22c55e' : '#ef4444'
-          }}>
-            {showPercentage 
-              ? `${((totalPnL / initialBalance) * 100).toFixed(2)}%`
-              : `$${totalPnL.toFixed(2)}`
-            }
-          </div>
         </div>
 
-        {/* Win Rate */}
+        {/* Key Metrics Row */}
         <div style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-          padding: '12px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '8px',
+          marginBottom: '16px'
         }}>
-          <h3 style={{ 
-            fontSize: '12px', 
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontWeight: 'normal',
-            marginBottom: '4px'
-          }}>
-            Win Rate
-          </h3>
-          <div style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold',
-            color: winRate >= 50 ? '#22c55e' : '#ef4444'
-          }}>
-            {winRate.toFixed(1)}%
-          </div>
-        </div>
-
-        {/* Risk-Reward Ratio */}
-        <div style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-          padding: '12px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
-        }}>
-          <h3 style={{ 
-            fontSize: '12px', 
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontWeight: 'normal',
-            marginBottom: '4px'
-          }}>
-            Avg Risk-Reward
-          </h3>
-          <div style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold',
-            color: avgRiskReward >= 2 ? '#22c55e' : '#f59e0b'
-          }}>
-            {avgRiskReward.toFixed(2)}R
-          </div>
-        </div>
-
-        {/* Expectancy */}
-        <div style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-          padding: '12px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
-        }}>
-          <h3 style={{ 
-            fontSize: '12px', 
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontWeight: 'normal',
-            marginBottom: '4px'
-          }}>
-            Expectancy
-          </h3>
-          <div style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold',
-            color: expectancy >= 0 ? '#22c55e' : '#ef4444'
-          }}>
-            ${expectancy.toFixed(2)}
-          </div>
-        </div>
-
-        {/* Average Holding Time */}
-        <div style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-          padding: '12px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
-        }}>
-          <h3 style={{ 
-            fontSize: '12px', 
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontWeight: 'normal',
-            marginBottom: '4px'
-          }}>
-            Avg Holding Time
-          </h3>
-          <div style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold',
-            color: 'white'
-          }}>
-            {avgHoldingTime}
-          </div>
-        </div>
-
-        {/* Max Drawdown */}
-        <div style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-          padding: '12px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
-        }}>
-          <h3 style={{ 
-            fontSize: '12px', 
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontWeight: 'normal',
-            marginBottom: '4px'
-          }}>
-            Max Drawdown
-          </h3>
-          <div style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold',
-            color: maxDrawdown <= 20 ? '#22c55e' : '#ef4444'
-          }}>
-            {maxDrawdown.toFixed(1)}%
-          </div>
-        </div>
-
-        {/* Best Trading Day */}
-        <div style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-          padding: '12px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
-        }}>
-          <h3 style={{ 
-            fontSize: '12px', 
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontWeight: 'normal',
-            marginBottom: '4px'
-          }}>
-            Best Trading Day
-          </h3>
-          <div style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold',
-            color: 'white'
-          }}>
-            {bestDayOfWeek}
-          </div>
-          <div style={{ 
-            fontSize: '11px', 
-            color: 'rgba(255, 255, 255, 0.6)'
-          }}>
-            {bestDayWinRate.toFixed(1)}% win rate
-          </div>
-        </div>
-
-        {/* Number of Trades */}
-        <div style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-          padding: '12px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
-        }}>
-          <h3 style={{ 
-            fontSize: '12px', 
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontWeight: 'normal',
-            marginBottom: '4px'
-          }}>
-            Number of Trades
-          </h3>
-          <div style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold',
-            color: 'white'
-          }}>
-            {allTrades.length}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
-        gap: '8px',
-        marginBottom: '16px'
-      }}>
-        {/* Left Column - Chart */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px'
-        }}>
-          {/* Performance Chart */}
-          <div style={{ 
+          {/* Total Net P/L */}
+          <div style={{
             background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            borderRadius: '12px',
             padding: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
           }}>
             <div style={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
-              alignItems: 'center', 
-              marginBottom: '12px' 
-            }}>
-              <div>
-                <h3 style={{ 
-                  fontSize: '14px', 
-                  fontWeight: 'bold',
-                  marginBottom: '2px',
-                  background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}>
-                  Performance Overview
-                </h3>
-                <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                  Account growth over time
-                </p>
-              </div>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                {chartTypes.map((type) => (
-                  <button
-                    key={type.id}
-                    style={{
-                      padding: '6px 8px',
-                      borderRadius: '6px',
-                      border: 'none',
-                      backgroundColor: selectedChartType === type.id ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-                      color: selectedChartType === type.id ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '12px'
-                    }}
-                    onClick={() => setSelectedChartType(type.id)}
-                  >
-                    <type.icon />
-                    {type.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div style={{ height: '300px' }}>
-              {renderChart()}
-            </div>
-          </div>
-
-          {/* Trading Calendar */}
-          {isLoadingTrades ? (
-            <div style={{
-              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-              borderRadius: '12px',
-              padding: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              display: 'flex',
-              justifyContent: 'center',
               alignItems: 'center',
-              minHeight: '300px'
+              marginBottom: '4px'
             }}>
-              <div style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Loading trades...</div>
-            </div>
-          ) : (
-            <TradingCalendar trades={calendarTrades} />
-          )}
-        </div>
-
-        {/* Right Column - Recent Trades & Quick Stats */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px'
-        }}>
-          {/* Recent Trades */}
-          <div style={{ 
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            borderRadius: '12px',
-            padding: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)',
-            flex: 1
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              marginBottom: '12px' 
-            }}>
-              <div>
-                <h3 style={{ 
-                  fontSize: '14px', 
-                  fontWeight: 'bold',
-                  marginBottom: '2px',
-                  background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}>
-                  Recent Trades
-                </h3>
-                <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                  Last 24 hours
-                </p>
-              </div>
+              <h3 style={{ 
+                fontSize: '12px', 
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontWeight: 'normal'
+              }}>
+                Total Net P/L
+              </h3>
               <button style={{
-                padding: '6px',
-                borderRadius: '6px',
+                padding: '2px 6px',
+                borderRadius: '4px',
                 backgroundColor: 'rgba(255, 255, 255, 0.05)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 color: 'rgba(255, 255, 255, 0.6)',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                fontSize: '11px'
               }}>
-                <RiFilterLine />
+                {showPercentage ? '%' : '$'}
               </button>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {isLoadingTrades ? (
-                // Loading skeleton
-                Array(4).fill(null).map((_, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
+            <div style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              color: totalPnL >= 0 ? '#22c55e' : '#ef4444'
+            }}>
+              {showPercentage 
+                ? `${((totalPnL / initialBalance) * 100).toFixed(2)}%`
+                : `$${totalPnL.toFixed(2)}`
+              }
+            </div>
+          </div>
+
+          {/* Win Rate */}
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
+          }}>
+            <h3 style={{ 
+              fontSize: '12px', 
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontWeight: 'normal',
+              marginBottom: '4px'
+            }}>
+              Win Rate
+            </h3>
+            <div style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              color: winRate >= 50 ? '#22c55e' : '#ef4444'
+            }}>
+              {winRate.toFixed(1)}%
+            </div>
+          </div>
+
+          {/* Risk-Reward Ratio */}
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
+          }}>
+            <h3 style={{ 
+              fontSize: '12px', 
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontWeight: 'normal',
+              marginBottom: '4px'
+            }}>
+              Avg Risk-Reward
+            </h3>
+            <div style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              color: avgRiskReward >= 2 ? '#22c55e' : '#f59e0b'
+            }}>
+              {avgRiskReward.toFixed(2)}R
+            </div>
+          </div>
+
+          {/* Expectancy */}
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
+          }}>
+            <h3 style={{ 
+              fontSize: '12px', 
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontWeight: 'normal',
+              marginBottom: '4px'
+            }}>
+              Expectancy
+            </h3>
+            <div style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              color: expectancy >= 0 ? '#22c55e' : '#ef4444'
+            }}>
+              ${expectancy.toFixed(2)}
+            </div>
+          </div>
+
+          {/* Average Holding Time */}
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
+          }}>
+            <h3 style={{ 
+              fontSize: '12px', 
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontWeight: 'normal',
+              marginBottom: '4px'
+            }}>
+              Avg Holding Time
+            </h3>
+            <div style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              color: 'white'
+            }}>
+              {avgHoldingTime}
+            </div>
+          </div>
+
+          {/* Max Drawdown */}
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
+          }}>
+            <h3 style={{ 
+              fontSize: '12px', 
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontWeight: 'normal',
+              marginBottom: '4px'
+            }}>
+              Max Drawdown
+            </h3>
+            <div style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              color: maxDrawdown <= 20 ? '#22c55e' : '#ef4444'
+            }}>
+              {maxDrawdown.toFixed(1)}%
+            </div>
+          </div>
+
+          {/* Best Trading Day */}
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
+          }}>
+            <h3 style={{ 
+              fontSize: '12px', 
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontWeight: 'normal',
+              marginBottom: '4px'
+            }}>
+              Best Trading Day
+            </h3>
+            <div style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              color: 'white'
+            }}>
+              {bestDayOfWeek}
+            </div>
+            <div style={{ 
+              fontSize: '11px', 
+              color: 'rgba(255, 255, 255, 0.6)'
+            }}>
+              {bestDayWinRate.toFixed(1)}% win rate
+            </div>
+          </div>
+
+          {/* Number of Trades */}
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.05)'
+          }}>
+            <h3 style={{ 
+              fontSize: '12px', 
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontWeight: 'normal',
+              marginBottom: '4px'
+            }}>
+              Number of Trades
+            </h3>
+            <div style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              color: 'white'
+            }}>
+              {allTrades.length}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr',
+          gap: '8px',
+          marginBottom: '16px'
+        }}>
+          {/* Left Column - Chart */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            {/* Performance Chart */}
+            <div style={{ 
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '12px',
+              padding: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                marginBottom: '12px' 
+              }}>
+                <div>
+                  <h3 style={{ 
+                    fontSize: '14px', 
+                    fontWeight: 'bold',
+                    marginBottom: '2px',
+                    background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>
+                    Performance Overview
+                  </h3>
+                  <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                    Account growth over time
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {chartTypes.map((type) => (
+                    <button
+                      key={type.id}
+                      style={{
+                        padding: '6px 8px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        backgroundColor: selectedChartType === type.id ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+                        color: selectedChartType === type.id ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '12px'
+                      }}
+                      onClick={() => setSelectedChartType(type.id)}
+                    >
+                      <type.icon />
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ height: '300px' }}>
+                {renderChart()}
+              </div>
+            </div>
+
+            {/* Trading Calendar */}
+            {isLoadingTrades ? (
+              <div style={{
+                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+                borderRadius: '12px',
+                padding: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '300px'
+              }}>
+                <div style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Loading trades...</div>
+              </div>
+            ) : (
+              <TradingCalendar trades={calendarTrades} />
+            )}
+          </div>
+
+          {/* Right Column - Recent Trades & Quick Stats */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            {/* Recent Trades */}
+            <div style={{ 
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '12px',
+              padding: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              flex: 1
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                marginBottom: '12px' 
+              }}>
+                <div>
+                  <h3 style={{ 
+                    fontSize: '14px', 
+                    fontWeight: 'bold',
+                    marginBottom: '2px',
+                    background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>
+                    Recent Trades
+                  </h3>
+                  <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                    Last 24 hours
+                  </p>
+                </div>
+                <button style={{
+                  padding: '6px',
+                  borderRadius: '6px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}>
+                  <Filter />
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {isLoadingTrades ? (
+                  // Loading skeleton
+                  Array(4).fill(null).map((_, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '8px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
                         borderRadius: '8px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      }} />
-                      <div>
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        }} />
+                        <div>
+                          <div style={{ 
+                            width: '60px', 
+                            height: '12px', 
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '4px',
+                            marginBottom: '6px'
+                          }} />
+                          <div style={{ 
+                            width: '90px', 
+                            height: '10px', 
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '4px'
+                          }} />
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
                         <div style={{ 
-                          width: '60px', 
+                          width: '45px', 
                           height: '12px', 
                           backgroundColor: 'rgba(255, 255, 255, 0.05)',
                           borderRadius: '4px',
                           marginBottom: '6px'
                         }} />
                         <div style={{ 
-                          width: '90px', 
+                          width: '60px', 
                           height: '10px', 
                           backgroundColor: 'rgba(255, 255, 255, 0.05)',
                           borderRadius: '4px'
                         }} />
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ 
-                        width: '45px', 
-                        height: '12px', 
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderRadius: '4px',
-                        marginBottom: '6px'
-                      }} />
-                      <div style={{ 
-                        width: '60px', 
-                        height: '10px', 
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderRadius: '4px'
-                      }} />
-                    </div>
+                  ))
+                ) : recentTrades.length === 0 ? (
+                  <div style={{
+                    padding: '12px',
+                    textAlign: 'center',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                    borderRadius: '8px',
+                  }}>
+                    No trades in the last 24 hours
                   </div>
-                ))
-              ) : recentTrades.length === 0 ? (
-                <div style={{
-                  padding: '12px',
-                  textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                  borderRadius: '8px',
-                }}>
-                  No trades in the last 24 hours
-                </div>
-              ) : (
-                recentTrades.map((trade, index) => (
-                  <motion.div
-                    key={trade.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '8px',
-                      backgroundColor: hoveredMetric === trade.id ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.02)',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={() => setHoveredMetric(trade.id)}
-                    onMouseLeave={() => setHoveredMetric(null)}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '8px',
-                        backgroundColor: trade.type === 'Long' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                ) : (
+                  recentTrades.map((trade, index) => (
+                    <motion.div
+                      key={trade.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      style={{
                         display: 'flex',
+                        justifyContent: 'space-between',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        color: trade.type === 'Long' ? '#22c55e' : '#ef4444'
-                      }}>
-                        {trade.type === 'Long' ? <RiArrowUpLine size={16} /> : <RiArrowDownLine size={16} />}
-                      </div>
-                      <div>
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '6px', 
-                          marginBottom: '2px' 
+                        padding: '8px',
+                        backgroundColor: hoveredMetric === trade.id ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                      }}
+                      onMouseEnter={() => setHoveredMetric(trade.id)}
+                      onMouseLeave={() => setHoveredMetric(null)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          backgroundColor: trade.type === 'Long' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: trade.type === 'Long' ? '#22c55e' : '#ef4444'
                         }}>
-                          <span style={{ fontWeight: '600', fontSize: '13px' }}>{trade.symbol}</span>
-                          <span style={{ 
-                            fontSize: '11px', 
-                            color: 'rgba(255, 255, 255, 0.4)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
+                          {trade.type === 'Long' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                        </div>
+                        <div>
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '6px', 
+                            marginBottom: '2px' 
                           }}>
-                            <RiTimeLine size={10} />
-                            {new Date(trade.entry_date).toLocaleString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                              hour12: true
-                            })}
-                          </span>
+                            <span style={{ fontWeight: '600', fontSize: '13px' }}>{trade.symbol}</span>
+                            <span style={{ 
+                              fontSize: '11px', 
+                              color: 'rgba(255, 255, 255, 0.4)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}>
+                              <Clock size={10} />
+                              {new Date(trade.entry_date).toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                              })}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                            ${trade.entry_price} → ${trade.exit_price || 'Open'}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ 
+                          color: (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
+                          fontWeight: '600',
+                          marginBottom: '2px',
+                          fontSize: '13px'
+                        }}>
+                          ${Math.abs(trade.pnl || 0)}
                         </div>
                         <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                          ${trade.entry_price} → ${trade.exit_price || 'Open'}
+                          {trade.quantity} shares
                         </div>
                       </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ 
-                        color: (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444',
-                        fontWeight: '600',
-                        marginBottom: '2px',
-                        fontSize: '13px'
-                      }}>
-                        ${Math.abs(trade.pnl || 0)}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                        {trade.quantity} shares
-                      </div>
-                    </div>
-                  </motion.div>
-                ))
-              )}
+                    </motion.div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Strategy & Trade Type Breakdown */}
-      <div style={{ marginBottom: '16px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '8px'
-        }}>
-          {/* Performance by Strategy */}
+        {/* Strategy & Trade Type Breakdown */}
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '8px'
+          }}>
+            {/* Performance by Strategy */}
+            <div style={{
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '12px',
+              padding: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.05)'
+            }}>
+              <h2 style={{ 
+                fontSize: '14px', 
+                fontWeight: 'bold',
+                marginBottom: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <PieChart />
+                Performance by Strategy
+              </h2>
+              <div style={{ height: '300px' }}>
+                <Chart type="bar" data={strategyPerformanceData} options={strategyChartOptions} />
+              </div>
+            </div>
+
+            {/* Performance by Market */}
+            <div style={{
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '12px',
+              padding: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.05)'
+            }}>
+              <h2 style={{ 
+                fontSize: '14px', 
+                fontWeight: 'bold',
+                marginBottom: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <BarChart2 />
+                Performance by Market
+              </h2>
+              <div style={{ height: '300px' }}>
+                <Chart type="bar" data={marketPerformanceData} options={strategyChartOptions} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Entry/Exit Timing Heatmap */}
+        <div style={{ marginBottom: '16px' }}>
           <div style={{
             background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
             borderRadius: '12px',
@@ -1620,338 +1649,290 @@ const Dashboard = () => {
               alignItems: 'center',
               gap: '6px'
             }}>
-              <RiPieChartLine />
-              Performance by Strategy
+              <PieChart />
+              Entry/Exit Timing Heatmap
             </h2>
-            <div style={{ height: '300px' }}>
-              <Chart type="bar" data={strategyPerformanceData} options={strategyChartOptions} />
-            </div>
-          </div>
-
-          {/* Performance by Market */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            borderRadius: '12px',
-            padding: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h2 style={{ 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              marginBottom: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <RiBarChartGroupedLine />
-              Performance by Market
-            </h2>
-            <div style={{ height: '300px' }}>
-              <Chart type="bar" data={marketPerformanceData} options={strategyChartOptions} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Entry/Exit Timing Heatmap */}
-      <div style={{ marginBottom: '16px' }}>
-        <div style={{
-          background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-          borderRadius: '12px',
-          padding: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.05)'
-        }}>
-          <h2 style={{ 
-            fontSize: '14px', 
-            fontWeight: 'bold',
-            marginBottom: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            <RiPieChart2Line />
-            Entry/Exit Timing Heatmap
-          </h2>
-          <div style={{ overflowX: 'auto' }}>
-            <div style={{ 
-              display: 'grid',
-              gridTemplateColumns: 'auto repeat(24, minmax(32px, 1fr))',
-              gap: '1px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              padding: '1px',
-              borderRadius: '8px'
-            }}>
-              {/* Hours Header */}
-              <div style={{ padding: '6px', fontWeight: 'bold', textAlign: 'center', fontSize: '11px' }}></div>
-              {heatmapData.hours.map(hour => (
-                <div
-                  key={hour}
-                  style={{
-                    padding: '6px',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    backgroundColor: 'rgba(30, 41, 59, 0.4)',
-                    fontSize: '11px'
-                  }}
-                >
-                  {hour.toString().padStart(2, '0')}
-                </div>
-              ))}
-
-              {/* Days and Data */}
-              {heatmapData.days.map((day, dayIndex) => (
-                <React.Fragment key={day}>
-                  <div style={{
-                    padding: '6px',
-                    fontWeight: 'bold',
-                    backgroundColor: 'rgba(30, 41, 59, 0.4)',
-                    whiteSpace: 'nowrap',
-                    fontSize: '11px'
-                  }}>
-                    {day}
+            <div style={{ overflowX: 'auto' }}>
+              <div style={{ 
+                display: 'grid',
+                gridTemplateColumns: 'auto repeat(24, minmax(32px, 1fr))',
+                gap: '1px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                padding: '1px',
+                borderRadius: '8px'
+              }}>
+                {/* Hours Header */}
+                <div style={{ padding: '6px', fontWeight: 'bold', textAlign: 'center', fontSize: '11px' }}></div>
+                {heatmapData.hours.map(hour => (
+                  <div
+                    key={hour}
+                    style={{
+                      padding: '6px',
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                      backgroundColor: 'rgba(30, 41, 59, 0.4)',
+                      fontSize: '11px'
+                    }}
+                  >
+                    {hour.toString().padStart(2, '0')}
                   </div>
-                  {heatmapData.data[dayIndex].map((cell, hourIndex) => {
-                    const intensity = cell.count === 0 ? 0 : Math.min(Math.abs(cell.avgPnl) / 1000, 1);
-                    const color = cell.avgPnl >= 0 
-                      ? `rgba(34, 197, 94, ${intensity})`
-                      : `rgba(239, 68, 68, ${intensity})`;
-                    
-                    return (
-                      <div
-                        key={`${day}-${hourIndex}`}
-                        style={{
-                          padding: '6px',
-                          backgroundColor: cell.count === 0 ? 'rgba(30, 41, 59, 0.4)' : color,
-                          textAlign: 'center',
-                          fontSize: '11px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease'
-                        }}
-                        title={`${day} ${hourIndex}:00
+                ))}
+
+                {/* Days and Data */}
+                {heatmapData.days.map((day, dayIndex) => (
+                  <React.Fragment key={day}>
+                    <div style={{
+                      padding: '6px',
+                      fontWeight: 'bold',
+                      backgroundColor: 'rgba(30, 41, 59, 0.4)',
+                      whiteSpace: 'nowrap',
+                      fontSize: '11px'
+                    }}>
+                      {day}
+                    </div>
+                    {heatmapData.data[dayIndex].map((cell, hourIndex) => {
+                      const intensity = cell.count === 0 ? 0 : Math.min(Math.abs(cell.avgPnl) / 1000, 1);
+                      const color = cell.avgPnl >= 0 
+                        ? `rgba(34, 197, 94, ${intensity})`
+                        : `rgba(239, 68, 68, ${intensity})`;
+                      
+                      return (
+                        <div
+                          key={`${day}-${hourIndex}`}
+                          style={{
+                            padding: '6px',
+                            backgroundColor: cell.count === 0 ? 'rgba(30, 41, 59, 0.4)' : color,
+                            textAlign: 'center',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                          title={`${day} ${hourIndex}:00
 Trades: ${cell.count}
 Avg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
-                      >
-                        {cell.count}
-                      </div>
-                    );
-                  })}
-                </React.Fragment>
-              ))}
+                        >
+                          {cell.count}
+                        </div>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
+              </div>
             </div>
-          </div>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '12px',
-            marginTop: '12px',
-            fontSize: '11px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{
-                width: '12px',
-                height: '12px',
-                background: 'linear-gradient(to right, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 1))',
-                borderRadius: '2px'
-              }}></div>
-              <span>Loss</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{
-                width: '12px',
-                height: '12px',
-                background: 'linear-gradient(to right, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 1))',
-                borderRadius: '2px'
-              }}></div>
-              <span>Profit</span>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '12px',
+              marginTop: '12px',
+              fontSize: '11px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  background: 'linear-gradient(to right, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 1))',
+                  borderRadius: '2px'
+                }}></div>
+                <span>Loss</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  background: 'linear-gradient(to right, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 1))',
+                  borderRadius: '2px'
+                }}></div>
+                <span>Profit</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Behavioral & Discipline Metrics */}
-      <div style={{ marginBottom: '16px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '8px'
-        }}>
-          {/* Discipline Compliance Rate */}
+        {/* Behavioral & Discipline Metrics */}
+        <div style={{ marginBottom: '16px' }}>
           <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            borderRadius: '12px',
-            padding: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '8px'
           }}>
-            <h2 style={{ 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              marginBottom: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <RiSettings4Line />
-              Discipline Compliance
-            </h2>
+            {/* Discipline Compliance Rate */}
             <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '12px'
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '12px',
+              padding: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.05)'
             }}>
-              <div style={{
-                width: '100px',
-                height: '100px',
-                position: 'relative',
+              <h2 style={{ 
+                fontSize: '14px', 
+                fontWeight: 'bold',
+                marginBottom: '12px',
                 display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
+                gap: '6px'
               }}>
-                <svg width="100" height="100" style={{ transform: 'rotate(-90deg)' }}>
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    stroke="rgba(255, 255, 255, 0.1)"
-                    strokeWidth="6"
-                    fill="none"
-                  />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    stroke={disciplineMetrics.disciplineRate >= 80 ? '#22c55e' : '#f59e0b'}
-                    strokeWidth="6"
-                    fill="none"
-                    strokeDasharray={`${2 * Math.PI * 45}`}
-                    strokeDashoffset={`${2 * Math.PI * 45 * (1 - disciplineMetrics.disciplineRate / 100)}`}
-                    style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-                  />
-                </svg>
+                <Table />
+                Discipline Compliance
+              </h2>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
                 <div style={{
-                  position: 'absolute',
-                  fontSize: '20px',
-                  fontWeight: 'bold'
+                  width: '100px',
+                  height: '100px',
+                  position: 'relative',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
                 }}>
-                  {disciplineMetrics.disciplineRate.toFixed(1)}%
+                  <svg width="100" height="100" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      stroke="rgba(255, 255, 255, 0.1)"
+                      strokeWidth="6"
+                      fill="none"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      stroke={disciplineMetrics.disciplineRate >= 80 ? '#22c55e' : '#f59e0b'}
+                      strokeWidth="6"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 45}`}
+                      strokeDashoffset={`${2 * Math.PI * 45 * (1 - disciplineMetrics.disciplineRate / 100)}`}
+                      style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+                    />
+                  </svg>
+                  <div style={{
+                    position: 'absolute',
+                    fontSize: '20px',
+                    fontWeight: 'bold'
+                  }}>
+                    {disciplineMetrics.disciplineRate.toFixed(1)}%
+                  </div>
                 </div>
-              </div>
-              <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
-                Overall discipline compliance rate based on plan following, setup quality, and stop management
+                <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
+                  Overall discipline compliance rate based on plan following, setup quality, and stop management
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Emotion vs P/L Correlation */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            borderRadius: '12px',
-            padding: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h2 style={{ 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              marginBottom: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <RiLineChartLine />
-              Emotion vs P/L Correlation
-            </h2>
+            {/* Emotion vs P/L Correlation */}
             <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '12px'
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '12px',
+              padding: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.05)'
             }}>
-              <div style={{
-                width: '100px',
-                height: '100px',
-                position: 'relative',
+              <h2 style={{ 
+                fontSize: '14px', 
+                fontWeight: 'bold',
+                marginBottom: '12px',
                 display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <LineChart />
+                Emotion vs P/L Correlation
+              </h2>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '12px'
               }}>
                 <div style={{
-                  fontSize: '20px',
-                  fontWeight: 'bold',
-                  color: Math.abs(disciplineMetrics.emotionCorrelation) <= 0.3 ? '#22c55e' : '#ef4444'
+                  width: '100px',
+                  height: '100px',
+                  position: 'relative',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
                 }}>
-                  {disciplineMetrics.emotionCorrelation.toFixed(2)}
+                  <div style={{
+                    fontSize: '20px',
+                    fontWeight: 'bold',
+                    color: Math.abs(disciplineMetrics.emotionCorrelation) <= 0.3 ? '#22c55e' : '#ef4444'
+                  }}>
+                    {disciplineMetrics.emotionCorrelation.toFixed(2)}
+                  </div>
                 </div>
-              </div>
-              <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
-                Correlation between emotional state and trading performance (-1 to 1)
+                <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
+                  Correlation between emotional state and trading performance (-1 to 1)
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Checklist Adherence */}
-          <div style={{
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-            borderRadius: '12px',
-            padding: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.05)'
-          }}>
-            <h2 style={{ 
-              fontSize: '14px', 
-              fontWeight: 'bold',
-              marginBottom: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <RiFilterLine />
-              Checklist Adherence
-            </h2>
+            {/* Checklist Adherence */}
             <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '12px'
+              background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
+              borderRadius: '12px',
+              padding: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.05)'
             }}>
-              <div style={{
-                width: '100px',
-                height: '100px',
-                position: 'relative',
+              <h2 style={{ 
+                fontSize: '14px', 
+                fontWeight: 'bold',
+                marginBottom: '12px',
                 display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
+                gap: '6px'
               }}>
-                <svg width="100" height="100" style={{ transform: 'rotate(-90deg)' }}>
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    stroke="rgba(255, 255, 255, 0.1)"
-                    strokeWidth="6"
-                    fill="none"
-                  />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    stroke={disciplineMetrics.checklistAdherence >= 90 ? '#22c55e' : '#f59e0b'}
-                    strokeWidth="6"
-                    fill="none"
-                    strokeDasharray={`${2 * Math.PI * 45}`}
-                    strokeDashoffset={`${2 * Math.PI * 45 * (1 - disciplineMetrics.checklistAdherence / 100)}`}
-                    style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-                  />
-                </svg>
+                <Filter />
+                Checklist Adherence
+              </h2>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
                 <div style={{
-                  position: 'absolute',
-                  fontSize: '20px',
-                  fontWeight: 'bold'
+                  width: '100px',
+                  height: '100px',
+                  position: 'relative',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
                 }}>
-                  {disciplineMetrics.checklistAdherence.toFixed(1)}%
+                  <svg width="100" height="100" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      stroke="rgba(255, 255, 255, 0.1)"
+                      strokeWidth="6"
+                      fill="none"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      stroke={disciplineMetrics.checklistAdherence >= 90 ? '#22c55e' : '#f59e0b'}
+                      strokeWidth="6"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 45}`}
+                      strokeDashoffset={`${2 * Math.PI * 45 * (1 - disciplineMetrics.checklistAdherence / 100)}`}
+                      style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+                    />
+                  </svg>
+                  <div style={{
+                    position: 'absolute',
+                    fontSize: '20px',
+                    fontWeight: 'bold'
+                  }}>
+                    {disciplineMetrics.checklistAdherence.toFixed(1)}%
+                  </div>
                 </div>
-              </div>
-              <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
-                Percentage of pre-trade checklist items completed across all trades
+                <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
+                  Percentage of pre-trade checklist items completed across all trades
+                </div>
               </div>
             </div>
           </div>
