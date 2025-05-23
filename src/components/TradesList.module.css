@@ -1,0 +1,91 @@
+.menu {
+  position: absolute;
+  background-color: rgba(30, 41, 59, 0.95);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 0;
+  min-width: 160px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 1000;
+}
+
+.menuButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.menuButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.deleteButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.deleteButton:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.tradeContent {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr 1fr 1fr 1fr 1fr 1fr 80px;
+  align-items: center;
+  width: 100%;
+  padding: 0 10px;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #60a5fa;
+}
+
+.pnlPositive {
+  color: #34D399;
+  font-weight: bold;
+}
+
+.pnlNegative {
+  color: #F87171;
+  font-weight: bold;
+}
+
+.menuContainer {
+  position: relative;
+}
+
+.menuTrigger {
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.menuTrigger:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+} 
