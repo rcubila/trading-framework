@@ -13,12 +13,14 @@ import {
   RiImageLine,
   RiMagicLine,
   RiTestTubeLine,
+  RiDeleteBinLine,
 } from 'react-icons/ri';
 import { motion, AnimatePresence } from 'framer-motion';
 import { importTradesFromCSV } from '../lib/csv-import';
 import { processTradeImages, testOpenAIAccess } from '../lib/image-import';
 import { supabase, supabaseAdmin, profilesApi } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import styles from './ImportTrades.module.css';
 
 interface FileWithPreview extends File {
   preview?: string;
@@ -160,18 +162,7 @@ export const ImportTrades = () => {
             console.log('Trades imported successfully');
             // Show success message
             const successMessage = document.createElement('div');
-            successMessage.style.position = 'fixed';
-            successMessage.style.top = '20px';
-            successMessage.style.right = '20px';
-            successMessage.style.padding = '16px 24px';
-            successMessage.style.background = 'rgba(34, 197, 94, 0.9)';
-            successMessage.style.color = 'white';
-            successMessage.style.borderRadius = '8px';
-            successMessage.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-            successMessage.style.zIndex = '9999';
-            successMessage.style.display = 'flex';
-            successMessage.style.alignItems = 'center';
-            successMessage.style.gap = '8px';
+            successMessage.className = styles.successToast;
             successMessage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Trades imported successfully!';
             document.body.appendChild(successMessage);
 
@@ -205,18 +196,7 @@ export const ImportTrades = () => {
 
       // Show AI processing message
       const processingMessage = document.createElement('div');
-      processingMessage.style.position = 'fixed';
-      processingMessage.style.top = '20px';
-      processingMessage.style.right = '20px';
-      processingMessage.style.padding = '16px 24px';
-      processingMessage.style.background = 'rgba(168, 85, 247, 0.9)';
-      processingMessage.style.color = 'white';
-      processingMessage.style.borderRadius = '8px';
-      processingMessage.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-      processingMessage.style.zIndex = '9999';
-      processingMessage.style.display = 'flex';
-      processingMessage.style.alignItems = 'center';
-      processingMessage.style.gap = '8px';
+      processingMessage.className = styles.processingToast;
       processingMessage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path></svg>AI is processing your trade screenshots...';
       document.body.appendChild(processingMessage);
 
@@ -251,18 +231,7 @@ export const ImportTrades = () => {
       
       // Show success message
       const successMessage = document.createElement('div');
-      successMessage.style.position = 'fixed';
-      successMessage.style.top = '20px';
-      successMessage.style.right = '20px';
-      successMessage.style.padding = '16px 24px';
-      successMessage.style.background = 'rgba(34, 197, 94, 0.9)';
-      successMessage.style.color = 'white';
-      successMessage.style.borderRadius = '8px';
-      successMessage.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-      successMessage.style.zIndex = '9999';
-      successMessage.style.display = 'flex';
-      successMessage.style.alignItems = 'center';
-      successMessage.style.gap = '8px';
+      successMessage.className = styles.successToast;
       successMessage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Screenshots processed and trades imported successfully!';
       document.body.appendChild(successMessage);
 
