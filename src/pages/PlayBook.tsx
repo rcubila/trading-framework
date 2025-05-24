@@ -585,7 +585,7 @@ export const PlayBook: React.FC = () => {
                 onClick={() => setSelectedAsset(asset)}
               >
                 <div className={styles.cardActions}>
-                  <div style={{ position: 'relative' }}>
+                  <div className={styles.relative}>
                     <button 
                       className={styles.menuButton}
                       onClick={(e) => {
@@ -693,7 +693,7 @@ export const PlayBook: React.FC = () => {
                   onClick={() => setSelectedSetup(strategy)}
                 >
                   <div className={styles.cardActions}>
-                    <div style={{ position: 'relative' }}>
+                    <div className={styles.relative}>
                       <button 
                         className={styles.menuButton}
                         onClick={(e) => {
