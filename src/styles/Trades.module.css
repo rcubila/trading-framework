@@ -6,29 +6,100 @@
   backdrop-filter: blur(10px);
 }
 
-.headerActions {
+.header {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.actionButton {
-  padding: 5px;
-  border-radius: 12px;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-  cursor: pointer;
-  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
-  gap: 5px;
-  transition: all 0.2s ease;
+  margin-bottom: 20px;
+  width: 100%;
 }
 
-.actionButton.red {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+.header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: center;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.buttonIcon {
+  font-size: 16px;
+}
+
+.progressBar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #3b82f6;
+  transition: width 0.3s ease;
+}
+
+.tradeCard {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.tradeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tradeHeader h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.tradeDetails {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.tradeDetails div {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tradeDetails span {
+  color: rgba(255, 255, 255, 0.5);
+  margin-right: 4px;
 }
 
 /* Add the following classes for migrated styles */
@@ -291,16 +362,6 @@
 }
 
 /* Button styles */
-.button {
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .buttonPrimary {
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   border: none;
@@ -465,47 +526,10 @@
   color: white;
 }
 
-/* Progress bar */
-.progressBar {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  margin-bottom: 24px;
-}
-
-.progressBarFill {
-  height: 100%;
-  background: linear-gradient(to right, #60a5fa, #a78bfa);
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-
 /* Trade card */
-.tradeCard {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
-}
-
 .tradeCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.tradeHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.tradeHeader h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
 }
 
 .tradeType {
@@ -523,13 +547,6 @@
 .tradeType.short {
   background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
-}
-
-.tradeDetails {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
 }
 
 .tradeInfo {
