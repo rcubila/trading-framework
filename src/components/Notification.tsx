@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import styles from './Notification.module.css';
 
 interface NotificationProps {
   type: 'success' | 'error' | 'info';
@@ -27,24 +28,7 @@ export const Notification = ({ type, message, duration = 3000, onClose }: Notifi
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            padding: '16px 24px',
-            borderRadius: '8px',
-            backgroundColor: type === 'success' 
-              ? 'rgba(34, 197, 94, 0.9)'
-              : type === 'error'
-              ? 'rgba(239, 68, 68, 0.9)'
-              : 'rgba(168, 85, 247, 0.9)',
-            color: 'white',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
+          className={`${styles.notification} ${styles[type]}`}
         >
           {type === 'success' && (
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
