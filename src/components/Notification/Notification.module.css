@@ -28,4 +28,10 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+}
+
+.message {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.5;
 } 

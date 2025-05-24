@@ -26,16 +26,12 @@ const Sidebar: React.FC = () => {
               <li key={item.to}>
                 <Link
                   to={item.to}
-                  className={`${styles.navItem} ${
-                    isActive ? styles.navItemActive : styles.navItemInactive
-                  }`}
+                  className={`${styles.navItem} ${isActive ? styles.navItemActive : styles.navItemInactive}`}
                 >
-                  <span className={`${styles.icon} ${
-                    isActive ? styles.iconActive : styles.iconInactive
-                  }`}>
+                  <span className={`${styles.navIcon} ${isActive ? styles.navIconActive : styles.navIconInactive}`}>
                     {item.icon}
                   </span>
-                  <span className={styles.label}>{item.label}</span>
+                  <span className={styles.navText}>{item.label}</span>
                 </Link>
               </li>
             );

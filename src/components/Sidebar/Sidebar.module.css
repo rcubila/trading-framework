@@ -1,12 +1,12 @@
 .sidebar {
   height: 100vh;
   width: 18rem;
-  min-width: 280px;
   background: linear-gradient(to bottom, rgb(15, 23, 42), rgb(30, 41, 59), rgb(15, 23, 42));
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   display: flex;
   flex-direction: column;
   padding: 2rem 1rem;
+  min-width: 280px;
 }
 
 .logo {
@@ -39,10 +39,10 @@
   gap: 0.75rem;
   padding: 1rem 1.25rem;
   border-radius: 0.5rem;
+  transition: all 0.2s ease;
   font-weight: 500;
   font-size: 1rem;
   min-height: 56px;
-  transition: all 0.2s ease;
 }
 
 .navItemActive {
@@ -56,27 +56,23 @@
 }
 
 .navItemInactive:hover {
-  background-color: rgba(51, 65, 85, 0.6);
+  background: rgba(51, 65, 85, 0.6);
   color: white;
 }
 
-.icon {
+.navIcon {
   font-size: 1.25rem;
 }
 
-.iconActive {
+.navIconActive {
   color: white;
 }
 
-.iconInactive {
+.navIconInactive {
   color: rgb(165, 180, 252);
 }
 
-.iconInactive:hover {
-  color: white;
-}
-
-.label {
+.navText {
   flex: 1;
 }
 
