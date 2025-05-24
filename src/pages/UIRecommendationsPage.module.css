@@ -71,28 +71,29 @@
   margin-top: 0.25rem;
 }
 
-.badgeImplemented,
-.badgePending,
-.badgeInProgress {
+.statusBadge {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   border-radius: 9999px;
   border-width: 1px;
 }
 
-.badgeImplemented {
+.statusImplemented {
+  composes: statusBadge;
   background-color: rgba(22, 163, 74, 0.3);
   color: #4ade80;
   border-color: #16a34a;
 }
 
-.badgePending {
+.statusPending {
+  composes: statusBadge;
   background-color: rgba(234, 179, 8, 0.3);
   color: #facc15;
   border-color: #ca8a04;
 }
 
-.badgeInProgress {
+.statusInProgress {
+  composes: statusBadge;
   background-color: rgba(59, 130, 246, 0.3);
   color: #60a5fa;
   border-color: #2563eb;

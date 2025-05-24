@@ -1,25 +1,20 @@
 import React from 'react';
 import { PageHeader } from '../components/PageHeader';
+import styles from './UIRecommendationsPage.module.css';
 
 export const UIRecommendationsPage = () => {
   return (
-    <div style={{ 
-      padding: '5px',
-      color: 'white',
-      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
-      minHeight: '100vh',
-      backdropFilter: 'blur(10px)'
-    }}>
+    <div className={styles.container}>
       <PageHeader 
         title="UI Recommendations"
         subtitle="Suggestions to improve your user experience"
       />
 
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
-            <h2 className="text-xl font-semibold text-white mb-4">Visual Improvements</h2>
-            <ul className="space-y-4">
+      <div className={styles.content}>
+        <div className={styles.grid}>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Visual Improvements</h2>
+            <ul className={styles.list}>
               <RecommendationItem 
                 title="Consistent Spacing"
                 description="Use consistent margin and padding throughout the application."
@@ -38,9 +33,9 @@ export const UIRecommendationsPage = () => {
             </ul>
           </div>
 
-          <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
-            <h2 className="text-xl font-semibold text-white mb-4">Interaction Improvements</h2>
-            <ul className="space-y-4">
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Interaction Improvements</h2>
+            <ul className={styles.list}>
               <RecommendationItem 
                 title="Error Messages"
                 description="Provide clear error messages for all form submissions."
@@ -59,9 +54,9 @@ export const UIRecommendationsPage = () => {
             </ul>
           </div>
 
-          <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
-            <h2 className="text-xl font-semibold text-white mb-4">Performance Optimizations</h2>
-            <ul className="space-y-4">
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Performance Optimizations</h2>
+            <ul className={styles.list}>
               <RecommendationItem 
                 title="Image Optimization"
                 description="Optimize all images for faster loading times."
@@ -80,9 +75,9 @@ export const UIRecommendationsPage = () => {
             </ul>
           </div>
 
-          <div className="bg-gray-800/60 border border-gray-700 p-6 rounded-xl">
-            <h2 className="text-xl font-semibold text-white mb-4">Animation Recommendations</h2>
-            <ul className="space-y-4">
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Animation Recommendations</h2>
+            <ul className={styles.list}>
               <RecommendationItem 
                 title="Page Transitions"
                 description="Implement smooth page transitions using AnimatedRoutes component with fade and slide effects."
@@ -126,24 +121,24 @@ const RecommendationItem = ({ title, description, status }: RecommendationItemPr
   const getStatusBadge = () => {
     switch (status) {
       case 'implemented':
-        return <span className="px-2 py-1 text-xs rounded-full bg-green-900/30 text-green-400 border border-green-700">Implemented</span>;
+        return <span className={styles.statusImplemented}>Implemented</span>;
       case 'pending':
-        return <span className="px-2 py-1 text-xs rounded-full bg-yellow-900/30 text-yellow-400 border border-yellow-700">Pending</span>;
+        return <span className={styles.statusPending}>Pending</span>;
       case 'in-progress':
-        return <span className="px-2 py-1 text-xs rounded-full bg-blue-900/30 text-blue-400 border border-blue-700">In Progress</span>;
+        return <span className={styles.statusInProgress}>In Progress</span>;
       default:
         return null;
     }
   };
 
   return (
-    <li className="flex items-start space-x-4">
-      <div className="flex-1">
-        <div className="flex items-center justify-between">
-          <h3 className="font-medium text-white">{title}</h3>
+    <li className={styles.recommendationItem}>
+      <div className={styles.recommendationContent}>
+        <div className={styles.recommendationHeader}>
+          <h3 className={styles.recommendationTitle}>{title}</h3>
           {getStatusBadge()}
         </div>
-        <p className="text-gray-400 text-sm mt-1">{description}</p>
+        <p className={styles.recommendationDescription}>{description}</p>
       </div>
     </li>
   );

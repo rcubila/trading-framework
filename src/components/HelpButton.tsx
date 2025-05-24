@@ -37,7 +37,7 @@ export const HelpButton = () => {
               }}
             >
               <p className={styles.bubbleText}>
-                <RiMessage2Line style={{ flexShrink: 0 }} />
+                <RiMessage2Line className={styles.icon} />
                 Hi! Need help? 👋
               </p>
             </motion.div>
