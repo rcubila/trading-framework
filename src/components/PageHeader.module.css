@@ -163,4 +163,22 @@
   padding: 8px 12px;
   background: rgba(31, 41, 55, 0.95);
   color: rgba(255, 255, 255, 0.8);
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
 } 

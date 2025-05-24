@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import styles from './Playbook.module.css';
 import { AnimatedButton } from '../components/AnimatedButton';
 import { IconSelector } from '../components/IconSelector';
-import { MoreVertical, Plus, Search } from 'lucide-react';
+import { MoreVertical, Plus, Search, Edit, Trash2 } from 'lucide-react';
 
 interface Trade {
   id: string;
@@ -226,6 +226,7 @@ export const PlayBook: React.FC = () => {
   const [strategyToDelete, setStrategyToDelete] = useState<{ id: string; name: string } | null>(null);
   const [showDeleteStrategyModal, setShowDeleteStrategyModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showMenu, setShowMenu] = useState<string | null>(null);
 
   // Fetch assets and their strategies when component mounts
   useEffect(() => {
@@ -584,12 +585,42 @@ export const PlayBook: React.FC = () => {
                 onClick={() => setSelectedAsset(asset)}
               >
                 <div className={styles.cardActions}>
-                  <button
-                    className={styles.deleteButton}
-                    onClick={(e) => handleDeleteClick(e, asset)}
-                  >
-                    Delete
-                  </button>
+                  <div style={{ position: 'relative' }}>
+                    <button 
+                      className={styles.menuButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowMenu(showMenu === asset.id ? null : asset.id);
+                      }}
+                    >
+                      <MoreVertical size={16} />
+                    </button>
+                    {showMenu === asset.id && (
+                      <div className={styles.menuDropdown}>
+                        <button 
+                          className={styles.menuItem}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowMenu(null);
+                          }}
+                        >
+                          <Edit size={14} />
+                          Edit
+                        </button>
+                        <button 
+                          className={styles.menuItemDelete}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAssetToDelete({ id: asset.id, name: asset.asset });
+                            setShowDeleteConfirmModal(true);
+                          }}
+                        >
+                          <Trash2 size={14} />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className={styles.cardContent}>
                   <div className={styles.cardHeader}>
@@ -662,12 +693,42 @@ export const PlayBook: React.FC = () => {
                   onClick={() => setSelectedSetup(strategy)}
                 >
                   <div className={styles.cardActions}>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={(e) => handleDeleteStrategyClick(e, strategy)}
-                    >
-                      Delete
-                    </button>
+                    <div style={{ position: 'relative' }}>
+                      <button 
+                        className={styles.menuButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowMenu(showMenu === strategy.id ? null : strategy.id);
+                        }}
+                      >
+                        <MoreVertical size={16} />
+                      </button>
+                      {showMenu === strategy.id && (
+                        <div className={styles.menuDropdown}>
+                          <button 
+                            className={styles.menuItem}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowMenu(null);
+                            }}
+                          >
+                            <Edit size={14} />
+                            Edit
+                          </button>
+                          <button 
+                            className={styles.menuItemDelete}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setStrategyToDelete({ id: strategy.id, name: strategy.title });
+                              setShowDeleteStrategyModal(true);
+                            }}
+                          >
+                            <Trash2 size={14} />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className={styles.cardContent}>
                     <div className={styles.cardHeader}>
