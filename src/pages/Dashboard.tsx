@@ -1063,7 +1063,7 @@ const Dashboard = () => {
                   <Filter />
                 </button>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className={styles.recentTradesList}>
                 {isLoadingTrades ? (
                   // Loading skeleton
                   Array(4).fill(null).map((_, index) => (
@@ -1193,11 +1193,9 @@ const Dashboard = () => {
                     return (
                       <div
                         key={`${day}-${hourIndex}`}
-                        className={styles.heatmapCell}
-                        style={{ backgroundColor: cell.count === 0 ? 'rgba(30, 41, 59, 0.4)' : color }}
-                        title={`${day} ${hourIndex}:00
-Trades: ${cell.count}
-Avg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
+                        className={`${styles.heatmapCell} ${cell.count === 0 ? styles.heatmapCellEmpty : ''}`}
+                        style={cell.count === 0 ? undefined : { backgroundColor: color }}
+                        title={`${day} ${hourIndex}:00\nTrades: ${cell.count}\nAvg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
                       >
                         {cell.count}
                       </div>

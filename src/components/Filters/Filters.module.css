@@ -1,0 +1,69 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.filterGroup label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.filterGroup input,
+.filterGroup select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+  outline: none;
+}
+
+.filterGroup input:focus,
+.filterGroup select:focus {
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateRange input {
+  flex: 1;
+}
+
+.dateRange span {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.resetButton {
+  align-self: flex-end;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resetButton:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+} 
