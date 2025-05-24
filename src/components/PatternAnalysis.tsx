@@ -9,6 +9,7 @@ import {
   RiArrowUpLine,
   RiArrowDownLine,
 } from 'react-icons/ri';
+import styles from './PatternAnalysis.module.css';
 
 interface Trade {
   id: string;
@@ -139,71 +140,42 @@ export const PatternAnalysis = ({ trades }: { trades: Trade[] }) => {
   };
 
   return (
-    <div style={{ display: 'grid', gap: '24px' }}>
+    <div className={styles.container}>
       {/* Setup Performance */}
-      <div style={{
-        background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-        borderRadius: '16px',
-        padding: '24px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-      }}>
-        <h2 style={{ 
-          fontSize: '18px', 
-          fontWeight: 'bold', 
-          marginBottom: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}>
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>
           <RiStockLine />
           Setup Performance
         </h2>
-        <div style={{ display: 'grid', gap: '12px' }}>
+        <div className={styles.metricsGrid}>
           {metrics.setupPerformance.map((setup) => (
             <div
               key={setup.setup}
-              style={{
-                padding: '16px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '12px',
-                display: 'grid',
-                gridTemplateColumns: '1fr auto auto auto',
-                gap: '16px',
-                alignItems: 'center',
-              }}
+              className={styles.metricCard}
             >
               <div>
-                <div style={{ fontWeight: '500' }}>{setup.setup}</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.metricName}>{setup.setup}</div>
+                <div className={styles.metricCount}>
                   {setup.count} trades
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ color: setup.winRate >= 50 ? '#22c55e' : '#ef4444' }}>
+              <div className={styles.metricValue}>
+                <div className={setup.winRate >= 50 ? styles.positiveValue : styles.negativeValue}>
                   {setup.winRate.toFixed(1)}%
                 </div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.metricLabel}>
                   Win Rate
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ color: setup.avgReturn >= 0 ? '#22c55e' : '#ef4444' }}>
+              <div className={styles.metricValue}>
+                <div className={setup.avgReturn >= 0 ? styles.positiveValue : styles.negativeValue}>
                   {setup.avgReturn >= 0 ? '+' : ''}{setup.avgReturn.toFixed(2)}%
                 </div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.metricLabel}>
                   Avg Return
                 </div>
               </div>
-              <div style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                background: setup.avgReturn >= 0 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: setup.avgReturn >= 0 ? '#22c55e' : '#ef4444',
-              }}>
+              <div className={`${styles.trendIcon} ${setup.avgReturn >= 0 ? styles.trendIconPositive : styles.trendIconNegative}`}>
                 {setup.avgReturn >= 0 ? <RiArrowUpLine /> : <RiArrowDownLine />}
               </div>
             </div>
@@ -212,56 +184,36 @@ export const PatternAnalysis = ({ trades }: { trades: Trade[] }) => {
       </div>
 
       {/* Time-Based Patterns */}
-      <div style={{
-        background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-        borderRadius: '16px',
-        padding: '24px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-      }}>
-        <h2 style={{ 
-          fontSize: '18px', 
-          fontWeight: 'bold', 
-          marginBottom: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}>
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>
           <RiTimeLine />
           Time-Based Patterns
         </h2>
-        <div style={{ display: 'grid', gap: '12px' }}>
+        <div className={styles.metricsGrid}>
           {metrics.timeBasedPatterns.map((time) => (
             <div
               key={time.timeOfDay}
-              style={{
-                padding: '16px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '12px',
-                display: 'grid',
-                gridTemplateColumns: '1fr auto auto',
-                gap: '16px',
-                alignItems: 'center',
-              }}
+              className={`${styles.metricCard} ${styles.metricCardTime}`}
             >
               <div>
-                <div style={{ fontWeight: '500' }}>{time.timeOfDay}</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.metricName}>{time.timeOfDay}</div>
+                <div className={styles.metricCount}>
                   {time.count} trades
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ color: time.winRate >= 50 ? '#22c55e' : '#ef4444' }}>
+              <div className={styles.metricValue}>
+                <div className={time.winRate >= 50 ? styles.positiveValue : styles.negativeValue}>
                   {time.winRate.toFixed(1)}%
                 </div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.metricLabel}>
                   Win Rate
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ color: time.avgReturn >= 0 ? '#22c55e' : '#ef4444' }}>
+              <div className={styles.metricValue}>
+                <div className={time.avgReturn >= 0 ? styles.positiveValue : styles.negativeValue}>
                   {time.avgReturn >= 0 ? '+' : ''}{time.avgReturn.toFixed(2)}%
                 </div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.metricLabel}>
                   Avg Return
                 </div>
               </div>
@@ -271,58 +223,41 @@ export const PatternAnalysis = ({ trades }: { trades: Trade[] }) => {
       </div>
 
       {/* Market Conditions */}
-      <div style={{
-        background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%)',
-        borderRadius: '16px',
-        padding: '24px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-      }}>
-        <h2 style={{ 
-          fontSize: '18px', 
-          fontWeight: 'bold', 
-          marginBottom: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}>
-          <RiSunLine />
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>
+          <RiLineChartLine />
           Market Conditions
         </h2>
-        <div style={{ display: 'grid', gap: '12px' }}>
+        <div className={styles.metricsGrid}>
           {metrics.marketConditions.map((condition) => (
             <div
               key={condition.condition}
-              style={{
-                padding: '16px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '12px',
-                display: 'grid',
-                gridTemplateColumns: '1fr auto auto',
-                gap: '16px',
-                alignItems: 'center',
-              }}
+              className={styles.metricCard}
             >
               <div>
-                <div style={{ fontWeight: '500' }}>{condition.condition}</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.metricName}>{condition.condition}</div>
+                <div className={styles.metricCount}>
                   {condition.count} trades
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ color: condition.winRate >= 50 ? '#22c55e' : '#ef4444' }}>
+              <div className={styles.metricValue}>
+                <div className={condition.winRate >= 50 ? styles.positiveValue : styles.negativeValue}>
                   {condition.winRate.toFixed(1)}%
                 </div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.metricLabel}>
                   Win Rate
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ color: condition.avgReturn >= 0 ? '#22c55e' : '#ef4444' }}>
+              <div className={styles.metricValue}>
+                <div className={condition.avgReturn >= 0 ? styles.positiveValue : styles.negativeValue}>
                   {condition.avgReturn >= 0 ? '+' : ''}{condition.avgReturn.toFixed(2)}%
                 </div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                <div className={styles.metricLabel}>
                   Avg Return
                 </div>
+              </div>
+              <div className={`${styles.trendIcon} ${condition.avgReturn >= 0 ? styles.trendIconPositive : styles.trendIconNegative}`}>
+                {condition.avgReturn >= 0 ? <RiArrowUpLine /> : <RiArrowDownLine />}
               </div>
             </div>
           ))}
