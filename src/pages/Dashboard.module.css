@@ -338,10 +338,10 @@
   color: white;
 }
 
-.tradeList {
+.recentTradesList {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .tradeItem {
@@ -938,4 +938,8 @@
 
 .emotionValueHigh {
   color: #ef4444;
+}
+
+.heatmapCellEmpty {
+  background-color: rgba(30, 41, 59, 0.4);
 } 

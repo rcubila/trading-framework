@@ -1,0 +1,31 @@
+.card {
+  @apply bg-white/5;
+  @apply backdrop-blur-lg;
+  @apply rounded-2xl;
+  @apply border border-white/10;
+  @apply p-5;
+  @apply transition-all duration-200;
+  @apply cursor-pointer;
+  @apply hover:bg-white/10;
+  @apply hover:shadow-lg hover:shadow-black/10;
+  @apply active:shadow-md;
+}
+
+/* Glass effect */
+.card::before {
+  content: '';
+  @apply absolute inset-0;
+  @apply rounded-2xl;
+  @apply bg-gradient-to-b from-white/10 to-transparent;
+  @apply opacity-0;
+  @apply transition-opacity duration-200;
+}
+
+.card:hover::before {
+  @apply opacity-100;
+}
+
+/* Content styles */
+.content {
+  @apply relative z-10;
+} 

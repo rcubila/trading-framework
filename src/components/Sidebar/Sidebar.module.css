@@ -1,0 +1,89 @@
+.sidebar {
+  height: 100vh;
+  width: 18rem;
+  min-width: 280px;
+  background: linear-gradient(to bottom, rgb(15, 23, 42), rgb(30, 41, 59), rgb(15, 23, 42));
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1rem;
+}
+
+.logo {
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(129, 140, 248);
+  letter-spacing: 0.025em;
+}
+
+.nav {
+  flex: 1;
+}
+
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 1rem;
+  min-height: 56px;
+  transition: all 0.2s ease;
+}
+
+.navItemActive {
+  background: linear-gradient(to right, rgb(99, 102, 241), rgb(59, 130, 246));
+  color: white;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.navItemInactive {
+  color: rgb(226, 232, 240);
+}
+
+.navItemInactive:hover {
+  background-color: rgba(51, 65, 85, 0.6);
+  color: white;
+}
+
+.icon {
+  font-size: 1.25rem;
+}
+
+.iconActive {
+  color: white;
+}
+
+.iconInactive {
+  color: rgb(165, 180, 252);
+}
+
+.iconInactive:hover {
+  color: white;
+}
+
+.label {
+  flex: 1;
+}
+
+.footer {
+  margin-top: auto;
+  font-size: 0.75rem;
+  color: rgb(100, 116, 139);
+  text-align: center;
+  opacity: 0.7;
+} 
