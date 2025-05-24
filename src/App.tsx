@@ -9,7 +9,7 @@ import { ImportTrades } from './pages/ImportTrades';
 import { Analytics } from './pages/Analytics';
 import Login from './pages/Login';
 import { Profile } from './pages/Profile';
-import { Settings } from './pages/Settings';
+import Settings from './pages/Settings';
 import { UIRecommendationsPage } from './pages/UIRecommendationsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
