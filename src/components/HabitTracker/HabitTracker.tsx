@@ -79,84 +79,84 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ onHabitToggle }) => 
   };
 
   return (
-    <div className="overflow-x-auto">
-      <div className="mb-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-white">Daily Trading Habits</h2>
-        <div className="flex items-center space-x-4">
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Daily Trading Habits</h2>
+        <div className={styles.headerControls}>
           <button
             onClick={() => setSelectedMonth(new Date())}
-            className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className={styles.todayButton}
           >
             Today
           </button>
-          <span className="text-gray-300">
+          <span className={styles.monthText}>
             {format(selectedMonth, 'MMMM yyyy')}
           </span>
         </div>
       </div>
 
-      <table className="min-w-full bg-gray-800 rounded-lg overflow-hidden">
+      <table className={styles.table}>
         <thead>
           <tr>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Habit</th>
-            <th className="px-4 py-3 text-center text-sm font-medium text-gray-300 w-24">Progress</th>
-            <th className="px-4 py-3 text-center text-sm font-medium text-gray-300 w-20">Goal</th>
-            <th className="px-4 py-3 text-center text-sm font-medium text-gray-300 w-20">Done</th>
-            <th className="px-4 py-3 text-center text-sm font-medium text-gray-300 w-20">Left</th>
+            <th className={styles.tableHeader}>Habit</th>
+            <th className={`${styles.tableHeader} ${styles.tableHeaderCenter}`}>Progress</th>
+            <th className={`${styles.tableHeader} ${styles.tableHeaderCenter}`}>Goal</th>
+            <th className={`${styles.tableHeader} ${styles.tableHeaderCenter}`}>Done</th>
+            <th className={`${styles.tableHeader} ${styles.tableHeaderCenter}`}>Left</th>
             {daysInMonth.map(day => (
               <th 
                 key={format(day, 'yyyy-MM-dd')} 
-                className="px-2 py-3 text-center text-xs font-medium text-gray-300"
+                className={`${styles.tableHeader} ${styles.tableHeaderCenter}`}
               >
                 {format(day, 'd')}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-700">
+        <tbody>
           {habits.map(habit => {
             const completionRate = calculateCompletionRate(habit.id);
             return (
-              <tr key={habit.id} className="hover:bg-gray-700">
-                <td className="px-4 py-3 text-sm text-gray-300">
-                  <div className="flex items-center">
-                    <span className="mr-2">{habit.icon}</span>
+              <tr key={habit.id} className={styles.tableRow}>
+                <td className={styles.tableCell}>
+                  <div className={styles.habitInfo}>
+                    <span className={styles.habitIcon}>{habit.icon}</span>
                     <div>
-                      <div>{habit.name}</div>
-                      <div className="text-xs text-gray-400">{habit.description}</div>
+                      <div className={styles.habitName}>{habit.name}</div>
+                      <div className={styles.habitDescription}>{habit.description}</div>
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className={`${styles.tableCell} ${styles.tableCellCenter}`}>
                   <div className={styles.progressBar}>
                     <div
                       className={styles.progressBarFill}
                       style={{ '--completion-rate': `${completionRate}%` } as React.CSSProperties}
                     />
                   </div>
-                  <span className="text-xs text-gray-400 mt-1">{completionRate}%</span>
+                  <span className={styles.progressText}>{completionRate}%</span>
                 </td>
-                <td className="px-4 py-3 text-center text-sm text-gray-300">{habit.goal}</td>
-                <td className="px-4 py-3 text-center text-sm text-green-400">{habit.done}</td>
-                <td className="px-4 py-3 text-center text-sm text-red-400">{habit.remaining}</td>
+                <td className={`${styles.tableCell} ${styles.tableCellCenter}`}>{habit.goal}</td>
+                <td className={`${styles.tableCell} ${styles.tableCellCenter} ${styles.completedCount}`}>{habit.done}</td>
+                <td className={`${styles.tableCell} ${styles.tableCellCenter} ${styles.remainingCount}`}>{habit.remaining}</td>
                 {daysInMonth.map(day => {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isCompleted = isHabitCompleted(habit.id, dateStr);
                   return (
                     <td 
                       key={dateStr}
-                      className="px-2 py-3 text-center"
+                      className={`${styles.tableCell} ${styles.tableCellCenter}`}
                     >
                       <button
                         onClick={() => handleHabitToggle(habit.id, dateStr, !isCompleted)}
-                        className={`w-6 h-6 rounded-full ${
+                        className={`${styles.checkboxButton} ${
                           isCompleted 
-                            ? 'bg-green-500 hover:bg-green-600' 
-                            : 'bg-gray-600 hover:bg-gray-500'
+                            ? styles.checkboxButtonCompleted 
+                            : styles.checkboxButtonIncomplete
                         }`}
                       >
                         {isCompleted && (
-                          <svg className="w-4 h-4 mx-auto text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className={styles.checkboxIcon} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
                         )}
@@ -170,19 +170,19 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ onHabitToggle }) => 
         </tbody>
       </table>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-lg font-medium text-white mb-3">Habit Statistics</h3>
-          <div className="space-y-2">
+      <div className={styles.statsGrid}>
+        <div className={styles.statsCard}>
+          <h3 className={styles.statsTitle}>Habit Statistics</h3>
+          <div className={styles.statsList}>
             {habits.map(habit => {
               const completionRate = calculateCompletionRate(habit.id);
               return (
-                <div key={habit.id} className="flex justify-between items-center">
-                  <span className="text-sm text-gray-300">{habit.name}</span>
-                  <span className={`text-sm ${
-                    completionRate >= 70 ? 'text-green-400' :
-                    completionRate >= 40 ? 'text-yellow-400' :
-                    'text-red-400'
+                <div key={habit.id} className={styles.statsItem}>
+                  <span className={styles.statsLabel}>{habit.name}</span>
+                  <span className={`${styles.statsValue} ${
+                    completionRate >= 70 ? styles.statsValueHigh :
+                    completionRate >= 40 ? styles.statsValueMedium :
+                    styles.statsValueLow
                   }`}>
                     {completionRate}%
                   </span>
@@ -192,9 +192,9 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ onHabitToggle }) => 
           </div>
         </div>
 
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-lg font-medium text-white mb-3">Best Performing</h3>
-          <div className="space-y-2">
+        <div className={styles.statsCard}>
+          <h3 className={styles.statsTitle}>Best Performing</h3>
+          <div className={styles.statsList}>
             {habits
               .map(habit => ({
                 habit,
@@ -203,17 +203,17 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ onHabitToggle }) => 
               .sort((a, b) => b.completionRate - a.completionRate)
               .slice(0, 5)
               .map(({ habit, completionRate }) => (
-                <div key={habit.id} className="flex justify-between items-center">
-                  <span className="text-sm text-gray-300">{habit.name}</span>
-                  <span className="text-sm text-green-400">{completionRate}%</span>
+                <div key={habit.id} className={styles.statsItem}>
+                  <span className={styles.statsLabel}>{habit.name}</span>
+                  <span className={`${styles.statsValue} ${styles.statsValueHigh}`}>{completionRate}%</span>
                 </div>
               ))}
           </div>
         </div>
 
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-lg font-medium text-white mb-3">Needs Improvement</h3>
-          <div className="space-y-2">
+        <div className={styles.statsCard}>
+          <h3 className={styles.statsTitle}>Needs Improvement</h3>
+          <div className={styles.statsList}>
             {habits
               .map(habit => ({
                 habit,
@@ -222,9 +222,9 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ onHabitToggle }) => 
               .sort((a, b) => a.completionRate - b.completionRate)
               .slice(0, 5)
               .map(({ habit, completionRate }) => (
-                <div key={habit.id} className="flex justify-between items-center">
-                  <span className="text-sm text-gray-300">{habit.name}</span>
-                  <span className="text-sm text-red-400">{completionRate}%</span>
+                <div key={habit.id} className={styles.statsItem}>
+                  <span className={styles.statsLabel}>{habit.name}</span>
+                  <span className={`${styles.statsValue} ${styles.statsValueLow}`}>{completionRate}%</span>
                 </div>
               ))}
           </div>
