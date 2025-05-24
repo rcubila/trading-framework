@@ -96,7 +96,7 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
             <div className={styles.tradeInfoList}>
               <div className={styles.tradeInfoItem}>
                 <div className={styles.tradeInfoLabel}>
-                  <RiExchangeDollarLine style={{ color: '#3b82f6' }} />
+                  <RiExchangeDollarLine className={styles.entryIcon} />
                   Entry Price
                 </div>
                 <div className={`${styles.tradeInfoValue} ${styles.entryPrice}`}>
@@ -106,7 +106,7 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
               
               <div className={styles.tradeInfoItem}>
                 <div className={styles.tradeInfoLabel}>
-                  <RiExchangeDollarLine style={{ color: '#8b5cf6' }} />
+                  <RiExchangeDollarLine className={styles.exitIcon} />
                   Exit Price
                 </div>
                 <div className={`${styles.tradeInfoValue} ${styles.exitPrice}`}>
@@ -116,7 +116,7 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
 
               <div className={styles.tradeInfoItem}>
                 <div className={styles.tradeInfoLabel}>
-                  <RiTimeLine style={{ color: '#f59e0b' }} />
+                  <RiTimeLine className={styles.durationIcon} />
                   Duration
                 </div>
                 <div className={`${styles.tradeInfoValue} ${styles.duration}`}>
@@ -126,7 +126,7 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
 
               <div className={styles.tradeInfoItem}>
                 <div className={styles.tradeInfoLabel}>
-                  <RiScales3Line style={{ color: '#22c55e' }} />
+                  <RiScales3Line className={styles.riskRewardIcon} />
                   Risk/Reward
                 </div>
                 <div className={`${styles.tradeInfoValue} ${styles.riskReward}`}>
@@ -193,7 +193,7 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
         </div>
 
         {/* Right Column - Chart */}
-        <div style={{ flex: '1' }}>
+        <div className={styles.chartContainer}>
           <TradeChart trade={trade} />
         </div>
       </div>
