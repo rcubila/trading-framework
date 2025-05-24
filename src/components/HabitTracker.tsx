@@ -4,6 +4,7 @@ import { TradingHabit, HabitVerification } from '../types/discipline';
 import { useDiscipline } from '../context/DisciplineContext';
 import { supabase } from '../lib/supabaseClient';
 import toast from 'react-hot-toast';
+import styles from './HabitTracker.module.css';
 
 interface HabitTrackerProps {
   onHabitToggle: (habitId: string, date: string, completed: boolean) => void;
@@ -127,9 +128,9 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ onHabitToggle }) => 
                   </div>
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className={styles.progressBar}>
                     <div
-                      className="bg-indigo-600 h-2 rounded-full"
+                      className={styles.progressBarFill}
                       style={{ width: `${completionRate}%` }}
                     />
                   </div>
