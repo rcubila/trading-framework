@@ -50,7 +50,7 @@ export const Notification = ({ type, message, duration = 3000, onClose }: Notifi
               <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
           )}
-          {message}
+          <span className={styles.message}>{message}</span>
         </motion.div>
       )}
     </AnimatePresence>
