@@ -32,7 +32,7 @@
 
 .chartContainer {
   flex: 1;
-  min-height: 400px;
+  height: var(--container-height, 800px);
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   display: flex;
