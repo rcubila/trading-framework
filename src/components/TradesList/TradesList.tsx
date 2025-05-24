@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { RiArrowUpLine, RiArrowDownLine, RiDeleteBinLine, RiMoreLine, RiEditLine, RiFileCopyLine } from 'react-icons/ri';
 import { FixedSizeList as List } from 'react-window';
-import type { Trade } from '../types/trade';
-import { formatPnL } from '../utils/trading';
+import type { Trade } from '../../types/trade';
+import { formatPnL } from '../../utils/trading';
 import styles from './TradesList.module.css';
 
 interface TradesListProps {
@@ -11,7 +11,7 @@ interface TradesListProps {
   onTradeClick: (trade: Trade) => void;
   onDeleteClick: (trade: Trade) => void;
   selectedTrades: Set<string>;
-  onSelectTrade: (tradeId: string) => void;
+  onSelectTrade: (trade: Trade) => void;
   onSelectAll: (trades: Trade[]) => void;
   refreshTrigger: number;
 }
@@ -19,27 +19,30 @@ interface TradesListProps {
 interface TradeMenuProps {
   trade: Trade;
   onEdit: (trade: Trade) => void;
-  onDelete: (tradeId: string) => void;
-}
-
-interface RowProps {
-  trade: Trade;
-  onEdit: (trade: Trade) => void;
-  onDelete: (tradeId: string) => void;
-  isSelected: boolean;
-  onSelect: (tradeId: string) => void;
+  onDelete: (trade: Trade) => void;
 }
 
 interface TradeContentProps {
-  trades: Trade[];
-  onDeleteClick: (tradeId: string) => void;
+  trade: Trade;
+  onDeleteClick?: (trade: Trade) => void;
   onSelectTrade: (trade: Trade) => void;
+}
+
+interface RowProps {
+  index: number;
+  style: React.CSSProperties;
+  data: {
+    trades: Trade[];
+    onTradeClick?: (trade: Trade) => void;
+    onDeleteClick?: (trade: Trade) => void;
+    selectedTrades: Set<string>;
+    onSelectTrade: (trade: Trade) => void;
+  };
 }
 
 const ITEM_SIZE = 72; // Height of each trade row
 const LOADING_BUFFER = 10; // Number of items to load before reaching the end
 
-// Add dropdown menu component
 const TradeMenu = ({ trade, onEdit, onDelete }: TradeMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, right: 0 });
@@ -81,7 +84,7 @@ const TradeMenu = ({ trade, onEdit, onDelete }: TradeMenuProps) => {
             </svg>
             Edit
           </button>
-          <button className={styles.menuButtonDelete} onClick={() => onDelete(trade.id)}>
+          <button className={styles.menuButtonDelete} onClick={() => onDelete(trade)}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -93,43 +96,23 @@ const TradeMenu = ({ trade, onEdit, onDelete }: TradeMenuProps) => {
   );
 };
 
-// Modify TradeContent to include menu functionality
-const TradeContent = ({ trades, onDeleteClick, onSelectTrade }: TradeContentProps) => {
-  const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
-
+const TradeContent = ({ trade, onDeleteClick, onSelectTrade }: TradeContentProps) => {
   return (
-    <div className={styles.listContainer}>
-      {trades.map((trade) => (
-        <Row
-          key={trade.id}
-          trade={trade}
-          onEdit={onSelectTrade}
-          onDelete={onDeleteClick}
-          isSelected={selectedTrade?.id === trade.id}
-          onSelect={(tradeId) => setSelectedTrade(trades.find(t => t.id === tradeId) || null)}
-        />
-      ))}
+    <div className={styles.tradeContent}>
+      <TradeMenu trade={trade} onEdit={onSelectTrade} onDelete={onDeleteClick || (() => {})} />
     </div>
   );
 };
 
-// Memoize the row component
-const Row = memo(({ index, style, data }: { 
-  index: number; 
-  style: React.CSSProperties; 
-  data: { 
-    trades: Trade[]; 
-    onTradeClick?: (trade: Trade) => void;
-    onDeleteClick?: (trade: Trade) => void;
-    selectedTrades: Set<string>;
-    onSelectTrade: (tradeId: string) => void;
-  } 
-}) => {
+const Row = memo(({ index, style, data }: RowProps) => {
   const trade = data.trades[index];
   
   if (!trade) {
     return (
-      <div className={styles.skeleton} style={style}>
+      <div 
+        className={styles.skeleton} 
+        style={{ '--skeleton-height': `${style.height}px` } as React.CSSProperties}
+      >
         <div className={styles.skeletonLine} />
         <div className={styles.skeletonLine} />
       </div>
@@ -139,10 +122,14 @@ const Row = memo(({ index, style, data }: {
   return (
     <div
       className={styles.tradeRow}
-      style={style}
+      style={{ height: style.height }}
       onClick={() => data.onTradeClick?.(trade)}
     >
-      <TradeContent trade={trade} onDeleteClick={data.onDeleteClick} onSelectTrade={data.onSelectTrade} />
+      <TradeContent 
+        trade={trade} 
+        onDeleteClick={data.onDeleteClick} 
+        onSelectTrade={data.onSelectTrade} 
+      />
     </div>
   );
 });
