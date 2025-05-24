@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RiCloseLine } from 'react-icons/ri';
 import { supabase } from '../lib/supabaseClient';
 import type { TradingRule } from '../types/discipline';
+import styles from './AddRuleModal.module.css';
 
 interface AddRuleModalProps {
   isOpen: boolean;
@@ -62,79 +63,27 @@ export const AddRuleModal = ({ isOpen, onClose, onRuleAdded }: AddRuleModalProps
   if (!isOpen) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0, 0, 0, 0.7)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000,
-      backdropFilter: 'blur(4px)'
-    }}>
+    <div className={styles.modalOverlay}>
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        style={{
-          background: 'rgba(15, 23, 42, 0.9)',
-          borderRadius: '16px',
-          padding: '24px',
-          width: '90%',
-          maxWidth: '500px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          color: 'white',
-          position: 'relative'
-        }}
+        className={styles.modalContent}
       >
         <button
           onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
-            background: 'none',
-            border: 'none',
-            color: 'rgba(255, 255, 255, 0.6)',
-            cursor: 'pointer',
-            padding: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '4px',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = 'white';
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
-            e.currentTarget.style.background = 'none';
-          }}
+          className={styles.closeButton}
         >
           <RiCloseLine size={24} />
         </button>
 
-        <h2 style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          marginBottom: '20px'
-        }}>
+        <h2 className={styles.modalTitle}>
           Add Trading Rule
         </h2>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              color: 'rgba(255, 255, 255, 0.7)'
-            }}>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
               Rule Name
             </label>
             <input
@@ -143,39 +92,19 @@ export const AddRuleModal = ({ isOpen, onClose, onRuleAdded }: AddRuleModalProps
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               placeholder="Enter rule name"
               required
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                fontSize: '14px'
-              }}
+              className={styles.input}
             />
           </div>
 
-          <div>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              color: 'rgba(255, 255, 255, 0.7)'
-            }}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
               Category
             </label>
             <select
               value={formData.category}
               onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
               required
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                fontSize: '14px'
-              }}
+              className={styles.select}
             >
               <option value="">Select category</option>
               {['Entry', 'Exit', 'Risk Management', 'Psychology', 'Process'].map(category => (
@@ -184,27 +113,15 @@ export const AddRuleModal = ({ isOpen, onClose, onRuleAdded }: AddRuleModalProps
             </select>
           </div>
 
-          <div>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              color: 'rgba(255, 255, 255, 0.7)'
-            }}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
               Importance
             </label>
             <select
               value={formData.importance}
               onChange={(e) => setFormData(prev => ({ ...prev, importance: e.target.value }))}
               required
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                fontSize: '14px'
-              }}
+              className={styles.select}
             >
               <option value="">Select importance</option>
               {['Critical', 'Important', 'Good Practice'].map(level => (
@@ -213,12 +130,8 @@ export const AddRuleModal = ({ isOpen, onClose, onRuleAdded }: AddRuleModalProps
             </select>
           </div>
 
-          <div>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              color: 'rgba(255, 255, 255, 0.7)'
-            }}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
               Description
             </label>
             <textarea
@@ -226,55 +139,20 @@ export const AddRuleModal = ({ isOpen, onClose, onRuleAdded }: AddRuleModalProps
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Enter rule description"
               required
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                fontSize: '14px',
-                minHeight: '100px',
-                resize: 'vertical'
-              }}
+              className={styles.textarea}
             />
           </div>
 
           {error && (
-            <div style={{
-              padding: '12px',
-              borderRadius: '8px',
-              background: 'rgba(239, 68, 68, 0.1)',
-              color: '#ef4444',
-              fontSize: '14px'
-            }}>
+            <div className={styles.errorMessage}>
               {error}
             </div>
           )}
 
           <button
             type="submit"
+            className={styles.submitButton}
             disabled={loading}
-            style={{
-              padding: '12px',
-              borderRadius: '8px',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-              color: 'white',
-              border: 'none',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
           >
             {loading ? 'Adding...' : 'Add Rule'}
           </button>
