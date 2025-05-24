@@ -829,85 +829,25 @@ const Dashboard = () => {
             <>
               <button
                 onClick={handleGenerateTestTrades}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  backgroundColor: '#4B5563',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
+                className={styles.generateTestButton}
               >
                 <Plus />
                 Generate Test Trades
               </button>
               <button
                 onClick={handleRefresh}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  backgroundColor: '#3B82F6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
+                className={styles.refreshButton}
               >
                 <Upload className={isRefreshing ? 'animate-spin' : ''} />
                 Refresh
               </button>
               <button
-                style={{ 
-                  padding: '10px',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
+                className={styles.downloadButton}
               >
                 <Download />
               </button>
               <button 
-                style={{ 
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                  color: 'white',
-                  padding: '10px 20px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 8px rgba(37, 99, 235, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.2)';
-                }}
+                className={styles.newTradeButton}
               >
                 <Clock />
                 New Trade
@@ -1098,16 +1038,8 @@ const Dashboard = () => {
 
             {/* Trading Calendar */}
             {isLoadingTrades ? (
-              <div className={styles.chartSection}>
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  alignItems: 'center', 
-                  minHeight: '300px',
-                  color: 'rgba(255, 255, 255, 0.6)' 
-                }}>
-                  Loading trades...
-                </div>
+              <div className={styles.loadingContainer}>
+                Loading trades...
               </div>
             ) : (
               <TradingCalendar trades={calendarTrades} />
@@ -1298,25 +1230,24 @@ Avg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
               </h2>
               <div className={styles.disciplineContent}>
                 <div className={styles.disciplineValue}>
-                  <svg width="100" height="100" style={{ transform: 'rotate(-90deg)' }}>
+                  <svg className={styles.disciplineChart}>
                     <circle
                       cx="50"
                       cy="50"
                       r="45"
-                      stroke="rgba(255, 255, 255, 0.1)"
-                      strokeWidth="6"
-                      fill="none"
+                      className={styles.disciplineCircleBackground}
                     />
                     <circle
                       cx="50"
                       cy="50"
                       r="45"
-                      stroke={disciplineMetrics.disciplineRate >= 80 ? '#22c55e' : '#f59e0b'}
-                      strokeWidth="6"
-                      fill="none"
+                      className={`${styles.disciplineCircle} ${styles.disciplineCircleProgress} ${
+                        disciplineMetrics.disciplineRate >= 80 
+                          ? styles.disciplineCircleProgressHigh 
+                          : styles.disciplineCircleProgressLow
+                      }`}
                       strokeDasharray={`${2 * Math.PI * 45}`}
                       strokeDashoffset={`${2 * Math.PI * 45 * (1 - disciplineMetrics.disciplineRate / 100)}`}
-                      style={{ transition: 'stroke-dashoffset 0.5s ease' }}
                     />
                   </svg>
                   <div className={styles.disciplineValueText}>
@@ -1337,9 +1268,11 @@ Avg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
               </h2>
               <div className={styles.disciplineContent}>
                 <div className={styles.disciplineValue}>
-                  <div className={styles.disciplineValueText} style={{ 
-                    color: Math.abs(disciplineMetrics.emotionCorrelation) <= 0.3 ? '#22c55e' : '#ef4444' 
-                  }}>
+                  <div className={`${styles.disciplineValueText} ${
+                    Math.abs(disciplineMetrics.emotionCorrelation) <= 0.3 
+                      ? styles.emotionValue 
+                      : styles.emotionValueHigh
+                  }`}>
                     {disciplineMetrics.emotionCorrelation.toFixed(2)}
                   </div>
                 </div>
@@ -1357,25 +1290,24 @@ Avg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
               </h2>
               <div className={styles.disciplineContent}>
                 <div className={styles.disciplineValue}>
-                  <svg width="100" height="100" style={{ transform: 'rotate(-90deg)' }}>
+                  <svg className={styles.disciplineChart}>
                     <circle
                       cx="50"
                       cy="50"
                       r="45"
-                      stroke="rgba(255, 255, 255, 0.1)"
-                      strokeWidth="6"
-                      fill="none"
+                      className={styles.disciplineCircleBackground}
                     />
                     <circle
                       cx="50"
                       cy="50"
                       r="45"
-                      stroke={disciplineMetrics.checklistAdherence >= 90 ? '#22c55e' : '#f59e0b'}
-                      strokeWidth="6"
-                      fill="none"
+                      className={`${styles.disciplineCircle} ${styles.disciplineCircleProgress} ${
+                        disciplineMetrics.checklistAdherence >= 90 
+                          ? styles.disciplineCircleProgressHigh 
+                          : styles.disciplineCircleProgressLow
+                      }`}
                       strokeDasharray={`${2 * Math.PI * 45}`}
                       strokeDashoffset={`${2 * Math.PI * 45 * (1 - disciplineMetrics.checklistAdherence / 100)}`}
-                      style={{ transition: 'stroke-dashoffset 0.5s ease' }}
                     />
                   </svg>
                   <div className={styles.disciplineValueText}>

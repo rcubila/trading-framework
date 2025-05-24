@@ -827,4 +827,115 @@
 .tradeQuantity {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.6);
+}
+
+/* Discipline Compliance Chart */
+.disciplineChart {
+  width: 100px;
+  height: 100px;
+  transform: rotate(-90deg);
+}
+
+.disciplineCircle {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.disciplineCircleBackground {
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 6;
+  fill: none;
+}
+
+.disciplineCircleProgress {
+  stroke-width: 6;
+  fill: none;
+}
+
+.disciplineCircleProgressHigh {
+  stroke: #22c55e;
+}
+
+.disciplineCircleProgressLow {
+  stroke: #f59e0b;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Action Buttons */
+.generateTestButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #4B5563;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.downloadButton {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.downloadButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.newTradeButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.newTradeButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(37, 99, 235, 0.3);
+}
+
+/* Emotion vs P/L Correlation */
+.emotionValue {
+  color: #22c55e;
+}
+
+.emotionValueHigh {
+  color: #ef4444;
 } 

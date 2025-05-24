@@ -1,0 +1,55 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+}
+
+.slideOver {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: calc(98vw - 220px);
+  max-width: 1800px;
+  height: 100vh;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-left: 220px;
+}
+
+.header {
+  padding: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.closeButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: linear-gradient(145deg, rgba(96, 165, 250, 0.2), rgba(167, 139, 250, 0.2));
+  box-shadow: 0 0 15px rgba(96, 165, 250, 0.2);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+} 

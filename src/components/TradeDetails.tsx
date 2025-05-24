@@ -17,6 +17,7 @@ import type { Trade } from '../types/trade';
 import { SlideOver } from './SlideOver';
 import { TradeChart } from './TradeChart';
 import styles from './TradeDetails.module.css';
+import { Clock, TrendingUp, TrendingDown } from 'lucide-react';
 
 const calculateDuration = (entryDate: string, exitDate: string): string => {
   const start = new Date(entryDate);
@@ -82,8 +83,8 @@ export const TradeDetails = ({ trade, isOpen, onClose }: TradeDetailsProps) => {
               </div>
               <div className={styles.pnlContainer}>
                 <div className={`${styles.pnl} ${isProfit ? styles.pnlProfit : styles.pnlLoss}`}>
-                  {isProfit ? <RiArrowUpLine /> : <RiArrowDownLine />}
-                  ${Math.abs(trade.pnl || 0).toFixed(2)}
+                  {isProfit ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                  <span>${Math.abs(trade.pnl || 0).toFixed(2)}</span>
                 </div>
                 <p className={`${styles.pnlPercentage} ${isProfit ? styles.pnlPercentageProfit : styles.pnlPercentageLoss}`}>
                   {isProfit ? '+' : '-'}{Math.abs(trade.pnl_percentage || 0).toFixed(2)}%
