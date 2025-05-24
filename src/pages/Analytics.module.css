@@ -1,12 +1,94 @@
+.flexContainer {
+  display: flex;
+  gap: 10px;
+}
+
 .container {
-  display: grid;
-  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .grid {
   display: grid;
+  gap: 24px;
+}
+
+.gridSmall {
+  display: grid;
+  gap: 16px;
+}
+
+.gridAutoFit {
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 16px;
+}
+
+.card {
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.cardValue {
+  font-size: 24px;
+  color: #60a5fa;
+}
+
+.monteCarloTitle {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.monteCarloGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.monteCarloLabel {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.monteCarloValue {
+  font-size: 20px;
+}
+
+.monteCarloValueWorst {
+  color: #ef4444;
+}
+
+.monteCarloValueBest {
+  color: #22c55e;
+}
+
+.monteCarloValueAverage {
+  color: #60a5fa;
 }
 
 .metricCard {
@@ -120,4 +202,32 @@
 .emotionCorrelationNegative {
   composes: emotionCorrelation;
   color: #ef4444;
+}
+
+.analyticsRoot {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.4) 0%, rgba(30, 41, 59, 0.4) 100%);
+}
+
+.analyticsContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.tabsRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.gridGap24 {
+  display: grid;
+  gap: 24px;
+}
+
+.gridGap16 {
+  display: grid;
+  gap: 16px;
 } 

@@ -25,6 +25,7 @@ import { PageHeader } from '../components/PageHeader';
 import { AnimatedButton } from '../components/AnimatedButton';
 import { AnimatedCard } from '../components/AnimatedCard';
 import { AnimatedInput } from '../components/AnimatedInput';
+import styles from './Analytics.module.css';
 
 interface CalculatorInputs {
   accountSize: number;
@@ -369,18 +370,12 @@ export const Analytics = () => {
   const riskMetrics = calculateRiskMetrics();
 
   return (
-    <div style={{ 
-      padding: '5px',
-      color: 'white',
-      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
-      minHeight: '100vh',
-      backdropFilter: 'blur(10px)'
-    }}>
+    <div className={styles.analyticsRoot}>
       <PageHeader 
         title="Trading Analytics"
         subtitle="Analyze your trading performance and patterns"
         actions={
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div className={styles.flexContainer}>
             <AnimatedButton
               icon={<RiRefreshLine />}
               onClick={handleRefresh}
@@ -400,13 +395,9 @@ export const Analytics = () => {
         }
       />
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+      <div className={styles.analyticsContainer}>
         {/* Calculator Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: '12px',
-          marginBottom: '24px',
-        }}>
+        <div className={styles.tabsRow}>
           {[
             { id: 'position', label: 'Position Sizing', icon: RiCalculatorLine },
             { id: 'risk', label: 'Risk Analysis', icon: RiScales3Line },
@@ -426,9 +417,9 @@ export const Analytics = () => {
 
         {/* Position Sizing Calculator */}
         {activeTab === 'position' && (
-          <div style={{ display: 'grid', gap: '24px' }}>
+          <div className={styles.gridGap24}>
             <AnimatedCard>
-              <div style={{ display: 'grid', gap: '16px' }}>
+              <div className={styles.gridGap16}>
                 <AnimatedInput
                   label="Account Size"
                   type="number"
@@ -460,18 +451,14 @@ export const Analytics = () => {
               </div>
             </AnimatedCard>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+            <div className={styles.gridAutoFit}>
               <AnimatedCard>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Position Size</h3>
-                <p style={{ fontSize: '24px', color: '#60a5fa' }}>
-                  {positionMetrics.positionSize.toFixed(2)} units
-                </p>
+                <h3 className={styles.cardTitle}>Position Size</h3>
+                <p className={styles.cardValue}>{positionMetrics.positionSize.toFixed(2)} units</p>
               </AnimatedCard>
               <AnimatedCard>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Risk Amount</h3>
-                <p style={{ fontSize: '24px', color: '#60a5fa' }}>
-                  ${positionMetrics.riskAmount.toFixed(2)}
-                </p>
+                <h3 className={styles.cardTitle}>Risk Amount</h3>
+                <p className={styles.cardValue}>${positionMetrics.riskAmount.toFixed(2)}</p>
               </AnimatedCard>
             </div>
           </div>
@@ -479,9 +466,9 @@ export const Analytics = () => {
 
         {/* Risk Analysis */}
         {activeTab === 'risk' && (
-          <div style={{ display: 'grid', gap: '24px' }}>
+          <div className={styles.gridGap24}>
             <AnimatedCard>
-              <div style={{ display: 'grid', gap: '16px' }}>
+              <div className={styles.gridGap16}>
                 <AnimatedInput
                   label="Take Profit"
                   type="number"
@@ -492,18 +479,14 @@ export const Analytics = () => {
               </div>
             </AnimatedCard>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+            <div className={styles.gridAutoFit}>
               <AnimatedCard>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Risk/Reward Ratio</h3>
-                <p style={{ fontSize: '24px', color: '#60a5fa' }}>
-                  {riskMetrics.riskRewardRatio.toFixed(2)}
-                </p>
+                <h3 className={styles.cardTitle}>Risk/Reward Ratio</h3>
+                <p className={styles.cardValue}>{riskMetrics.riskRewardRatio.toFixed(2)}</p>
               </AnimatedCard>
               <AnimatedCard>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Breakeven Win Rate</h3>
-                <p style={{ fontSize: '24px', color: '#60a5fa' }}>
-                  {(riskMetrics.breakevenWinRate * 100).toFixed(1)}%
-                </p>
+                <h3 className={styles.cardTitle}>Breakeven Win Rate</h3>
+                <p className={styles.cardValue}>{(riskMetrics.breakevenWinRate * 100).toFixed(1)}%</p>
               </AnimatedCard>
             </div>
           </div>
@@ -511,58 +494,50 @@ export const Analytics = () => {
 
         {/* Advanced Metrics */}
         {activeTab === 'advanced' && (
-          <div style={{ display: 'grid', gap: '24px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+          <div className={styles.gridGap24}>
+            <div className={styles.gridAutoFit}>
               <AnimatedCard>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Expectancy</h3>
-                <p style={{ fontSize: '24px', color: '#60a5fa' }}>
-                  ${advancedMetrics.expectancy.toFixed(2)}
-                </p>
+                <h3 className={styles.cardTitle}>Expectancy</h3>
+                <p className={styles.cardValue}>${advancedMetrics.expectancy.toFixed(2)}</p>
               </AnimatedCard>
               <AnimatedCard>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Profit Factor</h3>
-                <p style={{ fontSize: '24px', color: '#60a5fa' }}>
-                  {advancedMetrics.profitFactor.toFixed(2)}
-                </p>
+                <h3 className={styles.cardTitle}>Profit Factor</h3>
+                <p className={styles.cardValue}>{advancedMetrics.profitFactor.toFixed(2)}</p>
               </AnimatedCard>
               <AnimatedCard>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>MAE</h3>
-                <p style={{ fontSize: '24px', color: '#60a5fa' }}>
-                  ${advancedMetrics.mae.toFixed(2)}
-                </p>
+                <h3 className={styles.cardTitle}>MAE</h3>
+                <p className={styles.cardValue}>${advancedMetrics.mae.toFixed(2)}</p>
               </AnimatedCard>
               <AnimatedCard>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>MFE</h3>
-                <p style={{ fontSize: '24px', color: '#60a5fa' }}>
-                  ${advancedMetrics.mfe.toFixed(2)}
-                </p>
+                <h3 className={styles.cardTitle}>MFE</h3>
+                <p className={styles.cardValue}>${advancedMetrics.mfe.toFixed(2)}</p>
               </AnimatedCard>
             </div>
 
             <AnimatedCard>
-              <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>Monte Carlo Simulation</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+              <h3 className={styles.monteCarloTitle}>Monte Carlo Simulation</h3>
+              <div className={styles.monteCarloGrid}>
                 <div>
-                  <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>Worst Drawdown</p>
-                  <p style={{ fontSize: '20px', color: '#ef4444' }}>
+                  <p className={styles.monteCarloLabel}>Worst Drawdown</p>
+                  <p className={`${styles.monteCarloValue} ${styles.monteCarloValueWorst}`}>
                     {(advancedMetrics.monteCarloResults.worstDrawdown * 100).toFixed(1)}%
                   </p>
                 </div>
                 <div>
-                  <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>Best Return</p>
-                  <p style={{ fontSize: '20px', color: '#22c55e' }}>
+                  <p className={styles.monteCarloLabel}>Best Return</p>
+                  <p className={`${styles.monteCarloValue} ${styles.monteCarloValueBest}`}>
                     {(advancedMetrics.monteCarloResults.bestReturn * 100).toFixed(1)}%
                   </p>
                 </div>
                 <div>
-                  <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>Average Return</p>
-                  <p style={{ fontSize: '20px', color: '#60a5fa' }}>
+                  <p className={styles.monteCarloLabel}>Average Return</p>
+                  <p className={`${styles.monteCarloValue} ${styles.monteCarloValueAverage}`}>
                     {(advancedMetrics.monteCarloResults.averageReturn * 100).toFixed(1)}%
                   </p>
                 </div>
                 <div>
-                  <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>95% Confidence Interval</p>
-                  <p style={{ fontSize: '20px', color: '#60a5fa' }}>
+                  <p className={styles.monteCarloLabel}>95% Confidence Interval</p>
+                  <p className={`${styles.monteCarloValue} ${styles.monteCarloValueAverage}`}>
                     {(advancedMetrics.monteCarloResults.confidenceInterval[0] * 100).toFixed(1)}% to{' '}
                     {(advancedMetrics.monteCarloResults.confidenceInterval[1] * 100).toFixed(1)}%
                   </p>
