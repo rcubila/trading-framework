@@ -72,7 +72,7 @@ const TradeMenu = ({ trade, onEdit, onDelete }: TradeMenuProps) => {
       </button>
       {isOpen && (
         <div 
-          className={`${styles.menu} ${styles.menuPosition}`}
+          className={styles.menu}
           style={{
             '--menu-top': `${position.top}px`,
             '--menu-right': `${position.right}px`
@@ -122,7 +122,7 @@ const Row = memo(({ index, style, data }: RowProps) => {
   return (
     <div
       className={styles.tradeRow}
-      style={{ height: style.height }}
+      style={{ '--row-height': `${style.height}px` } as React.CSSProperties}
       onClick={() => data.onTradeClick?.(trade)}
     >
       <TradeContent 
