@@ -17,15 +17,16 @@ import {
 } from 'react-icons/ri';
 import type { TradingRule, DisciplineEntry, DisciplineStats } from '../types/discipline';
 import { supabase } from '../lib/supabaseClient';
-import { AddRuleModal } from '../components/AddRuleModal';
-import { AddEntryModal } from '../components/AddEntryModal';
-import { AddGoalModal } from '../components/AddGoalModal';
+import { AddRuleModal } from '../components/AddRuleModal/AddRuleModal';
+import { AddEntryModal } from '../components/AddEntryModal/AddEntryModal';
+import { AddGoalModal } from '../components/AddGoalModal/AddGoalModal';
 import type { DailyEntry, Goal } from '../types/discipline';
 import { useDiscipline } from '../context/DisciplineContext';
 import { DailyLog } from './discipline/DailyLog';
 import { ProgressInsights } from './discipline/ProgressInsights';
 import type { DailyCheckInData } from './discipline/DailyLog';
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '../components/PageHeader/PageHeader';
+import styles from '../styles/DisciplineTracker.module.css';
 
 const ruleCategories = [
   'Entry',
@@ -275,50 +276,22 @@ export const DisciplineTracker: React.FC = () => {
   }, [dailyCheckIns]);
 
   return (
-    <div style={{ 
-      padding: '5px',
-      color: 'white',
-      background: 'linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%)',
-      minHeight: '100vh',
-      backdropFilter: 'blur(10px)'
-    }}>
+    <div className={styles.container}>
       <PageHeader 
         title="Discipline Tracker"
         subtitle="Track your trading discipline and progress"
         actions={
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div className={styles.headerActions}>
             <button
               onClick={() => setShowAddRule(true)}
-              style={{
-                padding: '5px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                color: '#60a5fa',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.2s ease',
-              }}
+              className={styles.actionButton}
             >
               <RiAddLine />
               New Rule
             </button>
             <button
               onClick={() => setShowAddEntry(true)}
-              style={{
-                padding: '5px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                color: '#60a5fa',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.2s ease',
-              }}
+              className={styles.actionButton}
             >
               <RiAddLine />
               New Entry
@@ -327,61 +300,55 @@ export const DisciplineTracker: React.FC = () => {
         }
       />
 
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Trading Discipline Tracker</h1>
-          <div className="flex gap-4">
+      <div className={styles.mainContent}>
+        <div className={styles.header}>
+          <h1 className={styles.headerTitle}>Trading Discipline Tracker</h1>
+          <div className={styles.headerActions}>
             <button
               type="button"
               onClick={() => setShowAddGoal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className={styles.actionButton}
             >
-              <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+              <PlusIcon className={styles.tabIcon} aria-hidden="true" />
               New Goal
             </button>
           </div>
         </div>
 
         <Tab.Group>
-          <Tab.List className="flex space-x-1 rounded-xl bg-indigo-900/20 p-1">
+          <Tab.List className={styles.tabList}>
             <Tab
               className={({ selected }) =>
                 classNames(
-                  'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
-                  'ring-white/60 ring-offset-2 ring-offset-indigo-400 focus:outline-none focus:ring-2',
-                  selected
-                    ? 'bg-indigo-600 text-white shadow'
-                    : 'text-gray-300 hover:bg-indigo-800/[0.12] hover:text-white'
+                  styles.tab,
+                  selected ? styles.tabSelected : ''
                 )
               }
             >
-              <div className="flex items-center justify-center">
-                <CalendarIcon className="h-5 w-5 mr-2" />
+              <div className={styles.tabContent}>
+                <CalendarIcon className={styles.tabIcon} />
                 Daily Log
               </div>
             </Tab>
             <Tab
               className={({ selected }) =>
                 classNames(
-                  'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
-                  'ring-white/60 ring-offset-2 ring-offset-indigo-400 focus:outline-none focus:ring-2',
-                  selected
-                    ? 'bg-indigo-600 text-white shadow'
-                    : 'text-gray-300 hover:bg-indigo-800/[0.12] hover:text-white'
+                  styles.tab,
+                  selected ? styles.tabSelected : ''
                 )
               }
             >
-              <div className="flex items-center justify-center">
-                <ChartBarIcon className="h-5 w-5 mr-2" />
+              <div className={styles.tabContent}>
+                <ChartBarIcon className={styles.tabIcon} />
                 History & Trends
               </div>
             </Tab>
           </Tab.List>
-          <Tab.Panels className="mt-4">
-            <Tab.Panel className="rounded-xl bg-gray-800 p-4">
+          <Tab.Panels className={styles.tabPanels}>
+            <Tab.Panel className={styles.tabPanel}>
               <DailyLog onSubmit={handleDailyCheckIn} />
             </Tab.Panel>
-            <Tab.Panel className="rounded-xl bg-gray-800 p-4">
+            <Tab.Panel className={styles.tabPanel}>
               <ProgressInsights 
                 recentCheckIns={dailyCheckIns}
                 quickStats={quickStats}
