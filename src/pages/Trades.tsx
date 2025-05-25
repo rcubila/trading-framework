@@ -310,15 +310,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
               value={tradeData.leverage}
               onChange={(e) => handleInputChange('leverage', e.target.value)}
               placeholder="Enter leverage (e.g., 5x)"
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                fontSize: '14px',
-              }}
+              className={styles.formInput}
             />
           </div>
         )}
@@ -329,15 +321,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
           <select
             value={tradeData.exchange}
             onChange={(e) => handleInputChange('exchange', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'white',
-              fontSize: '14px',
-            }}
+            className={styles.formInput}
           >
             <option value="">Select Exchange</option>
             {config.exchanges.map((exchange) => (
@@ -373,14 +357,7 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
       const helperText = getFuturesHelperText(tradeData.symbol);
       if (helperText) {
         return (
-          <div style={{ 
-            fontSize: '12px', 
-            color: 'rgba(255, 255, 255, 0.5)', 
-            marginTop: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px' 
-          }}>
+          <div className={styles.helperText}>
             <RiInformationLine />
             {helperText}
           </div>
@@ -465,44 +442,24 @@ const AddTradeModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
             animate="visible"
             exit="hidden"
             variants={overlayVariants}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0, 0, 0, 0.7)',
-              backdropFilter: 'blur(5px)',
-              zIndex: 50,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            className={styles.overlay}
           >
             <motion.div
               variants={modalVariants}
-              style={{
-                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%)',
-                borderRadius: '20px',
-                padding: '32px',
-                width: '90%',
-                maxWidth: '600px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-                maxHeight: '90vh',
-                overflowY: 'auto',
-              }}
+              className={styles.modal}
             >
               <div className={styles.flexBetween}>
                 <h2 className={styles.stepTitle}>
                   {step === 1 ? 'Trade Details' : step === 2 ? 'Entry Information' : 'Additional Info'}
                 </h2>
-                <button
-                  onClick={onClose}
-                  className={styles.closeButton}
-                >
-                  <RiCloseLine />
-                </button>
+                <div className={styles.actionButtons}>
+                  <button
+                    onClick={onClose}
+                    className={styles.closeButton}
+                  >
+                    <RiCloseLine />
+                  </button>
+                </div>
               </div>
 
               <div className={styles.mb24}>
@@ -798,25 +755,6 @@ const createTestLosingTrade = async () => {
   }
 };
 
-// Add this function to fix GER40 trades
-const handleFixGER40Trades = async () => {
-  try {
-    const updatedTrades = await fixGER40Trades(15800); // Using a default DAX price of 15800
-    if (updatedTrades.length > 0) {
-      alert(`Fixed ${updatedTrades.length} GER40/DE40/DAX trades in the database.`);
-    } else {
-      alert('No GER40/DE40/DAX trades needed fixing.');
-    }
-    // Refresh the trades list
-    setRefreshTrigger((prev: number) => prev + 1);
-    return true;
-  } catch (error) {
-    console.error('Error fixing GER40 trades:', error);
-    alert('Error fixing GER40 trades. Check console for details.');
-    return false;
-  }
-};
-
 export const Trades = () => {
   const [showAddTrade, setShowAddTrade] = useState(false);
   const [showFilters, setFiltersOpen] = useState(false);
@@ -993,6 +931,23 @@ export const Trades = () => {
     }
   };
 
+  const handleFixGER40Trades = async () => {
+    try {
+      const updatedTrades = await fixGER40Trades(15800);
+      if (updatedTrades.length > 0) {
+        alert(`Fixed ${updatedTrades.length} GER40/DE40/DAX trades in the database.`);
+      } else {
+        alert('No GER40/DE40/DAX trades needed fixing.');
+      }
+      setRefreshTrigger(prev => prev + 1);
+      return true;
+    } catch (error) {
+      console.error('Error fixing GER40 trades:', error);
+      alert('Error fixing GER40 trades. Check console for details.');
+      return false;
+    }
+  };
+
   // Add this function to render test and admin buttons
   const renderTestButtons = () => (
     <div style={{ display: 'flex', gap: '12px' }}>
@@ -1111,7 +1066,7 @@ export const Trades = () => {
         </div>
         
         {/* Delete Confirmation Modals */}
-        {showDeleteConfirm && (
+        {showDeleteConfirm && tradeToDelete && (
           <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
               <h3 className={styles.modalTitle}>Delete Trade</h3>
@@ -1120,19 +1075,19 @@ export const Trades = () => {
                 <div className={`${styles.modalInfoBox} ${styles.mt12}`}>
                   <div className={styles.tradeDetailRow}>
                     <span className={styles.tradeDetailLabel}>Symbol:</span>
-                    <span className={styles.tradeDetailValue}>{tradeToDelete.symbol}</span>
+                    <span className={styles.tradeDetailValue}>{tradeToDelete?.symbol}</span>
                   </div>
                   <div className={styles.tradeDetailRow}>
                     <span className={styles.tradeDetailLabel}>Type:</span>
-                    <span className={tradeToDelete.type === 'Long' ? styles.tradeDetailValueLong : styles.tradeDetailValueShort}>
-                      {tradeToDelete.type === 'Long' ? <RiArrowUpLine /> : <RiArrowDownLine />}
-                      {tradeToDelete.type}
+                    <span className={tradeToDelete?.type === 'Long' ? styles.tradeDetailValueLong : styles.tradeDetailValueShort}>
+                      {tradeToDelete?.type === 'Long' ? <RiArrowUpLine /> : <RiArrowDownLine />}
+                      {tradeToDelete?.type}
                     </span>
                   </div>
                   <div className={styles.tradeDetailRow}>
                     <span className={styles.tradeDetailLabel}>P&L:</span>
-                    <span className={(tradeToDelete.pnl || 0) >= 0 ? styles.tradeDetailValueProfit : styles.tradeDetailValueLoss}>
-                      ${Math.abs(tradeToDelete.pnl || 0).toFixed(2)}
+                    <span className={(tradeToDelete?.pnl || 0) >= 0 ? styles.tradeDetailValueProfit : styles.tradeDetailValueLoss}>
+                      ${Math.abs(tradeToDelete?.pnl || 0).toFixed(2)}
                     </span>
                   </div>
                 </div>
