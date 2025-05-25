@@ -3,6 +3,7 @@ import { Menu } from '@headlessui/react';
 import { useNavigate } from 'react-router-dom';
 import { RiUserLine, RiLogoutBoxLine, RiSettings4Line } from 'react-icons/ri';
 import { useAuth } from '../context/AuthContext';
+import styles from './UserMenu.module.css';
 
 export const UserMenu = () => {
   const navigate = useNavigate();
@@ -37,19 +38,13 @@ export const UserMenu = () => {
   return (
     <Menu as="div" className="relative">
       <div>
-        <Menu.Button
-          className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
+        <Menu.Button className={styles.menuButton}>
           {avatarUrl ? (
-            <div className="absolute inset-0 rounded-full overflow-hidden">
+            <div className={styles.avatarContainer}>
               <img 
                 src={avatarUrl} 
                 alt="Profile" 
-                className="w-full h-full object-cover"
-                style={{
-                  objectFit: 'cover',
-                  objectPosition: 'center'
-                }}
+                className={styles.avatarImage}
                 onError={() => setAvatarUrl(null)}
               />
             </div>
@@ -59,26 +54,21 @@ export const UserMenu = () => {
         </Menu.Button>
       </div>
 
-      <Menu.Items
-        className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-700 rounded-md bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transform opacity-100 scale-100"
-        style={{
-          zIndex: 50,
-        }}
-      >
+      <Menu.Items className={styles.menuItems}>
         <div className="px-1 py-1">
           {/* User Info with Avatar */}
           {user?.email && (
-            <div className="px-4 py-3 text-sm text-gray-300 border-b border-gray-700 flex items-center gap-3">
+            <div className={styles.userInfo}>
               {avatarUrl && (
                 <img 
                   src={avatarUrl} 
                   alt="Profile" 
-                  className="w-8 h-8 rounded-full object-cover"
+                  className={styles.userAvatar}
                 />
               )}
-              <div className="flex flex-col">
-                <span className="font-medium">{user.email.split('@')[0]}</span>
-                <span className="text-xs text-gray-400">{user.email}</span>
+              <div className={styles.userDetails}>
+                <span className={styles.userName}>{user.email.split('@')[0]}</span>
+                <span className={styles.userEmail}>{user.email}</span>
               </div>
             </div>
           )}
@@ -86,9 +76,7 @@ export const UserMenu = () => {
           <Menu.Item>
             {({ active }) => (
               <button
-                className={`${
-                  active ? 'bg-gray-700 text-white' : 'text-gray-300'
-                } group flex w-full items-center rounded-md px-2 py-2 text-sm gap-2`}
+                className={`${styles.menuItem} ${active ? styles.menuItemActive : ''}`}
                 onClick={() => navigate('/profile')}
               >
                 <RiUserLine />
@@ -100,9 +88,7 @@ export const UserMenu = () => {
           <Menu.Item>
             {({ active }) => (
               <button
-                className={`${
-                  active ? 'bg-gray-700 text-white' : 'text-gray-300'
-                } group flex w-full items-center rounded-md px-2 py-2 text-sm gap-2`}
+                className={`${styles.menuItem} ${active ? styles.menuItemActive : ''}`}
                 onClick={() => navigate('/settings')}
               >
                 <RiSettings4Line />
@@ -114,9 +100,7 @@ export const UserMenu = () => {
           <Menu.Item>
             {({ active }) => (
               <button
-                className={`${
-                  active ? 'bg-gray-700 text-white' : 'text-gray-300'
-                } group flex w-full items-center rounded-md px-2 py-2 text-sm gap-2`}
+                className={`${styles.menuItem} ${active ? styles.menuItemActive : ''}`}
                 onClick={handleLogout}
               >
                 <RiLogoutBoxLine />
