@@ -200,7 +200,7 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ onHabitToggle }) => 
                 habit,
                 completionRate: calculateCompletionRate(habit.id)
               }))
-              .sort((a, b) => b.completionRate - a.completionRate)
+              .sort((a, b) => b.completionRate - a.com  pletionRate)
               .slice(0, 5)
               .map(({ habit, completionRate }) => (
                 <div key={habit.id} className="flex justify-between items-center">

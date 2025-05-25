@@ -53,4 +53,27 @@ export interface DisciplineStats {
   mostBrokenRules: Array<{ rule: string; count: number }>;
   weeklyTrend: Array<{ week: string; averageRating: number }>;
   moodDistribution: Record<string, number>;
+}
+
+export interface TradingHabit {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  goal: number;
+  done: number;
+  remaining: number;
+}
+
+export interface HabitVerification {
+  id: string;
+  habitId: string;
+  userId: string;
+  date: string;
+  completed: boolean;
+}
+
+export interface DisciplineContextType {
+  habits: TradingHabit[];
+  updateHabitStatus: (habitId: string, date: string, completed: boolean) => Promise<void>;
 } 
