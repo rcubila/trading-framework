@@ -14,16 +14,16 @@
   --color-background-secondary: #1e293b;
   --color-background-paper: #334155;
 
-  /* Text Colors */
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #cbd5e1;
-  --color-text-disabled: #64748b;
+  /* Text Colors - Improved Contrast */
+  --color-text-primary: #ffffff; /* Increased contrast from #f8fafc */
+  --color-text-secondary: #e2e8f0; /* Increased contrast from #cbd5e1 */
+  --color-text-disabled: #94a3b8; /* Increased contrast from #64748b */
 
-  /* Status Colors */
-  --color-error: #ef4444;
-  --color-warning: #f59e0b;
-  --color-success: #22c55e;
-  --color-info: #3b82f6;
+  /* Status Colors - Improved Contrast */
+  --color-error: #dc2626; /* Darker red for better contrast */
+  --color-warning: #d97706; /* Darker yellow for better contrast */
+  --color-success: #16a34a; /* Darker green for better contrast */
+  --color-info: #2563eb; /* Using primary blue for consistency */
 
   /* Gradients */
   --gradient-primary: linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%);
