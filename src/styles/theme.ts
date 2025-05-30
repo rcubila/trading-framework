@@ -16,14 +16,14 @@ export const theme = {
       paper: '#334155',
     },
     text: {
-      primary: '#f8fafc',
-      secondary: '#cbd5e1',
-      disabled: '#64748b',
+      primary: '#ffffff',
+      secondary: '#e2e8f0',
+      disabled: '#94a3b8',
     },
-    error: '#ef4444',
-    warning: '#f59e0b',
-    success: '#22c55e',
-    info: '#3b82f6',
+    error: '#dc2626',
+    warning: '#d97706',
+    success: '#16a34a',
+    info: '#2563eb',
   },
   typography: {
     fontFamily: {
