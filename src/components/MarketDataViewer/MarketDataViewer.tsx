@@ -14,6 +14,7 @@ import {
   Legend
 } from 'chart.js';
 import styles from './MarketDataViewer.module.css';
+import { SkeletonLoader } from '../SkeletonLoader';
 
 // Register ChartJS components
 ChartJS.register(
@@ -111,23 +112,34 @@ export const MarketDataViewer = ({ symbol, timeframe }: MarketDataViewerProps) =
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-text-primary">Loading market data...</div>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <SkeletonLoader type="text" width="200px" height="24px" className={styles.title} />
+          <SkeletonLoader type="text" width="120px" height="16px" className={styles.subtitle} />
+        </div>
+        <div className={styles.chartContainer}>
+          <SkeletonLoader type="chart" height="300px" />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-error">{error}</div>
+      <div className={styles.errorContainer}>
+        <div className={styles.errorMessage}>{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="card p-4">
-      <Line data={chartData} options={chartOptions} />
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.title}>{symbol} - {timeframe} Timeframe</h2>
+      </div>
+      <div className={styles.chartContainer}>
+        <Line data={chartData} options={chartOptions} />
+      </div>
     </div>
   );
 }; 
