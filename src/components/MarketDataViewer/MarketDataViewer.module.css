@@ -1,0 +1,49 @@
+.container {
+  background-color: var(--color-background-secondary);
+  border-radius: 8px;
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  color: var(--color-text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.chartContainer {
+  flex: 1;
+  min-height: 300px;
+  position: relative;
+}
+
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  background-color: var(--color-background-secondary);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.errorMessage {
+  color: var(--color-error);
+  font-size: 0.875rem;
+  text-align: center;
+} 
