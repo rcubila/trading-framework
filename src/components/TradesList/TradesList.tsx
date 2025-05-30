@@ -3,6 +3,7 @@ import { RiArrowUpLine, RiArrowDownLine, RiDeleteBinLine, RiMoreLine, RiEditLine
 import { FixedSizeList as List } from 'react-window';
 import type { Trade } from '../../types/trade';
 import { formatPnL } from '../../utils/trading';
+import { SkeletonLoader } from '../SkeletonLoader';
 import styles from './TradesList.module.css';
 
 interface TradesListProps {
@@ -37,10 +38,11 @@ interface RowProps {
     onDeleteClick?: (trade: Trade) => void;
     selectedTrades: Set<string>;
     onSelectTrade: (trade: Trade) => void;
+    isLoading: boolean;
   };
 }
 
-const ITEM_SIZE = 72; // Height of each trade row
+const ITEM_SIZE = 60;
 const LOADING_BUFFER = 10; // Number of items to load before reaching the end
 
 const TradeMenu = ({ trade, onEdit, onDelete }: TradeMenuProps) => {
@@ -104,31 +106,50 @@ const TradeContent = ({ trade, onDeleteClick, onSelectTrade }: TradeContentProps
   );
 };
 
+const renderSkeletonRow = (style: React.CSSProperties) => (
+  <div className={styles.tradeRow} style={style}>
+    <div className={styles.tradeContent}>
+      <div className={styles.tradeLeft}>
+        <SkeletonLoader type="circle" width="20px" height="20px" />
+        <div className={styles.tradeInfo}>
+          <SkeletonLoader type="text" width="80px" height="16px" />
+          <SkeletonLoader type="text" width="120px" height="14px" />
+        </div>
+      </div>
+      <div className={styles.tradeRight}>
+        <div className={styles.tradeDetails}>
+          <SkeletonLoader type="text" width="60px" height="16px" />
+          <SkeletonLoader type="text" width="40px" height="14px" />
+        </div>
+        <SkeletonLoader type="button" width="32px" height="32px" />
+      </div>
+    </div>
+  </div>
+);
+
 const Row = memo(({ index, style, data }: RowProps) => {
   const trade = data.trades[index];
+  const isLoading = data.isLoading && index >= data.trades.length;
   
+  if (isLoading) {
+    return renderSkeletonRow(style);
+  }
+
   if (!trade) {
-    return (
-      <div 
-        className={styles.skeleton} 
-        style={{ '--skeleton-height': `${style.height}px` } as React.CSSProperties}
-      >
-        <div className={styles.skeletonLine} />
-        <div className={styles.skeletonLine} />
-      </div>
-    );
+    return null;
   }
 
   return (
     <div
       className={styles.tradeRow}
-      style={{ '--row-height': `${style.height}px` } as React.CSSProperties}
+      style={style}
       onClick={() => data.onTradeClick?.(trade)}
     >
       <TradeContent 
         trade={trade} 
         onDeleteClick={data.onDeleteClick} 
-        onSelectTrade={data.onSelectTrade} 
+        onSelectTrade={data.onSelectTrade}
+        selectedTrades={data.selectedTrades}
       />
     </div>
   );
@@ -217,6 +238,60 @@ export const TradesList = ({
     }
   };
 
+  const renderSkeletonHeader = () => (
+    <div className={styles.header}>
+      <div className={styles.headerLeft}>
+        <SkeletonLoader type="circle" width="20px" height="20px" />
+        <SkeletonLoader type="text" width="80px" height="16px" />
+      </div>
+      <div className={styles.headerRight}>
+        <SkeletonLoader type="button" width="100px" height="32px" />
+      </div>
+    </div>
+  );
+
+  const renderSkeletonTable = () => (
+    <div className={styles.content}>
+      <div className={styles.tableHeader}>
+        <div></div>
+        <div><SkeletonLoader type="text" width="60px" height="16px" /></div>
+        <div><SkeletonLoader type="text" width="80px" height="16px" /></div>
+        <div><SkeletonLoader type="text" width="40px" height="16px" /></div>
+        <div><SkeletonLoader type="text" width="60px" height="16px" /></div>
+        <div><SkeletonLoader type="text" width="60px" height="16px" /></div>
+        <div><SkeletonLoader type="text" width="40px" height="16px" /></div>
+        <div><SkeletonLoader type="text" width="60px" height="16px" /></div>
+        <div></div>
+      </div>
+      <List
+        height={listHeight}
+        itemCount={pageSize}
+        itemSize={ITEM_SIZE}
+        width="100%"
+        itemData={{ 
+          trades: [], 
+          onTradeClick, 
+          onDeleteClick, 
+          selectedTrades, 
+          onSelectTrade,
+          isLoading: true
+        }}
+        className={styles.listContainer}
+      >
+        {Row}
+      </List>
+    </div>
+  );
+
+  if (loading && trades.length === 0) {
+    return (
+      <div className={styles.tradesListContainer}>
+        {renderSkeletonHeader()}
+        {renderSkeletonTable()}
+      </div>
+    );
+  }
+
   return (
     <div className={styles.tradesListContainer}>
       <div className={styles.header}>
@@ -252,7 +327,7 @@ export const TradesList = ({
             </div>
             <List
               height={listHeight}
-              itemCount={trades.length}
+              itemCount={trades.length + (loading ? pageSize : 0)}
               itemSize={ITEM_SIZE}
               width="100%"
               itemData={{ 
@@ -260,18 +335,21 @@ export const TradesList = ({
                 onTradeClick, 
                 onDeleteClick,
                 selectedTrades,
-                onSelectTrade
+                onSelectTrade,
+                isLoading: loading
               }}
               className={styles.listContainer}
+              onScroll={({ scrollOffset, scrollUpdateWasRequested }) => {
+                if (!scrollUpdateWasRequested && !loading && hasMore) {
+                  const maxOffset = (trades.length - LOADING_BUFFER) * ITEM_SIZE;
+                  if (scrollOffset >= maxOffset) {
+                    handleLoadMore();
+                  }
+                }
+              }}
             >
               {Row}
             </List>
-            
-            {loading && (
-              <div className={styles.loadingMessage}>
-                Loading trades...
-              </div>
-            )}
           </>
         )}
       </div>
