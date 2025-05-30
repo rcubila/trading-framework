@@ -6,6 +6,11 @@ import styles from './Playbook.module.css';
 import { AnimatedButton } from '../components/AnimatedButton';
 import { IconSelector } from '../components/IconSelector';
 import { MoreVertical, Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { SkeletonLoader } from '../components/SkeletonLoader';
+import { toast } from 'react-hot-toast';
+import { usePlaybookData } from '../hooks/usePlaybookData';
+import type { PlaybookAsset, PlaybookStrategy } from '../hooks/usePlaybookData';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 
 interface Trade {
   id: string;
@@ -200,9 +205,20 @@ const fetchStrategiesForPlaybook = async (playbookId: string) => {
 
 export const PlayBook: React.FC = () => {
   const { user } = useAuth();
-  const [assets, setAssets] = useState<AssetPlaybook[]>([]);
-  const [selectedAsset, setSelectedAsset] = useState<AssetPlaybook | null>(null);
-  const [selectedSetup, setSelectedSetup] = useState<PlaybookSetup | null>(null);
+  const {
+    assets,
+    isLoading,
+    error,
+    createAsset,
+    deleteAsset,
+    createStrategy,
+    deleteStrategy,
+    updateStrategyIcon,
+    refreshData,
+  } = usePlaybookData();
+
+  const [selectedAsset, setSelectedAsset] = useState<PlaybookAsset | null>(null);
+  const [selectedSetup, setSelectedSetup] = useState<PlaybookStrategy | null>(null);
   const [activeTab, setActiveTab] = useState('Overview');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreateStrategyModal, setShowCreateStrategyModal] = useState(false);
@@ -228,159 +244,27 @@ export const PlayBook: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showMenu, setShowMenu] = useState<string | null>(null);
 
-  // Fetch assets and their strategies when component mounts
-  useEffect(() => {
-    const fetchAssets = async () => {
-      try {
-        // Get unique asset names from strategies
-        const { data: strategies, error } = await supabase
-          .from('strategies')
-          .select('asset_name')
-          .not('asset_name', 'is', null)
-          .order('asset_name');
-
-        if (error) throw error;
-
-        // Get unique asset names
-        const uniqueAssets = [...new Set(strategies.map(s => s.asset_name))];
-
-        // Create asset objects with their strategies
-        const assetsData = await Promise.all(
-          uniqueAssets.map(async (assetName) => {
-            const strategies = await fetchStrategiesForPlaybook(assetName);
-            return {
-              id: assetName, // Using asset name as ID
-              asset: assetName,
-              description: `${assetName} trading strategies`,
-              strategies,
-              performance: {
-                totalTrades: strategies.reduce((sum, s) => sum + s.performance.totalTrades, 0),
-                winRate: strategies.reduce((sum, s) => sum + s.performance.winRate, 0) / strategies.length || 0,
-                averageR: strategies.reduce((sum, s) => sum + s.performance.averageR, 0) / strategies.length || 0,
-                profitFactor: strategies.reduce((sum, s) => sum + s.performance.profitFactor, 0) / strategies.length || 0,
-                expectancy: strategies.reduce((sum, s) => sum + s.performance.expectancy, 0) / strategies.length || 0,
-                netPL: strategies.reduce((sum, s) => sum + s.performance.netPL, 0),
-              },
-            };
-          })
-        );
-
-        setAssets(assetsData);
-      } catch (error) {
-        console.error('Error fetching assets:', error);
-      }
-    };
-
-    fetchAssets();
-  }, []); // Empty dependency array means this runs once when component mounts
-
   const handleCreatePlaybook = async () => {
     try {
-      // Get the current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!user) throw new Error('No user found');
-
-      console.log('Current user ID:', user.id);
-      console.log('Inserting playbook with data:', {
-        user_id: user.id,
-        name: newPlaybook.title,
+      await createAsset({
+        asset: newPlaybook.asset,
         description: newPlaybook.description,
-        type: newPlaybook.type,
-        asset_name: newPlaybook.asset,
-        rules: newPlaybook.tags.split(',').map(t => t.trim()).filter(Boolean),
-        is_playbook: false
+        icon: newPlaybook.icon,
       });
-
-      const { data, error } = await supabase
-        .from('strategies')
-        .insert({
-          user_id: user.id,
-          name: newPlaybook.title,
-          description: newPlaybook.description,
-          type: newPlaybook.type,
-          asset_name: newPlaybook.asset,
-          rules: newPlaybook.tags.split(',').map(t => t.trim()).filter(Boolean),
-          market_conditions: [],
-          timeframes: [],
-          risk_percentage: null,
-          reward_ratio: null,
-          is_playbook: false,
-          performance_total_trades: 0,
-          performance_win_rate: 0,
-          performance_average_r: 0,
-          performance_profit_factor: 0,
-          performance_expectancy: 0,
-          performance_largest_win: 0,
-          performance_largest_loss: 0,
-          performance_average_win: 0,
-          performance_average_loss: 0,
-          performance_net_pl: 0
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      console.log('Playbook created successfully:', data);
-
-      // Refresh the assets list
-      const { data: strategies } = await supabase
-        .from('strategies')
-        .select('asset_name')
-        .not('asset_name', 'is', null)
-        .order('asset_name');
-
-      if (strategies) {
-        const uniqueAssets = [...new Set(strategies.map(s => s.asset_name))];
-        const assetsData = await Promise.all(
-          uniqueAssets.map(async (assetName) => {
-            const strategies = await fetchStrategiesForPlaybook(assetName);
-            return {
-              id: assetName,
-              asset: assetName,
-              description: `${assetName} trading strategies`,
-              strategies,
-              performance: {
-                totalTrades: strategies.reduce((sum, s) => sum + s.performance.totalTrades, 0),
-                winRate: strategies.reduce((sum, s) => sum + s.performance.winRate, 0) / strategies.length || 0,
-                averageR: strategies.reduce((sum, s) => sum + s.performance.averageR, 0) / strategies.length || 0,
-                profitFactor: strategies.reduce((sum, s) => sum + s.performance.profitFactor, 0) / strategies.length || 0,
-                expectancy: strategies.reduce((sum, s) => sum + s.performance.expectancy, 0) / strategies.length || 0,
-                netPL: strategies.reduce((sum, s) => sum + s.performance.netPL, 0),
-              },
-            };
-          })
-        );
-        setAssets(assetsData);
-      }
-
       setShowCreateModal(false);
       setNewPlaybook({ asset: '', title: '', type: '', tags: '', description: '', icon: '' });
     } catch (error) {
       console.error('Error creating playbook:', error);
-      alert('Failed to create playbook. Please try again.');
     }
   };
 
   const handleDeletePlaybook = async (id: string) => {
     try {
-      // Delete all strategies associated with this asset
-      const { error: strategiesError } = await supabase
-        .from('strategies')
-        .delete()
-        .eq('asset_name', id);
-
-      if (strategiesError) throw strategiesError;
-
-      // Update local state
-      setAssets(assets.filter(asset => asset.id !== id));
+      await deleteAsset(id);
+      setShowDeleteConfirmModal(false);
+      setAssetToDelete(null);
     } catch (error) {
       console.error('Error deleting playbook:', error);
-      alert('Failed to delete playbook. Please try again.');
     }
   };
 
@@ -388,155 +272,37 @@ export const PlayBook: React.FC = () => {
     if (!selectedAsset) return;
     
     try {
-      // Get the current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!user) throw new Error('No user found');
-
-      // First, create the strategy without parent_id
-      const { data: strategy, error } = await supabase
-        .from('strategies')
-        .insert({
-          user_id: user.id,
-          name: newStrategy.title,
-          description: newStrategy.description,
-          type: newStrategy.type,
-          asset_name: selectedAsset.asset,
-          rules: newStrategy.tags.split(',').map(t => t.trim()).filter(Boolean),
-          market_conditions: [],
-          timeframes: [],
-          risk_percentage: null,
-          reward_ratio: null,
-          is_playbook: false,
-          performance_total_trades: 0,
-          performance_win_rate: 0,
-          performance_average_r: 0,
-          performance_profit_factor: 0,
-          performance_expectancy: 0,
-          performance_largest_win: 0,
-          performance_largest_loss: 0,
-          performance_average_win: 0,
-          performance_average_loss: 0,
-          performance_net_pl: 0
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Fetch the updated strategies for this playbook
-      const strategies = await fetchStrategiesForPlaybook(selectedAsset.asset);
-      
-      // Update the selected asset with the new strategies
-      const updatedSelectedAsset = {
-        ...selectedAsset,
-        strategies
-      };
-      
-      // Update the assets list with the new strategy
-      const updatedAssets = assets.map(asset => 
-        asset.id === selectedAsset.id ? updatedSelectedAsset : asset
-      );
-
-      setAssets(updatedAssets);
-      setSelectedAsset(updatedSelectedAsset);
+      await createStrategy(selectedAsset.id, {
+        title: newStrategy.title,
+        description: newStrategy.description,
+        type: newStrategy.type,
+        tags: newStrategy.tags.split(',').map(t => t.trim()).filter(Boolean),
+        notes: '',
+        checklist: [],
+        trades: [],
+      });
       setShowCreateStrategyModal(false);
       setNewStrategy({ title: '', type: '', tags: '', description: '' });
     } catch (error) {
       console.error('Error creating strategy:', error);
-      // You might want to show an error toast here
     }
   };
 
-  const handleDeleteClick = (e: React.MouseEvent, asset: AssetPlaybook) => {
-    e.stopPropagation();
-    setAssetToDelete({ id: asset.id, name: asset.asset });
-    setShowDeleteConfirmModal(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (assetToDelete) {
-      await handleDeletePlaybook(assetToDelete.id);
-      setShowDeleteConfirmModal(false);
-      setAssetToDelete(null);
-    }
-  };
-
-  const handleDeleteStrategyClick = (e: React.MouseEvent, strategy: PlaybookSetup) => {
-    e.stopPropagation();
-    setStrategyToDelete({ id: strategy.id, name: strategy.title });
-    setShowDeleteStrategyModal(true);
-  };
-
-  const handleDeleteStrategyConfirm = async () => {
-    if (strategyToDelete && selectedAsset) {
-      try {
-        const { error } = await supabase
-          .from('strategies')
-          .delete()
-          .eq('id', strategyToDelete.id);
-
-        if (error) throw error;
-
-        // Fetch the updated strategies for this playbook
-        const strategies = await fetchStrategiesForPlaybook(selectedAsset.asset);
-        
-        // Update the selected asset with the new strategies
-        const updatedSelectedAsset = {
-          ...selectedAsset,
-          strategies
-        };
-        
-        // Update the assets list with the new strategy
-        const updatedAssets = assets.map(asset => 
-          asset.id === selectedAsset.id ? updatedSelectedAsset : asset
-        );
-
-        setAssets(updatedAssets);
-        setSelectedAsset(updatedSelectedAsset);
-        setShowDeleteStrategyModal(false);
-        setStrategyToDelete(null);
-      } catch (error) {
-        console.error('Error deleting strategy:', error);
-      }
+  const handleDeleteStrategy = async (strategyId: string) => {
+    if (!selectedAsset) return;
+    
+    try {
+      await deleteStrategy(selectedAsset.id, strategyId);
+      setShowDeleteStrategyModal(false);
+      setStrategyToDelete(null);
+    } catch (error) {
+      console.error('Error deleting strategy:', error);
     }
   };
 
   const handleStrategyIconChange = async (strategyId: string, icon: string) => {
-    if (!selectedAsset) return;
-    
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!user) throw new Error('No user found');
-
-      const { error } = await supabase
-        .from('strategies')
-        .update({
-          icon: icon,
-        })
-        .eq('id', strategyId);
-
-      if (error) throw error;
-
-      // Fetch the updated strategies for this playbook
-      const strategies = await fetchStrategiesForPlaybook(selectedAsset.asset);
-      
-      // Update the selected asset with the new strategies
-      const updatedSelectedAsset = {
-        ...selectedAsset,
-        strategies
-      };
-      
-      // Update the assets list with the new strategy
-      const updatedAssets = assets.map(asset => 
-        asset.id === selectedAsset.id ? updatedSelectedAsset : asset
-      );
-
-      setAssets(updatedAssets);
-      setSelectedAsset(updatedSelectedAsset);
-      setShowDeleteStrategyModal(false);
-      setStrategyToDelete(null);
+      await updateStrategyIcon(strategyId, icon);
     } catch (error) {
       console.error('Error changing strategy icon:', error);
     }
@@ -556,7 +322,10 @@ export const PlayBook: React.FC = () => {
           <Search size={18} />
         </button>
       </div>
-      <button className={styles.actionButtonGradient}>
+      <button 
+        className={styles.actionButtonGradient}
+        onClick={() => setShowCreateModal(true)}
+      >
         <Plus size={18} />
         New Playbook
       </button>
@@ -566,641 +335,670 @@ export const PlayBook: React.FC = () => {
     </div>
   );
 
+  if (error) {
+    return (
+      <div className={styles.errorContainer}>
+        <h2>Error loading playbooks</h2>
+        <p>{error.message}</p>
+        <button onClick={() => refreshData()}>Retry</button>
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.container}>
-      <PageHeader
-        title="Playbooks"
-        subtitle="Manage your trading playbooks and strategies"
-        actions={headerActions}
-      />
-      
-      <div className={styles.content}>
-        {/* Asset View */}
-        {!selectedAsset && (
-          <div className={styles.assetsGrid}>
-            {assets.map(asset => (
-              <div
-                key={asset.id}
-                className={styles.card}
-                onClick={() => setSelectedAsset(asset)}
-              >
-                <div className={styles.cardActions}>
-                  <div className={styles.relative}>
-                    <button 
-                      className={styles.menuButton}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowMenu(showMenu === asset.id ? null : asset.id);
-                      }}
-                    >
-                      <MoreVertical size={16} />
-                    </button>
-                    {showMenu === asset.id && (
-                      <div className={styles.menuDropdown}>
-                        <button 
-                          className={styles.menuItem}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowMenu(null);
-                          }}
-                        >
-                          <Edit size={14} />
-                          Edit
-                        </button>
-                        <button 
-                          className={styles.menuItemDelete}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setAssetToDelete({ id: asset.id, name: asset.asset });
-                            setShowDeleteConfirmModal(true);
-                          }}
-                        >
-                          <Trash2 size={14} />
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className={styles.cardContent}>
-                  <div className={styles.cardHeader}>
-                    {asset.icon && (
-                      <img 
-                        src={asset.icon} 
-                        alt={`${asset.asset} icon`} 
-                        className={styles.cardIcon}
-                      />
-                    )}
-                    <h3 className={styles.cardTitle}>{asset.asset}</h3>
-                  </div>
-                  <p className={styles.cardDescription}>{asset.description}</p>
-                  <div className={styles.tagsContainer}>
-                    {asset.strategies.map(strategy => (
-                      <span
-                        key={strategy.id}
-                        className={styles.assetTag}
-                      >
-                        {strategy.title}
-                      </span>
-                    ))}
-                  </div>
-                  <div className={styles.performanceGrid}>
-                    <div className={styles.performanceItem}>
-                      <span className={styles.performanceLabel}>Win Rate</span>
-                      <div className={styles.performanceValueGreen}>{asset.performance.winRate}%</div>
-                    </div>
-                    <div className={styles.performanceItem}>
-                      <span className={styles.performanceLabel}>Total Trades</span>
-                      <div className={styles.performanceValue}>{asset.performance.totalTrades}</div>
-                    </div>
-                    <div className={styles.performanceItem}>
-                      <span className={styles.performanceLabel}>Avg R</span>
-                      <div className={styles.performanceValueBlue}>{asset.performance.averageR.toFixed(2)}R</div>
-                    </div>
-                    <div className={styles.performanceItem}>
-                      <span className={styles.performanceLabel}>Net P&L</span>
-                      <div className={styles.performanceValueGreen}>${asset.performance.netPL.toLocaleString()}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Strategy View */}
-        {selectedAsset && !selectedSetup && (
-          <div>
-            <div className={styles.strategyHeader}>
-              <button
-                className={styles.primaryButton}
-                onClick={() => setShowCreateStrategyModal(true)}
-              >
-                + New Strategy
-              </button>
-              <button
-                onClick={() => setSelectedAsset(null)}
-                className={styles.secondaryButton}
-              >
-                ← Back to Assets
-              </button>
-            </div>
-            <div className={styles.strategiesGrid}>
-              {selectedAsset.strategies.map(strategy => (
-                <div
-                  key={strategy.id}
-                  className={styles.card}
-                  onClick={() => setSelectedSetup(strategy)}
-                >
-                  <div className={styles.cardActions}>
-                    <div className={styles.relative}>
-                      <button 
-                        className={styles.menuButton}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowMenu(showMenu === strategy.id ? null : strategy.id);
-                        }}
-                      >
-                        <MoreVertical size={16} />
-                      </button>
-                      {showMenu === strategy.id && (
-                        <div className={styles.menuDropdown}>
-                          <button 
-                            className={styles.menuItem}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowMenu(null);
-                            }}
-                          >
-                            <Edit size={14} />
-                            Edit
-                          </button>
-                          <button 
-                            className={styles.menuItemDelete}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setStrategyToDelete({ id: strategy.id, name: strategy.title });
-                              setShowDeleteStrategyModal(true);
-                            }}
-                          >
-                            <Trash2 size={14} />
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className={styles.cardContent}>
-                    <div className={styles.cardHeader}>
-                      <div className={styles.strategyIcon}>
-                        <IconSelector
-                          selectedIcon={strategy.icon || 'trending-up'}
-                          onSelectIcon={(icon) => handleStrategyIconChange(strategy.id, icon)}
-                        />
-                      </div>
-                      <h3 className={styles.cardTitle}>{strategy.title}</h3>
-                    </div>
-                    <p className={styles.cardDescription}>{strategy.description}</p>
-                    <div className={styles.tagsContainer}>
-                      {strategy.tags.map((tag, index) => (
-                        <span key={index} className={styles.tag}>
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <div className={styles.performanceGrid}>
-                      <div className={styles.performanceItem}>
-                        <span className={styles.performanceLabel}>Win Rate</span>
-                        <div className={styles.performanceValueGreen}>{strategy.performance.winRate}%</div>
-                      </div>
-                      <div className={styles.performanceItem}>
-                        <span className={styles.performanceLabel}>Total Trades</span>
-                        <div className={styles.performanceValue}>{strategy.performance.totalTrades}</div>
-                      </div>
-                      <div className={styles.performanceItem}>
-                        <span className={styles.performanceLabel}>Avg R</span>
-                        <div className={styles.performanceValueBlue}>{strategy.performance.averageR.toFixed(2)}R</div>
-                      </div>
-                      <div className={styles.performanceItem}>
-                        <span className={styles.performanceLabel}>Net P&L</span>
-                        <div className={styles.performanceValueGreen}>${strategy.performance.netPL.toLocaleString()}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Create Playbook Modal */}
-        {showCreateModal && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modal}>
-              <h2 className={styles.modalTitle}>New Playbook</h2>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Asset</label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={newPlaybook.asset}
-                  onChange={e => setNewPlaybook({ ...newPlaybook, asset: e.target.value })}
-                  placeholder="e.g., GER40, GOLD, etc."
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Strategy Title</label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={newPlaybook.title}
-                  onChange={e => setNewPlaybook({ ...newPlaybook, title: e.target.value })}
-                  placeholder="e.g., Morning Breakout, Range Trading"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Type</label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={newPlaybook.type}
-                  onChange={e => setNewPlaybook({ ...newPlaybook, type: e.target.value })}
-                  placeholder="e.g., Breakout, Range, Trend"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Tags (comma separated)</label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={newPlaybook.tags}
-                  onChange={e => setNewPlaybook({ ...newPlaybook, tags: e.target.value })}
-                  placeholder="e.g., morning session, gap-up, range"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Description</label>
-                <textarea
-                  className={styles.formTextarea}
-                  rows={3}
-                  value={newPlaybook.description}
-                  onChange={e => setNewPlaybook({ ...newPlaybook, description: e.target.value })}
-                  placeholder="Describe your strategy..."
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Icon</label>
-                <IconSelector
-                  selectedIcon={newPlaybook.icon || 'trending-up'}
-                  onSelectIcon={(icon) => setNewPlaybook({ ...newPlaybook, icon })}
-                />
-              </div>
-              <div className={styles.formActions}>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className={styles.cancelButton}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreatePlaybook}
-                  className={styles.primaryButton}
-                  disabled={!newPlaybook.asset.trim()}
-                  title={!newPlaybook.asset.trim() ? "Please enter an asset name" : ""}
-                >
-                  Create
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Create Strategy Modal */}
-        {showCreateStrategyModal && selectedAsset && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modal}>
-              <h2 className={styles.modalTitle}>New Strategy for {selectedAsset.asset}</h2>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Strategy Title</label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={newStrategy.title}
-                  onChange={e => setNewStrategy({ ...newStrategy, title: e.target.value })}
-                  placeholder="e.g., Morning Breakout, Range Trading"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Type</label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={newStrategy.type}
-                  onChange={e => setNewStrategy({ ...newStrategy, type: e.target.value })}
-                  placeholder="e.g., Breakout, Range, Trend"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Tags (comma separated)</label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={newStrategy.tags}
-                  onChange={e => setNewStrategy({ ...newStrategy, tags: e.target.value })}
-                  placeholder="e.g., morning session, gap-up, range"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Description</label>
-                <textarea
-                  className={styles.formTextarea}
-                  rows={3}
-                  value={newStrategy.description}
-                  onChange={e => setNewStrategy({ ...newStrategy, description: e.target.value })}
-                  placeholder="Describe your strategy..."
-                />
-              </div>
-              <div className={styles.formActions}>
-                <button
-                  onClick={() => setShowCreateStrategyModal(false)}
-                  className={styles.cancelButton}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateStrategy}
-                  className={styles.primaryButton}
-                  disabled={!newStrategy.title.trim()}
-                >
-                  Create Strategy
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Playbook Detail Modal */}
-        {selectedSetup && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modalLarge}>
-              <div className={styles.modalHeader}>
-                <div>
-                  <h2 className={styles.modalLargeTitle}>{selectedSetup.title}</h2>
-                  <p className={styles.modalSubtitle}>{selectedSetup.type}</p>
-                </div>
-                <button
-                  onClick={() => setSelectedSetup(null)}
-                  className={styles.closeButton}
-                  aria-label="Close"
-                >
-                  &times;
-                </button>
-              </div>
-              {/* Tabs */}
-              <div className={styles.tabsContainer}>
-                {['Overview', 'Playbook Rules', 'Executed Trades', 'Missed Trades', 'Notes'].map(tab => (
-                  <button
-                    key={tab}
-                    className={`${styles.tab} ${
-                      activeTab === tab
-                        ? styles.tabActive
-                        : styles.tabInactive
-                    }`}
-                    onClick={() => setActiveTab(tab)}
+    <ErrorBoundary>
+      <div className={styles.container}>
+        <PageHeader
+          title="Playbooks"
+          subtitle="Manage your trading playbooks and strategies"
+          actions={headerActions}
+        />
+        
+        <div className={styles.content}>
+          {/* Asset View */}
+          {!selectedAsset && (
+            <div className={styles.assetsGrid}>
+              {isLoading ? (
+                // Loading skeletons - match the number of actual items
+                Array(assets.length || 2).fill(null).map((_, index) => (
+                  <SkeletonLoader key={`asset-skeleton-${index}`} type="card" />
+                ))
+              ) : (
+                assets.map(asset => (
+                  <div
+                    key={asset.id}
+                    className={styles.card}
+                    onClick={() => setSelectedAsset(asset)}
                   >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-              {/* Tab Content */}
-              <div className={styles.tabContent}>
-                {activeTab === 'Overview' && (
-                  <div>
-                    {/* Stats Grid */}
-                    <div className={styles.statsGrid}>
-                      <div className={styles.statItem}>
-                        <span className={styles.statLabel}>Net P&L</span>
-                        <span className={styles.statValueGreen}>
-                          ${selectedSetup.performance.netPL.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className={styles.statItem}>
-                        <span className={styles.statLabel}>Trades</span>
-                        <span className={styles.statValue}>{selectedSetup.performance.totalTrades}</span>
-                      </div>
-                      <div className={styles.statItem}>
-                        <span className={styles.statLabel}>Win Rate %</span>
-                        <span className={styles.statValue}>{selectedSetup.performance.winRate}%</span>
-                      </div>
-                      <div className={styles.statItem}>
-                        <span className={styles.statLabel}>Profit Factor</span>
-                        <span className={styles.statValue}>{selectedSetup.performance.profitFactor.toFixed(2)}</span>
-                      </div>
-                      <div className={styles.statItem}>
-                        <span className={styles.statLabel}>Expectancy</span>
-                        <span className={styles.statValue}>{selectedSetup.performance.expectancy.toFixed(2)}</span>
-                      </div>
-                      <div className={styles.statItem}>
-                        <span className={styles.statLabel}>Average Winner</span>
-                        <span className={styles.statValueGreen}>
-                          ${selectedSetup.performance.averageWin.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className={styles.statItem}>
-                        <span className={styles.statLabel}>Average Loser</span>
-                        <span className={styles.statValueRed}>
-                          -${Math.abs(selectedSetup.performance.averageLoss).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className={styles.statItem}>
-                        <span className={styles.statLabel}>Largest Profit</span>
-                        <span className={styles.statValueGreen}>
-                          ${selectedSetup.performance.largestWin.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className={styles.statItem}>
-                        <span className={styles.statLabel}>Largest Loss</span>
-                        <span className={styles.statValueRed}>
-                          -${Math.abs(selectedSetup.performance.largestLoss).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className={styles.statItem}>
-                        <span className={styles.statLabel}>Total R Multiple</span>
-                        <span className={styles.statValue}>{selectedSetup.performance.averageR.toFixed(2)}</span>
+                    <div className={styles.cardActions}>
+                      <div className={styles.relative}>
+                        <button 
+                          className={styles.menuButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowMenu(showMenu === asset.id ? null : asset.id);
+                          }}
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                        {showMenu === asset.id && (
+                          <div className={styles.menuDropdown}>
+                            <button 
+                              className={styles.menuItem}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowMenu(null);
+                              }}
+                            >
+                              <Edit size={14} />
+                              Edit
+                            </button>
+                            <button 
+                              className={styles.menuItemDelete}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAssetToDelete({ id: asset.id, name: asset.asset });
+                                setShowDeleteConfirmModal(true);
+                              }}
+                            >
+                              <Trash2 size={14} />
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
-
-                    <div className={styles.section}>
-                      <h3 className={styles.sectionTitle}>Description</h3>
-                      <p className={styles.sectionContent}>{selectedSetup.description}</p>
-                    </div>
-                    
-                    <div className={styles.section}>
-                      <h3 className={styles.sectionTitle}>Rules Followed</h3>
-                      <div className={styles.rulesContainer}>
-                        <div className={styles.rulesHeader}>
-                          <span className={styles.rulesHeaderText}>Rules Compliance</span>
-                          <span className={styles.rulesHeaderValue}>85%</span>
-                        </div>
-                        <div className={styles.progressBar}>
-                          <div className={styles.progressBarFill}></div>
-                        </div>
-                        <p className={styles.rulesFooter}>
-                          {selectedSetup.checklist.length} rules in total
-                        </p>
+                    <div className={styles.cardContent}>
+                      <div className={styles.cardHeader}>
+                        {asset.icon && (
+                          <img 
+                            src={asset.icon} 
+                            alt={`${asset.asset} icon`} 
+                            className={styles.cardIcon}
+                          />
+                        )}
+                        <h3 className={styles.cardTitle}>{asset.asset}</h3>
                       </div>
-                    </div>
-
-                    <div className={styles.section}>
-                      <h3 className={styles.sectionTitle}>Missed Trades</h3>
-                      <div className={styles.missedTradesContainer}>
-                        <div className={styles.missedTradesHeader}>
-                          <span className={styles.missedTradesCount}>3</span>
-                          <span className={styles.missedTradesLabel}>missed opportunities</span>
-                        </div>
-                        <p className={styles.missedTradesFooter}>
-                          Last missed trade: 2 days ago
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className={styles.section}>
-                      <h3 className={styles.sectionTitle}>Tags</h3>
+                      <p className={styles.cardDescription}>{asset.description}</p>
                       <div className={styles.tagsContainer}>
-                        {selectedSetup.tags.map((tag, index) => (
+                        {asset.strategies.map(strategy => (
                           <span
-                            key={index}
+                            key={strategy.id}
                             className={styles.assetTag}
                           >
-                            {tag}
+                            {strategy.title}
                           </span>
                         ))}
                       </div>
+                      <div className={styles.performanceGrid}>
+                        <div className={styles.performanceItem}>
+                          <span className={styles.performanceLabel}>Win Rate</span>
+                          <div className={styles.performanceValueGreen}>{asset.performance.winRate}%</div>
+                        </div>
+                        <div className={styles.performanceItem}>
+                          <span className={styles.performanceLabel}>Total Trades</span>
+                          <div className={styles.performanceValue}>{asset.performance.totalTrades}</div>
+                        </div>
+                        <div className={styles.performanceItem}>
+                          <span className={styles.performanceLabel}>Avg R</span>
+                          <div className={styles.performanceValueBlue}>{asset.performance.averageR.toFixed(2)}R</div>
+                        </div>
+                        <div className={styles.performanceItem}>
+                          <span className={styles.performanceLabel}>Net P&L</span>
+                          <div className={styles.performanceValueGreen}>${asset.performance.netPL.toLocaleString()}</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
-                {activeTab === 'Playbook Rules' && (
-                  <div className={styles.section}>
-                    <ul className={styles.rulesList}>
-                      {selectedSetup.checklist.map((rule, idx) => (
-                        <li key={idx} className={styles.ruleItem}>
-                          <input
-                            type="text"
-                            className={styles.ruleInput}
-                            value={rule}
-                            onChange={e => {
-                              const updated = [...selectedSetup.checklist];
-                              updated[idx] = e.target.value;
-                              setSelectedSetup({ ...selectedSetup, checklist: updated });
-                            }}
-                          />
-                          <button
-                            className={styles.deleteButton}
-                            onClick={() => {
-                              const updated = selectedSetup.checklist.filter((_, i) => i !== idx);
-                              setSelectedSetup({ ...selectedSetup, checklist: updated });
-                            }}
-                            title="Delete rule"
-                          >
-                            &times;
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className={styles.addRuleContainer}>
-                      <input
-                        type="text"
-                        className={styles.addRuleInput}
-                        placeholder="Add new rule..."
-                        value={newRuleInput}
-                        onChange={e => setNewRuleInput(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' && newRuleInput.trim()) {
-                            setSelectedSetup({
-                              ...selectedSetup,
-                              checklist: [...selectedSetup.checklist, newRuleInput.trim()],
-                            });
-                            setNewRuleInput('');
-                          }
-                        }}
-                      />
-                      <button
-                        className={styles.addButton}
-                        onClick={() => {
-                          if (newRuleInput.trim()) {
-                            setSelectedSetup({
-                              ...selectedSetup,
-                              checklist: [...selectedSetup.checklist, newRuleInput.trim()],
-                            });
-                            setNewRuleInput('');
-                          }
-                        }}
-                        disabled={!newRuleInput.trim()}
-                      >
-                        Add
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {activeTab === 'Executed Trades' && (
-                  <div className={styles.placeholderContent}>
-                    [Executed Trades Table]
-                  </div>
-                )}
-                {activeTab === 'Missed Trades' && (
-                  <div className={styles.placeholderContent}>
-                    [Missed Trades Table]
-                  </div>
-                )}
-                {activeTab === 'Notes' && (
-                  <div className={styles.notesContent}>
-                    {selectedSetup.notes}
-                  </div>
-                )}
-              </div>
+                ))
+              )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirmModal && assetToDelete && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modal}>
-              <h2 className={styles.modalTitle}>Delete Playbook</h2>
-              <p className={styles.modalText}>
-                Are you sure you want to delete {assetToDelete.name} and all its strategies? This action cannot be undone.
-              </p>
-              <div className={styles.formActions}>
+          {/* Strategy View */}
+          {selectedAsset && !selectedSetup && (
+            <div>
+              <div className={styles.strategyHeader}>
                 <button
-                  onClick={() => {
-                    setShowDeleteConfirmModal(false);
-                    setAssetToDelete(null);
-                  }}
-                  className={styles.cancelButton}
+                  className={styles.primaryButton}
+                  onClick={() => setShowCreateStrategyModal(true)}
                 >
-                  Cancel
+                  + New Strategy
                 </button>
                 <button
-                  onClick={handleDeleteConfirm}
-                  className={styles.deleteButton}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Strategy Confirmation Modal */}
-        {showDeleteStrategyModal && strategyToDelete && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modal}>
-              <h2 className={styles.modalTitle}>Delete Strategy</h2>
-              <p className={styles.modalText}>
-                Are you sure you want to delete the strategy "{strategyToDelete.name}"? This action cannot be undone.
-              </p>
-              <div className={styles.modalActions}>
-                <button
+                  onClick={() => setSelectedAsset(null)}
                   className={styles.secondaryButton}
-                  onClick={() => {
-                    setShowDeleteStrategyModal(false);
-                    setStrategyToDelete(null);
-                  }}
                 >
-                  Cancel
-                </button>
-                <button
-                  className={styles.dangerButton}
-                  onClick={handleDeleteStrategyConfirm}
-                >
-                  Delete
+                  ← Back to Assets
                 </button>
               </div>
+              <div className={styles.strategiesGrid}>
+                {isLoading ? (
+                  Array(selectedAsset.strategies.length || 2).fill(null).map((_, index) => (
+                    <SkeletonLoader key={`strategy-skeleton-${index}`} type="card" />
+                  ))
+                ) : (
+                  selectedAsset.strategies.map(strategy => (
+                    <div
+                      key={strategy.id}
+                      className={styles.card}
+                      onClick={() => setSelectedSetup(strategy)}
+                    >
+                      <div className={styles.cardActions}>
+                        <div className={styles.relative}>
+                          <button 
+                            className={styles.menuButton}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowMenu(showMenu === strategy.id ? null : strategy.id);
+                            }}
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          {showMenu === strategy.id && (
+                            <div className={styles.menuDropdown}>
+                              <button 
+                                className={styles.menuItem}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowMenu(null);
+                                }}
+                              >
+                                <Edit size={14} />
+                                Edit
+                              </button>
+                              <button 
+                                className={styles.menuItemDelete}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setStrategyToDelete({ id: strategy.id, name: strategy.title });
+                                  setShowDeleteStrategyModal(true);
+                                }}
+                              >
+                                <Trash2 size={14} />
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className={styles.cardContent}>
+                        <div className={styles.cardHeader}>
+                          <div className={styles.strategyIcon}>
+                            <IconSelector
+                              selectedIcon={strategy.icon || 'trending-up'}
+                              onSelectIcon={(icon) => handleStrategyIconChange(strategy.id, icon)}
+                            />
+                          </div>
+                          <h3 className={styles.cardTitle}>{strategy.title}</h3>
+                        </div>
+                        <p className={styles.cardDescription}>{strategy.description}</p>
+                        <div className={styles.tagsContainer}>
+                          {strategy.tags.map((tag, index) => (
+                            <span key={index} className={styles.tag}>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <div className={styles.performanceGrid}>
+                          <div className={styles.performanceItem}>
+                            <span className={styles.performanceLabel}>Win Rate</span>
+                            <div className={styles.performanceValueGreen}>{strategy.performance.winRate}%</div>
+                          </div>
+                          <div className={styles.performanceItem}>
+                            <span className={styles.performanceLabel}>Total Trades</span>
+                            <div className={styles.performanceValue}>{strategy.performance.totalTrades}</div>
+                          </div>
+                          <div className={styles.performanceItem}>
+                            <span className={styles.performanceLabel}>Avg R</span>
+                            <div className={styles.performanceValueBlue}>{strategy.performance.averageR.toFixed(2)}R</div>
+                          </div>
+                          <div className={styles.performanceItem}>
+                            <span className={styles.performanceLabel}>Net P&L</span>
+                            <div className={styles.performanceValueGreen}>${strategy.performance.netPL.toLocaleString()}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Create Playbook Modal */}
+          {showCreateModal && (
+            <div className={styles.modalOverlay}>
+              <div className={styles.modal}>
+                <h2 className={styles.modalTitle}>New Playbook</h2>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Asset</label>
+                  <input
+                    type="text"
+                    className={styles.formInput}
+                    value={newPlaybook.asset}
+                    onChange={e => setNewPlaybook({ ...newPlaybook, asset: e.target.value })}
+                    placeholder="e.g., GER40, GOLD, etc."
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Strategy Title</label>
+                  <input
+                    type="text"
+                    className={styles.formInput}
+                    value={newPlaybook.title}
+                    onChange={e => setNewPlaybook({ ...newPlaybook, title: e.target.value })}
+                    placeholder="e.g., Morning Breakout, Range Trading"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Type</label>
+                  <input
+                    type="text"
+                    className={styles.formInput}
+                    value={newPlaybook.type}
+                    onChange={e => setNewPlaybook({ ...newPlaybook, type: e.target.value })}
+                    placeholder="e.g., Breakout, Range, Trend"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Tags (comma separated)</label>
+                  <input
+                    type="text"
+                    className={styles.formInput}
+                    value={newPlaybook.tags}
+                    onChange={e => setNewPlaybook({ ...newPlaybook, tags: e.target.value })}
+                    placeholder="e.g., morning session, gap-up, range"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Description</label>
+                  <textarea
+                    className={styles.formTextarea}
+                    rows={3}
+                    value={newPlaybook.description}
+                    onChange={e => setNewPlaybook({ ...newPlaybook, description: e.target.value })}
+                    placeholder="Describe your strategy..."
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Icon</label>
+                  <IconSelector
+                    selectedIcon={newPlaybook.icon || 'trending-up'}
+                    onSelectIcon={(icon) => setNewPlaybook({ ...newPlaybook, icon })}
+                  />
+                </div>
+                <div className={styles.formActions}>
+                  <button
+                    onClick={() => setShowCreateModal(false)}
+                    className={styles.cancelButton}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreatePlaybook}
+                    className={styles.primaryButton}
+                    disabled={!newPlaybook.asset.trim()}
+                    title={!newPlaybook.asset.trim() ? "Please enter an asset name" : ""}
+                  >
+                    Create
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Create Strategy Modal */}
+          {showCreateStrategyModal && selectedAsset && (
+            <div className={styles.modalOverlay}>
+              <div className={styles.modal}>
+                <h2 className={styles.modalTitle}>New Strategy for {selectedAsset.asset}</h2>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Strategy Title</label>
+                  <input
+                    type="text"
+                    className={styles.formInput}
+                    value={newStrategy.title}
+                    onChange={e => setNewStrategy({ ...newStrategy, title: e.target.value })}
+                    placeholder="e.g., Morning Breakout, Range Trading"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Type</label>
+                  <input
+                    type="text"
+                    className={styles.formInput}
+                    value={newStrategy.type}
+                    onChange={e => setNewStrategy({ ...newStrategy, type: e.target.value })}
+                    placeholder="e.g., Breakout, Range, Trend"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Tags (comma separated)</label>
+                  <input
+                    type="text"
+                    className={styles.formInput}
+                    value={newStrategy.tags}
+                    onChange={e => setNewStrategy({ ...newStrategy, tags: e.target.value })}
+                    placeholder="e.g., morning session, gap-up, range"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Description</label>
+                  <textarea
+                    className={styles.formTextarea}
+                    rows={3}
+                    value={newStrategy.description}
+                    onChange={e => setNewStrategy({ ...newStrategy, description: e.target.value })}
+                    placeholder="Describe your strategy..."
+                  />
+                </div>
+                <div className={styles.formActions}>
+                  <button
+                    onClick={() => setShowCreateStrategyModal(false)}
+                    className={styles.cancelButton}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateStrategy}
+                    className={styles.primaryButton}
+                    disabled={!newStrategy.title.trim()}
+                  >
+                    Create Strategy
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Playbook Detail Modal */}
+          {selectedSetup && (
+            <div className={styles.modalOverlay}>
+              <div className={styles.modalLarge}>
+                <div className={styles.modalHeader}>
+                  <div>
+                    <h2 className={styles.modalLargeTitle}>{selectedSetup.title}</h2>
+                    <p className={styles.modalSubtitle}>{selectedSetup.type}</p>
+                  </div>
+                  <button
+                    onClick={() => setSelectedSetup(null)}
+                    className={styles.closeButton}
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
+                </div>
+                {/* Tabs */}
+                <div className={styles.tabsContainer}>
+                  {['Overview', 'Playbook Rules', 'Executed Trades', 'Missed Trades', 'Notes'].map(tab => (
+                    <button
+                      key={tab}
+                      className={`${styles.tab} ${
+                        activeTab === tab
+                          ? styles.tabActive
+                          : styles.tabInactive
+                      }`}
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+                {/* Tab Content */}
+                <div className={styles.tabContent}>
+                  {activeTab === 'Overview' && (
+                    <div>
+                      {/* Stats Grid */}
+                      <div className={styles.statsGrid}>
+                        <div className={styles.statItem}>
+                          <span className={styles.statLabel}>Net P&L</span>
+                          <span className={styles.statValueGreen}>
+                            ${selectedSetup.performance.netPL.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className={styles.statItem}>
+                          <span className={styles.statLabel}>Trades</span>
+                          <span className={styles.statValue}>{selectedSetup.performance.totalTrades}</span>
+                        </div>
+                        <div className={styles.statItem}>
+                          <span className={styles.statLabel}>Win Rate %</span>
+                          <span className={styles.statValue}>{selectedSetup.performance.winRate}%</span>
+                        </div>
+                        <div className={styles.statItem}>
+                          <span className={styles.statLabel}>Profit Factor</span>
+                          <span className={styles.statValue}>{selectedSetup.performance.profitFactor.toFixed(2)}</span>
+                        </div>
+                        <div className={styles.statItem}>
+                          <span className={styles.statLabel}>Expectancy</span>
+                          <span className={styles.statValue}>{selectedSetup.performance.expectancy.toFixed(2)}</span>
+                        </div>
+                        <div className={styles.statItem}>
+                          <span className={styles.statLabel}>Average Winner</span>
+                          <span className={styles.statValueGreen}>
+                            ${selectedSetup.performance.averageWin.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className={styles.statItem}>
+                          <span className={styles.statLabel}>Average Loser</span>
+                          <span className={styles.statValueRed}>
+                            -${Math.abs(selectedSetup.performance.averageLoss).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className={styles.statItem}>
+                          <span className={styles.statLabel}>Largest Profit</span>
+                          <span className={styles.statValueGreen}>
+                            ${selectedSetup.performance.largestWin.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className={styles.statItem}>
+                          <span className={styles.statLabel}>Largest Loss</span>
+                          <span className={styles.statValueRed}>
+                            -${Math.abs(selectedSetup.performance.largestLoss).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className={styles.statItem}>
+                          <span className={styles.statLabel}>Total R Multiple</span>
+                          <span className={styles.statValue}>{selectedSetup.performance.averageR.toFixed(2)}</span>
+                        </div>
+                      </div>
+
+                      <div className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Description</h3>
+                        <p className={styles.sectionContent}>{selectedSetup.description}</p>
+                      </div>
+                      
+                      <div className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Rules Followed</h3>
+                        <div className={styles.rulesContainer}>
+                          <div className={styles.rulesHeader}>
+                            <span className={styles.rulesHeaderText}>Rules Compliance</span>
+                            <span className={styles.rulesHeaderValue}>85%</span>
+                          </div>
+                          <div className={styles.progressBar}>
+                            <div className={styles.progressBarFill}></div>
+                          </div>
+                          <p className={styles.rulesFooter}>
+                            {selectedSetup.checklist.length} rules in total
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Missed Trades</h3>
+                        <div className={styles.missedTradesContainer}>
+                          <div className={styles.missedTradesHeader}>
+                            <span className={styles.missedTradesCount}>3</span>
+                            <span className={styles.missedTradesLabel}>missed opportunities</span>
+                          </div>
+                          <p className={styles.missedTradesFooter}>
+                            Last missed trade: 2 days ago
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Tags</h3>
+                        <div className={styles.tagsContainer}>
+                          {selectedSetup.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className={styles.assetTag}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {activeTab === 'Playbook Rules' && (
+                    <div className={styles.section}>
+                      <ul className={styles.rulesList}>
+                        {selectedSetup.checklist.map((rule, idx) => (
+                          <li key={idx} className={styles.ruleItem}>
+                            <input
+                              type="text"
+                              className={styles.ruleInput}
+                              value={rule}
+                              onChange={e => {
+                                const updated = [...selectedSetup.checklist];
+                                updated[idx] = e.target.value;
+                                setSelectedSetup({ ...selectedSetup, checklist: updated });
+                              }}
+                            />
+                            <button
+                              className={styles.deleteButton}
+                              onClick={() => {
+                                const updated = selectedSetup.checklist.filter((_, i) => i !== idx);
+                                setSelectedSetup({ ...selectedSetup, checklist: updated });
+                              }}
+                              title="Delete rule"
+                            >
+                              &times;
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className={styles.addRuleContainer}>
+                        <input
+                          type="text"
+                          className={styles.addRuleInput}
+                          placeholder="Add new rule..."
+                          value={newRuleInput}
+                          onChange={e => setNewRuleInput(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && newRuleInput.trim()) {
+                              setSelectedSetup({
+                                ...selectedSetup,
+                                checklist: [...selectedSetup.checklist, newRuleInput.trim()],
+                              });
+                              setNewRuleInput('');
+                            }
+                          }}
+                        />
+                        <button
+                          className={styles.addButton}
+                          onClick={() => {
+                            if (newRuleInput.trim()) {
+                              setSelectedSetup({
+                                ...selectedSetup,
+                                checklist: [...selectedSetup.checklist, newRuleInput.trim()],
+                              });
+                              setNewRuleInput('');
+                            }
+                          }}
+                          disabled={!newRuleInput.trim()}
+                        >
+                          Add
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {activeTab === 'Executed Trades' && (
+                    <div className={styles.placeholderContent}>
+                      [Executed Trades Table]
+                    </div>
+                  )}
+                  {activeTab === 'Missed Trades' && (
+                    <div className={styles.placeholderContent}>
+                      [Missed Trades Table]
+                    </div>
+                  )}
+                  {activeTab === 'Notes' && (
+                    <div className={styles.notesContent}>
+                      {selectedSetup.notes}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Delete Confirmation Modal */}
+          {showDeleteConfirmModal && assetToDelete && (
+            <div className={styles.modalOverlay}>
+              <div className={styles.modal}>
+                <h2 className={styles.modalTitle}>Delete Playbook</h2>
+                <p className={styles.modalText}>
+                  Are you sure you want to delete {assetToDelete.name} and all its strategies? This action cannot be undone.
+                </p>
+                <div className={styles.formActions}>
+                  <button
+                    onClick={() => {
+                      setShowDeleteConfirmModal(false);
+                      setAssetToDelete(null);
+                    }}
+                    className={styles.cancelButton}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleDeletePlaybook(assetToDelete.id);
+                    }}
+                    className={styles.deleteButton}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Delete Strategy Confirmation Modal */}
+          {showDeleteStrategyModal && strategyToDelete && (
+            <div className={styles.modalOverlay}>
+              <div className={styles.modal}>
+                <h2 className={styles.modalTitle}>Delete Strategy</h2>
+                <p className={styles.modalText}>
+                  Are you sure you want to delete the strategy "{strategyToDelete.name}"? This action cannot be undone.
+                </p>
+                <div className={styles.modalActions}>
+                  <button
+                    className={styles.secondaryButton}
+                    onClick={() => {
+                      setShowDeleteStrategyModal(false);
+                      setStrategyToDelete(null);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className={styles.dangerButton}
+                    onClick={() => {
+                      handleDeleteStrategy(strategyToDelete.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 
