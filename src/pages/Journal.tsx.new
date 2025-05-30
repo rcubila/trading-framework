@@ -1,0 +1,419 @@
+import { useState, useEffect } from 'react';
+import styles from '../styles/Journal.module.css';
+import {
+  RiCalendarLine,
+  RiBarChartLine,
+  RiPieChart2Line,
+  RiLineChartLine,
+  RiTimeLine,
+  RiFilterLine,
+  RiAddLine,
+  RiSearchLine,
+  RiEmotionLine,
+  RiMoonClearLine,
+  RiSunLine,
+  RiThumbUpLine,
+  RiThumbDownLine,
+  RiCheckboxCircleLine,
+  RiCloseCircleLine,
+  RiExchangeDollarLine,
+  RiScales3Line,
+  RiBarChartGroupedLine,
+  RiCalendarCheckLine,
+} from 'react-icons/ri';
+import { motion } from 'framer-motion';
+import { Line, Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+import { supabase } from '../lib/supabase';
+import { PageHeader } from '../components/PageHeader';
+import { AnimatedButton } from '../components/AnimatedButton';
+import { SkeletonLoader } from '../components/SkeletonLoader';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
+// ... existing interfaces ...
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export const Journal = () => {
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [stats, setStats] = useState<JournalStats | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState('1M');
+  const [selectedView, setSelectedView] = useState('overview');
+  const [isLoading, setIsLoading] = useState(true);
+
+  const periods = [
+    { label: '1W', value: '1W' },
+    { label: '1M', value: '1M' },
+    { label: '3M', value: '3M' },
+    { label: '6M', value: '6M' },
+    { label: '1Y', value: '1Y' },
+    { label: 'ALL', value: 'ALL' },
+  ];
+
+  const views = [
+    { label: 'Overview', value: 'overview', icon: RiBarChartLine },
+    { label: 'Trade Analysis', value: 'analysis', icon: RiLineChartLine },
+    { label: 'Psychology', value: 'psychology', icon: RiEmotionLine },
+    { label: 'Journal Entries', value: 'entries', icon: RiCalendarLine },
+  ];
+
+  useEffect(() => {
+    fetchTrades();
+  }, [selectedPeriod]);
+
+  const fetchTrades = async () => {
+    try {
+      setIsLoading(true);
+      await delay(1000); // 1 second delay for testing
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      const { data: trades, error } = await supabase
+        .from('trades')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('entry_date', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching trades:', error);
+        setIsLoading(false);
+        return;
+      }
+
+      const tradesData = trades || [];
+      setTrades(tradesData);
+      calculateStats(tradesData);
+    } catch (error) {
+      console.error('Error fetching trades:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const calculateStats = (trades: Trade[]) => {
+    if (!trades.length) {
+      setStats({
+        totalTrades: 0,
+        winRate: 0,
+        profitFactor: 0,
+        averageWin: 0,
+        averageLoss: 0,
+        largestWin: 0,
+        largestLoss: 0,
+        averageHoldingTime: "0m",
+        bestPerformingSetup: "N/A",
+        worstPerformingSetup: "N/A",
+        bestTimeOfDay: "N/A",
+        profitBySession: {
+          preMarket: 0,
+          regular: 0,
+          afterHours: 0
+        },
+        emotionalBalance: 0,
+        mostCommonMistakes: [],
+        bestStrategies: [],
+        averageRiskPerTrade: 0,
+        maxDrawdown: 0,
+        maxDrawdownPercentage: 0,
+        sharpeRatio: 0,
+        averageRRR: 0,
+        performanceByDayOfWeek: [],
+        performanceBySize: [],
+        consecutiveStats: {
+          maxWinStreak: 0,
+          maxLossStreak: 0,
+          currentStreak: 0
+        },
+        timeStats: {
+          holdingTimeDistribution: [],
+          bestHoldingPeriod: "N/A",
+          worstHoldingPeriod: "N/A"
+        },
+        marketConditionStats: []
+      });
+      return;
+    }
+
+    const winningTrades = trades.filter(t => t.pnl > 0);
+    const losingTrades = trades.filter(t => t.pnl < 0);
+
+    const stats: JournalStats = {
+      totalTrades: trades.length,
+      winRate: (winningTrades.length / trades.length) * 100,
+      profitFactor: Math.abs(
+        winningTrades.reduce((sum, t) => sum + t.pnl, 0) /
+        (losingTrades.reduce((sum, t) => sum + t.pnl, 0) || 1)
+      ),
+      averageWin: winningTrades.length ? winningTrades.reduce((sum, t) => sum + t.pnl, 0) / winningTrades.length : 0,
+      averageLoss: losingTrades.length ? Math.abs(losingTrades.reduce((sum, t) => sum + t.pnl, 0) / losingTrades.length) : 0,
+      largestWin: winningTrades.length ? Math.max(...winningTrades.map(t => t.pnl)) : 0,
+      largestLoss: losingTrades.length ? Math.abs(Math.min(...losingTrades.map(t => t.pnl))) : 0,
+      averageHoldingTime: calculateAverageHoldingTime(trades),
+      bestPerformingSetup: findBestSetup(trades),
+      worstPerformingSetup: findWorstSetup(trades),
+      bestTimeOfDay: findBestTimeOfDay(trades),
+      profitBySession: calculateProfitBySession(trades),
+      emotionalBalance: calculateEmotionalBalance(trades),
+      mostCommonMistakes: findMostCommonMistakes(trades),
+      bestStrategies: findBestStrategies(trades),
+      averageRiskPerTrade: calculateAverageRisk(trades),
+      maxDrawdown: calculateMaxDrawdown(trades),
+      maxDrawdownPercentage: calculateMaxDrawdownPercentage(trades),
+      sharpeRatio: calculateSharpeRatio(trades),
+      averageRRR: calculateAverageRRR(trades),
+      performanceByDayOfWeek: calculatePerformanceByDayOfWeek(trades),
+      performanceBySize: calculatePerformanceBySize(trades),
+      consecutiveStats: calculateConsecutiveStats(trades),
+      timeStats: calculateTimeStats(trades),
+      marketConditionStats: calculateMarketConditionStats(trades),
+    };
+
+    setStats(stats);
+  };
+
+  // ... rest of the existing functions ...
+
+  return (
+    <div className={styles.container}>
+      <PageHeader
+        title="Trading Journal"
+        subtitle="Track and analyze your trading performance"
+      />
+      <div className={styles.journalContainer}>
+        <div className={styles.viewSelector}>
+          {views.map(view => (
+            <button
+              key={view.value}
+              className={`${styles.viewButton} ${selectedView === view.value ? styles.selected : ''}`}
+              onClick={() => setSelectedView(view.value)}
+            >
+              <view.icon size={20} />
+              {view.label}
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.periodSelector}>
+          {periods.map(period => (
+            <button
+              key={period.value}
+              className={`${styles.periodButton} ${selectedPeriod === period.value ? styles.selected : ''}`}
+              onClick={() => setSelectedPeriod(period.value)}
+            >
+              {period.label}
+            </button>
+          ))}
+        </div>
+
+        {isLoading ? (
+          <SkeletonLoader type="journal" />
+        ) : (
+          <>
+            {selectedView === 'overview' && stats && (
+              <div className={styles.overviewGrid}>
+                <div className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <RiBarChartLine className={styles.iconBlue} size={24} />
+                    <h3 className={styles.cardTitle}>Performance</h3>
+                  </div>
+                  <div className={styles.cardValue}>${stats.totalTrades}</div>
+                  <div className={styles.cardSub}>Total Trades</div>
+                </div>
+                <div className={`${styles.card} ${styles.cardRisk}`}>
+                  <div className={styles.cardHeader}>
+                    <RiScales3Line className={styles.iconGreen} size={24} />
+                    <h3 className={styles.cardTitle}>Risk Management</h3>
+                  </div>
+                  <div className={styles.cardValue}>{stats.averageRRR.toFixed(2)}R</div>
+                  <div className={styles.cardSub}>Average R:R</div>
+                </div>
+                <div className={`${styles.card} ${styles.cardConsistency}`}>
+                  <div className={styles.cardHeader}>
+                    <RiBarChartGroupedLine className={styles.iconPurple} size={24} />
+                    <h3 className={styles.cardTitle}>Consistency</h3>
+                  </div>
+                  <div className={styles.cardValue}>{stats.winRate.toFixed(1)}%</div>
+                  <div className={styles.cardSub}>Win Rate</div>
+                </div>
+                <div className={`${styles.card} ${styles.cardTime}`}>
+                  <div className={styles.cardHeader}>
+                    <RiTimeLine className={styles.iconYellow} size={24} />
+                    <h3 className={styles.cardTitle}>Time Analysis</h3>
+                  </div>
+                  <div className={styles.cardValue}>{stats.averageHoldingTime}</div>
+                  <div className={styles.cardSub}>Avg. Holding Time</div>
+                </div>
+              </div>
+            )}
+            {selectedView === 'analysis' && stats && (
+              <div className={styles.analysisGrid}>
+                <div className={styles.analysisLeft}>
+                  <div className={styles.analysisCard}>
+                    <h3 className={styles.analysisCardTitle}>Performance by Day</h3>
+                    <div className={styles.analysisDayGrid}>
+                      {stats.performanceByDayOfWeek.map((day, index) => (
+                        <div key={index} className={styles.analysisDay}>
+                          <div className={styles.analysisDayLabel}>{day.day}</div>
+                          <div className={styles.analysisDayValue}>
+                            {day.winRate.toFixed(1)}%
+                          </div>
+                          <div className={styles.analysisDayProfit}>
+                            +${day.pnl.toLocaleString()}
+                          </div>
+                          <div className={styles.analysisDayLoss}>
+                            {day.trades} trades
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.analysisRight}>
+                  <div className={styles.analysisCard}>
+                    <h3 className={styles.analysisCardTitle}>Market Conditions</h3>
+                    <div className={styles.analysisConditionGrid}>
+                      {stats.marketConditionStats.map((condition, index) => (
+                        <div key={index} className={styles.analysisCondition}>
+                          <div className={styles.analysisConditionLabel}>
+                            {condition.condition}
+                          </div>
+                          <div className={styles.analysisConditionValue}>
+                            {condition.winRate.toFixed(1)}%
+                          </div>
+                          <div className={styles.analysisConditionSub}>
+                            ${condition.pnl.toLocaleString()}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {selectedView === 'psychology' && stats && (
+              <div className={styles.psychologyGrid}>
+                <div className={styles.analysisCard}>
+                  <h3 className={styles.analysisCardTitle}>Emotional Balance</h3>
+                  <div className={styles.analysisTimeRow}>
+                    <div className={styles.analysisTimeLabel}>
+                      Emotional Score
+                      <div className={styles.analysisTimeSub}>
+                        Based on trade notes and performance
+                      </div>
+                    </div>
+                    <div className={styles.analysisTimeWinRate}>
+                      {stats.emotionalBalance.toFixed(1)}/10
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.analysisCard}>
+                  <h3 className={styles.analysisCardTitle}>Common Mistakes</h3>
+                  <div className={styles.analysisConditionGrid}>
+                    {stats.mostCommonMistakes.map((mistake, index) => (
+                      <div key={index} className={styles.analysisCondition}>
+                        <div className={styles.analysisConditionLabel}>
+                          {mistake}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            {selectedView === 'entries' && trades && (
+              <div className={styles.entriesGrid}>
+                <div className={styles.searchBar}>
+                  <div className={styles.searchInput}>
+                    <RiSearchLine className={styles.searchIcon} size={20} />
+                    <input
+                      type="text"
+                      className={styles.input}
+                      placeholder="Search trades..."
+                    />
+                  </div>
+                  <button className={styles.filterButton}>
+                    <RiFilterLine size={20} />
+                    Filters
+                  </button>
+                </div>
+                <div className={styles.tableContainer}>
+                  <table className={styles.table}>
+                    <thead className={styles.tableHeader}>
+                      <tr>
+                        <th>Date</th>
+                        <th>Symbol</th>
+                        <th>Setup</th>
+                        <th>Entry</th>
+                        <th>Exit</th>
+                        <th>P&L</th>
+                        <th>R:R</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {trades.map(trade => (
+                        <tr key={trade.id} className={styles.tableRow}>
+                          <td className={styles.tableCell}>
+                            {new Date(trade.entry_date).toLocaleDateString()}
+                          </td>
+                          <td className={styles.tableCell}>{trade.symbol}</td>
+                          <td className={styles.tableCell}>{trade.setup}</td>
+                          <td className={styles.tableCell}>
+                            ${trade.entry_price.toFixed(2)}
+                          </td>
+                          <td className={styles.tableCell}>
+                            ${trade.exit_price.toFixed(2)}
+                          </td>
+                          <td className={`${styles.tableCell} ${trade.pnl > 0 ? styles.profit : styles.loss}`}>
+                            ${trade.pnl.toFixed(2)}
+                          </td>
+                          <td className={styles.tableCell}>
+                            {trade.risk_reward.toFixed(2)}R
+                          </td>
+                          <td className={`${styles.tableCell} ${styles.actionButtons}`}>
+                            <button className={`${styles.actionButton} ${styles.viewButton}`}>
+                              <RiBarChartLine size={16} />
+                            </button>
+                            <button className={`${styles.actionButton} ${styles.addButton}`}>
+                              <RiAddLine size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}; 

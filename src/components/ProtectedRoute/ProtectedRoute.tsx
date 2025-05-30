@@ -1,6 +1,9 @@
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { SkeletonLoader } from '../SkeletonLoader';
+import styles from './ProtectedRoute.module.css';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -11,10 +14,13 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
 
   if (loading) {
-    // You can replace this with a proper loading component
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingContent}>
+          <SkeletonLoader type="avatar" width="64px" height="64px" rounded animation="pulse" />
+          <SkeletonLoader type="text" width="200px" height="24px" className={styles.titleSkeleton} />
+          <SkeletonLoader type="text" width="150px" height="16px" className={styles.subtitleSkeleton} />
+        </div>
       </div>
     );
   }
