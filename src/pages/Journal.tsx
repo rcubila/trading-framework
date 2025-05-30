@@ -331,7 +331,6 @@ export const Journal = () => {
   };
 
   const calculatePerformanceBySize = (trades: Trade[]) => {
-    // Implementation for calculating performance by size
     return [];
   };
 
