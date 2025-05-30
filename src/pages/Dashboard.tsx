@@ -439,7 +439,7 @@ const Dashboard = () => {
         display: true,
         position: 'top' as const,
         labels: {
-          color: 'rgba(255, 255, 255, 0.8)',
+          color: 'var(--color-text-primary)',
           font: {
             size: 12
           }
@@ -448,10 +448,10 @@ const Dashboard = () => {
       tooltip: {
         mode: 'index' as const,
         intersect: false,
-        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-        titleColor: 'rgba(255, 255, 255, 0.9)',
-        bodyColor: 'rgba(255, 255, 255, 0.7)',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'var(--color-background)',
+        titleColor: 'var(--color-text-primary)',
+        bodyColor: 'var(--color-text-secondary)',
+        borderColor: 'var(--color-border)',
         borderWidth: 1,
         padding: 12,
         boxPadding: 6,
@@ -468,11 +468,11 @@ const Dashboard = () => {
       x: {
         type: 'category',
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
-          borderColor: 'rgba(255, 255, 255, 0.1)'
+          color: 'var(--color-grid)',
+          borderColor: 'var(--color-grid)'
         },
         ticks: {
-          color: 'rgba(255, 255, 255, 0.6)',
+          color: 'var(--color-text-muted)',
           maxRotation: 45,
           minRotation: 45
         }
@@ -480,11 +480,11 @@ const Dashboard = () => {
       y: {
         type: 'linear',
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
-          borderColor: 'rgba(255, 255, 255, 0.1)'
+          color: 'var(--color-grid)',
+          borderColor: 'var(--color-grid)'
         },
         ticks: {
-          color: 'rgba(255, 255, 255, 0.6)',
+          color: 'var(--color-text-muted)',
           callback: function(value: number | string) {
             return `$${Number(value).toFixed(0)}`;
           }
@@ -889,6 +889,15 @@ const Dashboard = () => {
     </div>
   );
 
+  const calculateCircleDash = (rate: number) => {
+    const radius = 45;
+    const circumference = 2 * Math.PI * radius;
+    return {
+      strokeDasharray: circumference,
+      strokeDashoffset: circumference * (1 - rate / 100)
+    };
+  };
+
   if (isLoadingTrades) {
     return (
       <div className={styles.container}>
@@ -1270,8 +1279,17 @@ const Dashboard = () => {
                     return (
                       <div
                         key={`${day}-${hourIndex}`}
-                        className={`${styles.heatmapCell} ${cell.count === 0 ? styles.heatmapCellEmpty : ''}`}
-                        style={cell.count === 0 ? undefined : { backgroundColor: color }}
+                        className={`${styles.heatmapCell} ${
+                          cell.count === 0 
+                            ? styles.heatmapCellEmpty 
+                            : cell.avgPnl >= 0 
+                              ? styles.heatmapCellProfit 
+                              : styles.heatmapCellLoss
+                        }`}
+                        style={{
+                          '--heatmap-profit-color': `rgba(34, 197, 94, ${intensity})`,
+                          '--heatmap-loss-color': `rgba(239, 68, 68, ${intensity})`
+                        } as React.CSSProperties}
                         title={`${day} ${hourIndex}:00\nTrades: ${cell.count}\nAvg P&L: ${cell.avgPnl >= 0 ? '+' : ''}$${cell.avgPnl.toFixed(2)}`}
                       >
                         {cell.count}
@@ -1321,8 +1339,6 @@ const Dashboard = () => {
                           ? styles.disciplineCircleProgressHigh 
                           : styles.disciplineCircleProgressLow
                       }`}
-                      strokeDasharray={`${2 * Math.PI * 45}`}
-                      strokeDashoffset={`${2 * Math.PI * 45 * (1 - disciplineMetrics.disciplineRate / 100)}`}
                     />
                   </svg>
                   <div className={styles.disciplineValueText}>
@@ -1381,8 +1397,6 @@ const Dashboard = () => {
                           ? styles.disciplineCircleProgressHigh 
                           : styles.disciplineCircleProgressLow
                       }`}
-                      strokeDasharray={`${2 * Math.PI * 45}`}
-                      strokeDashoffset={`${2 * Math.PI * 45 * (1 - disciplineMetrics.checklistAdherence / 100)}`}
                     />
                   </svg>
                   <div className={styles.disciplineValueText}>
