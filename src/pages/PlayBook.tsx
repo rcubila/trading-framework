@@ -214,6 +214,7 @@ export const PlayBook: React.FC = () => {
     createStrategy,
     deleteStrategy,
     updateStrategyIcon,
+    updateStrategyRules,
     refreshData,
   } = usePlaybookData();
 
@@ -239,22 +240,39 @@ export const PlayBook: React.FC = () => {
   const [newRuleInput, setNewRuleInput] = useState('');
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<{ id: string; name: string } | null>(null);
-  const [strategyToDelete, setStrategyToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [strategyToDelete, setStrategyToDelete] = useState<PlaybookStrategy | null>(null);
   const [showDeleteStrategyModal, setShowDeleteStrategyModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMenu, setShowMenu] = useState<string | null>(null);
 
   const handleCreatePlaybook = async () => {
+    console.log('handleCreatePlaybook started', { newPlaybook });
     try {
-      await createAsset({
-        asset: newPlaybook.asset,
-        description: newPlaybook.description,
+      if (!newPlaybook.asset.trim()) {
+        console.log('Asset name is empty');
+        toast.error('Please enter an asset name');
+        return;
+      }
+
+      console.log('Calling createAsset with:', {
+        asset: newPlaybook.asset.trim(),
+        description: newPlaybook.description.trim(),
         icon: newPlaybook.icon,
       });
+
+      await createAsset({
+        asset: newPlaybook.asset.trim(),
+        description: newPlaybook.description.trim(),
+        icon: newPlaybook.icon,
+      });
+      
+      console.log('createAsset completed successfully');
       setShowCreateModal(false);
       setNewPlaybook({ asset: '', title: '', type: '', tags: '', description: '', icon: '' });
+      toast.success('Playbook created successfully');
     } catch (error) {
-      console.error('Error creating playbook:', error);
+      console.error('Error in handleCreatePlaybook:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create playbook');
     }
   };
 
@@ -269,34 +287,73 @@ export const PlayBook: React.FC = () => {
   };
 
   const handleCreateStrategy = async () => {
-    if (!selectedAsset) return;
+    console.log('handleCreateStrategy started', { selectedAsset, newStrategy });
+    
+    if (!selectedAsset) {
+      console.log('No asset selected');
+      toast.error('No asset selected');
+      return;
+    }
     
     try {
+      // Validate required fields
+      if (!newStrategy.title.trim()) {
+        console.log('Strategy title is empty');
+        toast.error('Please enter a strategy title');
+        return;
+      }
+
+      console.log('Creating strategy with data:', {
+        assetId: selectedAsset.id,
+        strategy: {
+          title: newStrategy.title.trim(),
+          description: newStrategy.description.trim(),
+          type: newStrategy.type.trim(),
+          tags: newStrategy.tags.split(',').map(t => t.trim()).filter(Boolean),
+          notes: '',
+          checklist: [],
+          trades: [],
+        }
+      });
+
+      // Create the strategy
       await createStrategy(selectedAsset.id, {
-        title: newStrategy.title,
-        description: newStrategy.description,
-        type: newStrategy.type,
+        title: newStrategy.title.trim(),
+        description: newStrategy.description.trim(),
+        type: newStrategy.type.trim(),
         tags: newStrategy.tags.split(',').map(t => t.trim()).filter(Boolean),
         notes: '',
         checklist: [],
         trades: [],
       });
+
+      console.log('Strategy created successfully');
+
+      // Close modal and reset form
       setShowCreateStrategyModal(false);
       setNewStrategy({ title: '', type: '', tags: '', description: '' });
+      toast.success('Strategy created successfully');
     } catch (error) {
-      console.error('Error creating strategy:', error);
+      console.error('Error in handleCreateStrategy:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create strategy');
     }
   };
 
-  const handleDeleteStrategy = async (strategyId: string) => {
-    if (!selectedAsset) return;
-    
+  const handleDeleteStrategy = async () => {
+    if (!selectedAsset || !strategyToDelete) {
+      toast.error('Missing required data for deletion');
+      return;
+    }
+
     try {
-      await deleteStrategy(selectedAsset.id, strategyId);
+      await deleteStrategy(selectedAsset.id, strategyToDelete.id);
       setShowDeleteStrategyModal(false);
       setStrategyToDelete(null);
+      setSelectedSetup(null);
+      setShowMenu(null);
     } catch (error) {
       console.error('Error deleting strategy:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete strategy');
     }
   };
 
@@ -305,6 +362,16 @@ export const PlayBook: React.FC = () => {
       await updateStrategyIcon(strategyId, icon);
     } catch (error) {
       console.error('Error changing strategy icon:', error);
+    }
+  };
+
+  const handleUpdateRules = async (strategyId: string, rules: string[]) => {
+    try {
+      await updateStrategyRules(strategyId, rules);
+      toast.success('Rules updated successfully');
+    } catch (error) {
+      console.error('Error updating rules:', error);
+      toast.error('Failed to update rules');
     }
   };
 
@@ -511,8 +578,12 @@ export const PlayBook: React.FC = () => {
                                 className={styles.menuItemDelete}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setStrategyToDelete({ id: strategy.id, name: strategy.title });
-                                  setShowDeleteStrategyModal(true);
+                                  const strategyToDelete = selectedAsset.strategies.find(s => s.id === strategy.id);
+                                  if (strategyToDelete) {
+                                    setStrategyToDelete(strategyToDelete);
+                                    setShowDeleteStrategyModal(true);
+                                    setShowMenu(null);
+                                  }
                                 }}
                               >
                                 <Trash2 size={14} />
@@ -636,7 +707,10 @@ export const PlayBook: React.FC = () => {
                     Cancel
                   </button>
                   <button
-                    onClick={handleCreatePlaybook}
+                    onClick={() => {
+                      console.log('Create button clicked in modal');
+                      handleCreatePlaybook();
+                    }}
                     className={styles.primaryButton}
                     disabled={!newPlaybook.asset.trim()}
                     title={!newPlaybook.asset.trim() ? "Please enter an asset name" : ""}
@@ -865,6 +939,7 @@ export const PlayBook: React.FC = () => {
                                 const updated = [...selectedSetup.checklist];
                                 updated[idx] = e.target.value;
                                 setSelectedSetup({ ...selectedSetup, checklist: updated });
+                                handleUpdateRules(selectedSetup.id, updated);
                               }}
                             />
                             <button
@@ -872,6 +947,7 @@ export const PlayBook: React.FC = () => {
                               onClick={() => {
                                 const updated = selectedSetup.checklist.filter((_, i) => i !== idx);
                                 setSelectedSetup({ ...selectedSetup, checklist: updated });
+                                handleUpdateRules(selectedSetup.id, updated);
                               }}
                               title="Delete rule"
                             >
@@ -889,10 +965,12 @@ export const PlayBook: React.FC = () => {
                           onChange={e => setNewRuleInput(e.target.value)}
                           onKeyDown={e => {
                             if (e.key === 'Enter' && newRuleInput.trim()) {
+                              const updated = [...selectedSetup.checklist, newRuleInput.trim()];
                               setSelectedSetup({
                                 ...selectedSetup,
-                                checklist: [...selectedSetup.checklist, newRuleInput.trim()],
+                                checklist: updated,
                               });
+                              handleUpdateRules(selectedSetup.id, updated);
                               setNewRuleInput('');
                             }
                           }}
@@ -901,10 +979,12 @@ export const PlayBook: React.FC = () => {
                           className={styles.addButton}
                           onClick={() => {
                             if (newRuleInput.trim()) {
+                              const updated = [...selectedSetup.checklist, newRuleInput.trim()];
                               setSelectedSetup({
                                 ...selectedSetup,
-                                checklist: [...selectedSetup.checklist, newRuleInput.trim()],
+                                checklist: updated,
                               });
+                              handleUpdateRules(selectedSetup.id, updated);
                               setNewRuleInput('');
                             }
                           }}
@@ -972,7 +1052,7 @@ export const PlayBook: React.FC = () => {
               <div className={styles.modal}>
                 <h2 className={styles.modalTitle}>Delete Strategy</h2>
                 <p className={styles.modalText}>
-                  Are you sure you want to delete the strategy "{strategyToDelete.name}"? This action cannot be undone.
+                  Are you sure you want to delete the strategy "{strategyToDelete.title}"? This action cannot be undone.
                 </p>
                 <div className={styles.modalActions}>
                   <button
@@ -986,9 +1066,7 @@ export const PlayBook: React.FC = () => {
                   </button>
                   <button
                     className={styles.dangerButton}
-                    onClick={() => {
-                      handleDeleteStrategy(strategyToDelete.id);
-                    }}
+                    onClick={() => handleDeleteStrategy()}
                   >
                     Delete
                   </button>
