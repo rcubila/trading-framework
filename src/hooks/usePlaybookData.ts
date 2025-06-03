@@ -47,6 +47,7 @@ interface UsePlaybookDataReturn {
   isLoading: boolean;
   error: Error | null;
   refreshData: () => Promise<void>;
+  refreshAssetData: (assetId: string) => Promise<PlaybookStrategy[]>;
   createAsset: (asset: Omit<PlaybookAsset, 'id' | 'strategies' | 'performance'>) => Promise<void>;
   deleteAsset: (assetId: string) => Promise<void>;
   createStrategy: (assetId: string, strategy: Omit<PlaybookStrategy, 'id' | 'performance'>) => Promise<void>;
@@ -245,6 +246,53 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
     }
   };
 
+  const refreshAssetData = async (assetId: string) => {
+    try {
+      const { data: strategies, error } = await supabase
+        .from('strategies')
+        .select('*')
+        .eq('asset_name', assetId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const updatedStrategies = strategies.map(strategy => ({
+        id: strategy.id,
+        title: strategy.name,
+        description: strategy.description || '',
+        type: strategy.type || '',
+        tags: strategy.rules || [],
+        notes: '',
+        checklist: [],
+        trades: [],
+        icon: strategy.icon || undefined,
+        performance: {
+          totalTrades: strategy.performance_total_trades || 0,
+          winRate: strategy.performance_win_rate || 0,
+          averageR: strategy.performance_average_r || 0,
+          profitFactor: strategy.performance_profit_factor || 0,
+          expectancy: strategy.performance_expectancy || 0,
+          largestWin: strategy.performance_largest_win || 0,
+          largestLoss: strategy.performance_largest_loss || 0,
+          averageWin: strategy.performance_average_win || 0,
+          averageLoss: strategy.performance_average_loss || 0,
+          netPL: strategy.performance_net_pl || 0,
+        },
+      }));
+
+      setAssets(prev => prev.map(asset => 
+        asset.id === assetId 
+          ? { ...asset, strategies: updatedStrategies }
+          : asset
+      ));
+
+      return updatedStrategies;
+    } catch (error) {
+      console.error('Error refreshing asset data:', error);
+      throw error;
+    }
+  };
+
   const createStrategy = async (assetId: string, strategy: Omit<PlaybookStrategy, 'id' | 'performance'>) => {
     console.log('createStrategy started with:', { assetId, strategy });
     try {
@@ -330,9 +378,8 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
       if (insertError) throw insertError;
       if (!newStrategy) throw new Error('Failed to create strategy');
 
-      // Refresh the data
-      console.log('Refreshing assets data');
-      await fetchAssets();
+      // Refresh the specific asset's data
+      await refreshAssetData(assetId);
       console.log('Strategy creation completed successfully');
     } catch (error) {
       console.error('Error in createStrategy:', error);
@@ -361,6 +408,8 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
         throw error;
       }
 
+      // Refresh the specific asset's data
+      await refreshAssetData(assetId);
       toast.success('Strategy deleted successfully');
     } catch (error) {
       console.error('Delete failed:', error);
@@ -506,6 +555,7 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
     isLoading,
     error,
     refreshData: fetchAssets,
+    refreshAssetData,
     createAsset,
     deleteAsset,
     createStrategy,

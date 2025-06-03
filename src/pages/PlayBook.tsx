@@ -216,6 +216,7 @@ export const PlayBook: React.FC = () => {
     updateStrategyIcon,
     updateStrategyRules,
     refreshData,
+    refreshAssetData,
   } = usePlaybookData();
 
   const [selectedAsset, setSelectedAsset] = useState<PlaybookAsset | null>(null);
@@ -287,10 +288,7 @@ export const PlayBook: React.FC = () => {
   };
 
   const handleCreateStrategy = async () => {
-    console.log('handleCreateStrategy started', { selectedAsset, newStrategy });
-    
     if (!selectedAsset) {
-      console.log('No asset selected');
       toast.error('No asset selected');
       return;
     }
@@ -298,23 +296,9 @@ export const PlayBook: React.FC = () => {
     try {
       // Validate required fields
       if (!newStrategy.title.trim()) {
-        console.log('Strategy title is empty');
         toast.error('Please enter a strategy title');
         return;
       }
-
-      console.log('Creating strategy with data:', {
-        assetId: selectedAsset.id,
-        strategy: {
-          title: newStrategy.title.trim(),
-          description: newStrategy.description.trim(),
-          type: newStrategy.type.trim(),
-          tags: newStrategy.tags.split(',').map(t => t.trim()).filter(Boolean),
-          notes: '',
-          checklist: [],
-          trades: [],
-        }
-      });
 
       // Create the strategy
       await createStrategy(selectedAsset.id, {
@@ -327,14 +311,16 @@ export const PlayBook: React.FC = () => {
         trades: [],
       });
 
-      console.log('Strategy created successfully');
+      // Refresh the selected asset's data
+      const updatedStrategies = await refreshAssetData(selectedAsset.id);
+      setSelectedAsset(prev => prev ? { ...prev, strategies: updatedStrategies } : null);
 
       // Close modal and reset form
       setShowCreateStrategyModal(false);
       setNewStrategy({ title: '', type: '', tags: '', description: '' });
       toast.success('Strategy created successfully');
     } catch (error) {
-      console.error('Error in handleCreateStrategy:', error);
+      console.error('Error creating strategy:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create strategy');
     }
   };
@@ -347,6 +333,11 @@ export const PlayBook: React.FC = () => {
 
     try {
       await deleteStrategy(selectedAsset.id, strategyToDelete.id);
+      
+      // Refresh the selected asset's data
+      const updatedStrategies = await refreshAssetData(selectedAsset.id);
+      setSelectedAsset(prev => prev ? { ...prev, strategies: updatedStrategies } : null);
+      
       setShowDeleteStrategyModal(false);
       setStrategyToDelete(null);
       setSelectedSetup(null);
