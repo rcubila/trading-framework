@@ -407,8 +407,8 @@ export const PlayBook: React.FC = () => {
     <ErrorBoundary>
       <div className={styles.container}>
         <PageHeader
-          title="Playbooks"
-          subtitle="Manage your trading playbooks and strategies"
+          title={selectedAsset ? "Strategies" : "Playbooks"}
+          subtitle={selectedAsset ? `Manage strategies for ${selectedAsset.asset}` : "Manage your trading playbooks and strategies"}
           actions={headerActions}
         />
         
