@@ -796,7 +796,7 @@ export const PlayBook: React.FC = () => {
                 </div>
                 {/* Tabs */}
                 <div className={styles.tabsContainer}>
-                  {['Overview', 'Playbook Rules', 'Executed Trades', 'Missed Trades', 'Notes'].map(tab => (
+                  {['Overview', 'Strategy Rules', 'Executed Trades', 'Missed Trades', 'Notes'].map(tab => (
                     <button
                       key={tab}
                       className={`${styles.tab} ${
