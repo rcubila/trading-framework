@@ -595,3 +595,29 @@
 .relative {
   position: relative;
 }
+
+.saveRulesButton {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 1001;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.15);
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, opacity 0.2s;
+  opacity: 1;
+}
+.saveRulesButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.saveRulesButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.25);
+}
