@@ -246,6 +246,7 @@ export const PlayBook: React.FC = () => {
   const [showDeleteStrategyModal, setShowDeleteStrategyModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMenu, setShowMenu] = useState<string | null>(null);
+  const [rulesDirty, setRulesDirty] = useState(false);
 
   const handleCreatePlaybook = async (playbook: {
     asset: string;
@@ -847,7 +848,7 @@ export const PlayBook: React.FC = () => {
                     </div>
                   )}
                   {activeTab === 'Strategy Rules' && (
-                    <div className={styles.section}>
+                    <div className={styles.section} style={{ position: 'relative', minHeight: '300px' }}>
                       <ul className={styles.rulesList}>
                         {selectedSetup.checklist.map((rule, idx) => (
                           <li key={idx} className={styles.ruleItem}>
@@ -859,7 +860,7 @@ export const PlayBook: React.FC = () => {
                                 const updated = [...selectedSetup.checklist];
                                 updated[idx] = e.target.value;
                                 setSelectedSetup({ ...selectedSetup, checklist: updated });
-                                handleUpdateRules(selectedSetup.id, updated);
+                                setRulesDirty(true);
                               }}
                             />
                             <button
@@ -867,7 +868,7 @@ export const PlayBook: React.FC = () => {
                               onClick={() => {
                                 const updated = selectedSetup.checklist.filter((_, i) => i !== idx);
                                 setSelectedSetup({ ...selectedSetup, checklist: updated });
-                                handleUpdateRules(selectedSetup.id, updated);
+                                setRulesDirty(true);
                               }}
                               title="Delete rule"
                             >
@@ -890,8 +891,8 @@ export const PlayBook: React.FC = () => {
                                 ...selectedSetup,
                                 checklist: updated,
                               });
-                              handleUpdateRules(selectedSetup.id, updated);
                               setNewRuleInput('');
+                              setRulesDirty(true);
                             }
                           }}
                         />
@@ -904,8 +905,8 @@ export const PlayBook: React.FC = () => {
                                 ...selectedSetup,
                                 checklist: updated,
                               });
-                              handleUpdateRules(selectedSetup.id, updated);
                               setNewRuleInput('');
+                              setRulesDirty(true);
                             }
                           }}
                           disabled={!newRuleInput.trim()}
@@ -913,6 +914,18 @@ export const PlayBook: React.FC = () => {
                           Add
                         </button>
                       </div>
+                      {/* Save Rules Button */}
+                      <button
+                        className={styles.saveRulesButton}
+                        style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 1001 }}
+                        disabled={!rulesDirty}
+                        onClick={async () => {
+                          await handleUpdateRules(selectedSetup.id, selectedSetup.checklist);
+                          setRulesDirty(false);
+                        }}
+                      >
+                        Save Rules
+                      </button>
                     </div>
                   )}
                   {activeTab === 'Playbook Rules' && (
