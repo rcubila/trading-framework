@@ -11,6 +11,7 @@ import { toast } from 'react-hot-toast';
 import { usePlaybookData } from '../hooks/usePlaybookData';
 import type { PlaybookAsset, PlaybookStrategy } from '../hooks/usePlaybookData';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { CreatePlaybookModal } from '../components/CreatePlaybookModal';
 
 interface Trade {
   id: string;
@@ -246,30 +247,36 @@ export const PlayBook: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showMenu, setShowMenu] = useState<string | null>(null);
 
-  const handleCreatePlaybook = async () => {
-    console.log('handleCreatePlaybook started', { newPlaybook });
+  const handleCreatePlaybook = async (playbook: {
+    asset: string;
+    title: string;
+    type: string;
+    tags: string;
+    description: string;
+    icon: string;
+  }) => {
+    console.log('handleCreatePlaybook started', { playbook });
     try {
-      if (!newPlaybook.asset.trim()) {
+      if (!playbook.asset.trim()) {
         console.log('Asset name is empty');
         toast.error('Please enter an asset name');
         return;
       }
 
       console.log('Calling createAsset with:', {
-        asset: newPlaybook.asset.trim(),
-        description: newPlaybook.description.trim(),
-        icon: newPlaybook.icon,
+        asset: playbook.asset.trim(),
+        description: playbook.description.trim(),
+        icon: playbook.icon,
       });
 
       await createAsset({
-        asset: newPlaybook.asset.trim(),
-        description: newPlaybook.description.trim(),
-        icon: newPlaybook.icon,
+        asset: playbook.asset.trim(),
+        description: playbook.description.trim(),
+        icon: playbook.icon,
       });
       
       console.log('createAsset completed successfully');
       setShowCreateModal(false);
-      setNewPlaybook({ asset: '', title: '', type: '', tags: '', description: '', icon: '' });
       toast.success('Playbook created successfully');
     } catch (error) {
       console.error('Error in handleCreatePlaybook:', error);
@@ -629,89 +636,11 @@ export const PlayBook: React.FC = () => {
           )}
 
           {/* Create Playbook Modal */}
-          {showCreateModal && (
-            <div className={styles.modalOverlay}>
-              <div className={styles.modal}>
-                <h2 className={styles.modalTitle}>New Playbook</h2>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Asset</label>
-                  <input
-                    type="text"
-                    className={styles.formInput}
-                    value={newPlaybook.asset}
-                    onChange={e => setNewPlaybook({ ...newPlaybook, asset: e.target.value })}
-                    placeholder="e.g., GER40, GOLD, etc."
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Strategy Title</label>
-                  <input
-                    type="text"
-                    className={styles.formInput}
-                    value={newPlaybook.title}
-                    onChange={e => setNewPlaybook({ ...newPlaybook, title: e.target.value })}
-                    placeholder="e.g., Morning Breakout, Range Trading"
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Type</label>
-                  <input
-                    type="text"
-                    className={styles.formInput}
-                    value={newPlaybook.type}
-                    onChange={e => setNewPlaybook({ ...newPlaybook, type: e.target.value })}
-                    placeholder="e.g., Breakout, Range, Trend"
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Tags (comma separated)</label>
-                  <input
-                    type="text"
-                    className={styles.formInput}
-                    value={newPlaybook.tags}
-                    onChange={e => setNewPlaybook({ ...newPlaybook, tags: e.target.value })}
-                    placeholder="e.g., morning session, gap-up, range"
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Description</label>
-                  <textarea
-                    className={styles.formTextarea}
-                    rows={3}
-                    value={newPlaybook.description}
-                    onChange={e => setNewPlaybook({ ...newPlaybook, description: e.target.value })}
-                    placeholder="Describe your strategy..."
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Icon</label>
-                  <IconSelector
-                    selectedIcon={newPlaybook.icon || 'trending-up'}
-                    onSelectIcon={(icon) => setNewPlaybook({ ...newPlaybook, icon })}
-                  />
-                </div>
-                <div className={styles.formActions}>
-                  <button
-                    onClick={() => setShowCreateModal(false)}
-                    className={styles.cancelButton}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      console.log('Create button clicked in modal');
-                      handleCreatePlaybook();
-                    }}
-                    className={styles.primaryButton}
-                    disabled={!newPlaybook.asset.trim()}
-                    title={!newPlaybook.asset.trim() ? "Please enter an asset name" : ""}
-                  >
-                    Create
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          <CreatePlaybookModal
+            isOpen={showCreateModal}
+            onClose={() => setShowCreateModal(false)}
+            onCreate={handleCreatePlaybook}
+          />
 
           {/* Create Strategy Modal */}
           {showCreateStrategyModal && selectedAsset && (
