@@ -11,7 +11,7 @@ import { toast } from 'react-hot-toast';
 import { usePlaybookData } from '../hooks/usePlaybookData';
 import type { PlaybookAsset, PlaybookStrategy } from '../hooks/usePlaybookData';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-import { CreatePlaybookModal } from '../components/CreatePlaybookModal';
+import { CreatePlaybookModal } from './components/CreatePlaybookModal/CreatePlaybookModal';
 
 interface Trade {
   id: string;
