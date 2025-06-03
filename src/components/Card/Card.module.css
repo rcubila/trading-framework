@@ -1,0 +1,100 @@
+.card {
+  background: var(--color-background-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-fast);
+  border: 1px solid var(--color-border);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.cardContent {
+  color: var(--color-text-secondary);
+}
+
+.cardFooter {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
+/* Variants */
+.primary {
+  composes: card;
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+}
+
+.secondary {
+  composes: card;
+  background: var(--color-secondary);
+  color: var(--color-text-primary);
+}
+
+.outlined {
+  composes: card;
+  background: transparent;
+  border: 2px solid var(--color-primary);
+}
+
+/* Interactive states */
+.interactive {
+  composes: card;
+  cursor: pointer;
+}
+
+.interactive:hover {
+  background: var(--color-background-hover);
+}
+
+/* Loading state */
+.loading {
+  composes: card;
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--color-primary-rgb), 0.1),
+    transparent
+  );
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+} 

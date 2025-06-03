@@ -1,0 +1,121 @@
+.input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-background-input);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.input:disabled {
+  background: var(--color-background-disabled);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.input::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+/* Variants */
+.outlined {
+  composes: input;
+  background: transparent;
+  border: 2px solid var(--color-border);
+}
+
+.outlined:focus {
+  border-color: var(--color-primary);
+}
+
+.filled {
+  composes: input;
+  background: var(--color-background-input-filled);
+  border: none;
+}
+
+.filled:focus {
+  background: var(--color-background-input-filled-focus);
+}
+
+/* States */
+.error {
+  composes: input;
+  border-color: var(--color-error);
+}
+
+.error:focus {
+  box-shadow: 0 0 0 2px rgba(var(--color-error-rgb), 0.1);
+}
+
+.success {
+  composes: input;
+  border-color: var(--color-success);
+}
+
+.success:focus {
+  box-shadow: 0 0 0 2px rgba(var(--color-success-rgb), 0.1);
+}
+
+/* Sizes */
+.sm {
+  composes: input;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 0.75rem;
+}
+
+.lg {
+  composes: input;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 1rem;
+}
+
+/* With icon */
+.withIcon {
+  composes: input;
+  padding-left: calc(var(--spacing-md) * 2 + 16px);
+}
+
+.icon {
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+/* Container */
+.container {
+  position: relative;
+  width: 100%;
+}
+
+/* Label */
+.label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Helper text */
+.helperText {
+  margin-top: var(--spacing-xs);
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.errorText {
+  composes: helperText;
+  color: var(--color-error);
+} 

@@ -1,29 +1,30 @@
 export const theme = {
   colors: {
     primary: {
-      main: '#2563eb', // Blue
-      light: '#3b82f6',
-      dark: '#1d4ed8',
+      main: 'var(--color-primary)',
+      light: 'var(--color-primary-light)',
+      dark: 'var(--color-primary-dark)',
     },
     secondary: {
-      main: '#10b981', // Green
-      light: '#34d399',
-      dark: '#059669',
+      main: 'var(--color-secondary)',
+      light: 'var(--color-secondary-light)',
+      dark: 'var(--color-secondary-dark)',
     },
     background: {
-      primary: '#0f172a',
-      secondary: '#1e293b',
-      paper: '#334155',
+      primary: 'var(--color-background-primary)',
+      secondary: 'var(--color-background-secondary)',
+      paper: 'var(--color-background-paper)',
     },
     text: {
-      primary: '#ffffff',
-      secondary: '#e2e8f0',
-      disabled: '#94a3b8',
+      primary: 'var(--color-text-primary)',
+      secondary: 'var(--color-text-secondary)',
+      disabled: 'var(--color-text-disabled)',
+      muted: 'var(--color-text-muted)',
     },
-    error: '#dc2626',
-    warning: '#d97706',
-    success: '#16a34a',
-    info: '#2563eb',
+    error: 'var(--color-error)',
+    warning: 'var(--color-warning)',
+    success: 'var(--color-success)',
+    info: 'var(--color-info)',
   },
   typography: {
     fontFamily: {
@@ -42,22 +43,23 @@ export const theme = {
     },
   },
   spacing: {
-    xs: '0.25rem',
-    sm: '0.5rem',
-    md: '1rem',
-    lg: '1.5rem',
-    xl: '2rem',
-    '2xl': '3rem',
+    xs: 'var(--spacing-xs)',
+    sm: 'var(--spacing-sm)',
+    md: 'var(--spacing-md)',
+    lg: 'var(--spacing-lg)',
+    xl: 'var(--spacing-xl)',
   },
   borderRadius: {
-    sm: '0.25rem',
-    md: '0.375rem',
-    lg: '0.5rem',
-    full: '9999px',
+    sm: 'var(--radius-sm)',
+    md: 'var(--radius-md)',
+    lg: 'var(--radius-lg)',
+    full: 'var(--radius-full)',
   },
   shadows: {
-    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+    sm: 'var(--shadow-sm)',
+    md: 'var(--shadow-md)',
+    lg: 'var(--shadow-lg)',
+    button: 'var(--shadow-button)',
+    'button-hover': 'var(--shadow-button-hover)',
   },
 }; 
