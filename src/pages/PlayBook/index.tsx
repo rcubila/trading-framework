@@ -66,6 +66,11 @@ interface AssetPlaybook {
   };
 }
 
+interface PlaybookRule {
+  content: string;
+  order_index: number;
+}
+
 const mockAssets: AssetPlaybook[] = [
   {
     id: '1',
@@ -169,7 +174,13 @@ const fetchStrategiesForPlaybook = async (playbookId: string) => {
   try {
     const { data: strategies, error } = await supabase
       .from('strategies')
-      .select('*')
+      .select(`
+        *,
+        playbook_rules (
+          content,
+          order_index
+        )
+      `)
       .eq('asset_name', playbookId)
       .order('created_at', { ascending: false });
 
@@ -180,9 +191,11 @@ const fetchStrategiesForPlaybook = async (playbookId: string) => {
       title: strategy.name,
       description: strategy.description || '',
       type: strategy.type || '',
-      tags: strategy.rules || [],
+      tags: strategy.rules || [], // Keep for backward compatibility
       notes: '',
-      checklist: [],
+      checklist: (strategy.playbook_rules as PlaybookRule[] || [])
+        .sort((a: PlaybookRule, b: PlaybookRule) => a.order_index - b.order_index)
+        .map((rule: PlaybookRule) => rule.content),
       trades: [],
       icon: strategy.icon || undefined,
       performance: {
@@ -367,6 +380,27 @@ export const PlayBook: React.FC = () => {
   const handleUpdateRules = async (strategyId: string, rules: string[]) => {
     try {
       await updateStrategyRules(strategyId, rules);
+      
+      // Update the selectedSetup state with the new rules
+      setSelectedSetup(prev => prev ? {
+        ...prev,
+        checklist: rules
+      } : null);
+      
+      // Update the selectedAsset state to reflect the changes
+      setSelectedAsset(prev => prev ? {
+        ...prev,
+        strategies: prev.strategies.map(strategy => 
+          strategy.id === strategyId 
+            ? { ...strategy, checklist: rules }
+            : strategy
+        )
+      } : null);
+      
+      // Refresh the data to ensure we have the latest state
+      await refreshData();
+      
+      setRulesDirty(false);
       toast.success('Rules updated successfully');
     } catch (error) {
       console.error('Error updating rules:', error);
@@ -920,8 +954,10 @@ export const PlayBook: React.FC = () => {
                         style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 1001 }}
                         disabled={!rulesDirty}
                         onClick={async () => {
-                          await handleUpdateRules(selectedSetup.id, selectedSetup.checklist);
-                          setRulesDirty(false);
+                          if (selectedSetup) {
+                            await handleUpdateRules(selectedSetup.id, selectedSetup.checklist);
+                            setRulesDirty(false);
+                          }
                         }}
                       >
                         Save Rules
