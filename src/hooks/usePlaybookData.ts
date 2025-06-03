@@ -512,10 +512,6 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
       console.log('Rules updated successfully');
     } catch (error) {
       console.error('Error in updateStrategyRules:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update strategy rules';
-      toast.error(errorMessage);
-      // Revert optimistic update
-      await fetchAssets();
       throw error;
     }
   };
