@@ -379,6 +379,7 @@ export const PlayBook: React.FC = () => {
 
   const handleUpdateRules = async (strategyId: string, rules: string[]) => {
     try {
+      // Call the API to update rules
       await updateStrategyRules(strategyId, rules);
       
       // Update the selectedSetup state with the new rules
@@ -400,11 +401,21 @@ export const PlayBook: React.FC = () => {
       // Refresh the data to ensure we have the latest state
       await refreshData();
       
+      // Reset dirty state
       setRulesDirty(false);
-      toast.success('Rules updated successfully');
+
+      // Show success message
+      const successMessage = document.createElement('div');
+      successMessage.className = styles.successMessage;
+      successMessage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Strategy rules saved successfully!';
+      document.body.appendChild(successMessage);
+
+      setTimeout(() => {
+        document.body.removeChild(successMessage);
+      }, 2000);
     } catch (error) {
       console.error('Error updating rules:', error);
-      toast.error('Failed to update rules');
+      throw error; // Re-throw the error to be handled by the caller
     }
   };
 
@@ -955,8 +966,20 @@ export const PlayBook: React.FC = () => {
                         disabled={!rulesDirty}
                         onClick={async () => {
                           if (selectedSetup) {
-                            await handleUpdateRules(selectedSetup.id, selectedSetup.checklist);
-                            setRulesDirty(false);
+                            try {
+                              await handleUpdateRules(selectedSetup.id, selectedSetup.checklist);
+                              setRulesDirty(false);
+                            } catch (error) {
+                              console.error('Error saving rules:', error);
+                              // Show error message
+                              const errorMessage = document.createElement('div');
+                              errorMessage.className = styles.errorMessage;
+                              errorMessage.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>Failed to save rules. Please try again.';
+                              document.body.appendChild(errorMessage);
+                              setTimeout(() => {
+                                document.body.removeChild(errorMessage);
+                              }, 3000);
+                            }
                           }
                         }}
                       >
