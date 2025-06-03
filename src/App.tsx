@@ -17,7 +17,7 @@ import { DisciplineProvider } from './context/DisciplineContext';
 import { AuthCallback } from './components/AuthCallback';
 import { useEffect } from 'react';
 import { trackPerformance } from './utils/performance';
-import PlayBook from './pages/PlayBook';
+import PlayBook from './pages/PlayBook/index';
 
 export const App = () => {
   useEffect(() => {
