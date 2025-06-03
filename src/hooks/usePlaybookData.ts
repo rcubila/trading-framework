@@ -42,6 +42,11 @@ export interface PlaybookAsset {
   };
 }
 
+interface PlaybookRule {
+  content: string;
+  order_index: number;
+}
+
 interface UsePlaybookDataReturn {
   assets: PlaybookAsset[];
   isLoading: boolean;
@@ -78,7 +83,13 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
     try {
       const { data: strategies, error } = await supabase
         .from('strategies')
-        .select('*')
+        .select(`
+          *,
+          playbook_rules (
+            content,
+            order_index
+          )
+        `)
         .eq('asset_name', assetName)
         .order('created_at', { ascending: false });
 
@@ -91,7 +102,9 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
         type: strategy.type || '',
         tags: strategy.rules || [],
         notes: '',
-        checklist: [],
+        checklist: (strategy.playbook_rules as PlaybookRule[] || [])
+          .sort((a: PlaybookRule, b: PlaybookRule) => a.order_index - b.order_index)
+          .map((rule: PlaybookRule) => rule.content),
         trades: [],
         icon: strategy.icon || undefined,
         performance: {
@@ -448,28 +461,57 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
     }
   };
 
-  const updateStrategyRules = async (strategyId: string, rules: string[]) => {
+  const updateStrategyRules = async (strategyId: string, rules: string[]): Promise<void> => {
+    console.log('updateStrategyRules called with:', { strategyId, rules });
     try {
-      // Optimistic update
-      setAssets(prev => prev.map(asset => ({
-        ...asset,
-        strategies: asset.strategies.map(strategy => {
-          if (strategy.id === strategyId) {
-            return { ...strategy, checklist: rules };
-          }
-          return strategy;
-        }),
-      })));
+      // First, delete existing rules for this strategy
+      console.log('Deleting existing rules for strategy:', strategyId);
+      const { error: deleteError } = await supabase
+        .from('playbook_rules')
+        .delete()
+        .eq('strategy_id', strategyId);
 
-      const { error } = await supabase
+      if (deleteError) {
+        console.error('Error deleting existing rules:', deleteError);
+        throw deleteError;
+      }
+
+      // Then, insert new rules with order_index
+      console.log('Inserting new rules:', rules);
+      const rulesToInsert = rules.map((content, index) => ({
+        strategy_id: strategyId,
+        content,
+        order_index: index
+      }));
+
+      const { error: insertError } = await supabase
+        .from('playbook_rules')
+        .insert(rulesToInsert);
+
+      if (insertError) {
+        console.error('Error inserting new rules:', insertError);
+        throw insertError;
+      }
+
+      // Update the rules array in strategies table for backward compatibility
+      console.log('Updating rules in strategies table');
+      const { error: updateError } = await supabase
         .from('strategies')
         .update({ rules })
         .eq('id', strategyId);
 
-      if (error) throw error;
+      if (updateError) {
+        console.error('Error updating strategies table:', updateError);
+        throw updateError;
+      }
 
-      toast.success('Strategy rules updated successfully');
+      // Refresh the data to ensure we have the latest state
+      console.log('Refreshing data after successful update');
+      await fetchAssets();
+      
+      console.log('Rules updated successfully');
     } catch (error) {
+      console.error('Error in updateStrategyRules:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to update strategy rules';
       toast.error(errorMessage);
       // Revert optimistic update
