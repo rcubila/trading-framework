@@ -1,0 +1,146 @@
+.accordion {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.item {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background: var(--color-background-paper);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.header:hover {
+  background: var(--color-background-hover);
+}
+
+.title {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  transition: transform var(--transition-fast);
+}
+
+.item.active .icon {
+  transform: rotate(180deg);
+}
+
+.content {
+  padding: var(--spacing-md);
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+
+/* Variants */
+.bordered .item {
+  margin: var(--spacing-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.bordered .item:last-child {
+  margin-bottom: var(--spacing-xs);
+}
+
+.separated .item {
+  margin-bottom: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.separated .item:last-child {
+  margin-bottom: 0;
+}
+
+/* Sizes */
+.sm .header {
+  padding: var(--spacing-sm);
+}
+
+.sm .content {
+  padding: var(--spacing-sm);
+  font-size: 0.75rem;
+}
+
+.lg .header {
+  padding: var(--spacing-lg);
+}
+
+.lg .content {
+  padding: var(--spacing-lg);
+  font-size: 1rem;
+}
+
+/* With icon */
+.withIcon .header {
+  gap: var(--spacing-sm);
+}
+
+.withIcon .title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.itemIcon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+/* Disabled state */
+.header:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .header {
+    padding: var(--spacing-sm);
+  }
+
+  .content {
+    padding: var(--spacing-sm);
+  }
+} 
