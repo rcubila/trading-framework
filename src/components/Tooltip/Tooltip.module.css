@@ -1,0 +1,168 @@
+.tooltip {
+  position: absolute;
+  z-index: 1000;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-background-paper);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all var(--transition-fast);
+  pointer-events: none;
+}
+
+.tooltip.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Arrow */
+.arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--color-background-paper);
+  transform: rotate(45deg);
+}
+
+/* Positions */
+.top {
+  composes: tooltip;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+}
+
+.top.visible {
+  transform: translateX(-50%) scale(1);
+}
+
+.top .arrow {
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.bottom {
+  composes: tooltip;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+}
+
+.bottom.visible {
+  transform: translateX(-50%) scale(1);
+}
+
+.bottom .arrow {
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.left {
+  composes: tooltip;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%) scale(0.95);
+}
+
+.left.visible {
+  transform: translateY(-50%) scale(1);
+}
+
+.left .arrow {
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.right {
+  composes: tooltip;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%) scale(0.95);
+}
+
+.right.visible {
+  transform: translateY(-50%) scale(1);
+}
+
+.right .arrow {
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* Variants */
+.light {
+  composes: tooltip;
+  background: var(--color-text-primary);
+  color: var(--color-background-paper);
+}
+
+.light .arrow {
+  background: var(--color-text-primary);
+}
+
+.dark {
+  composes: tooltip;
+  background: var(--color-background-paper);
+  color: var(--color-text-primary);
+}
+
+.dark .arrow {
+  background: var(--color-background-paper);
+}
+
+/* Sizes */
+.sm {
+  composes: tooltip;
+  padding: calc(var(--spacing-xs) / 2) var(--spacing-xs);
+  font-size: 0.625rem;
+}
+
+.lg {
+  composes: tooltip;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.875rem;
+}
+
+/* With icon */
+.withIcon {
+  composes: tooltip;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.icon {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .tooltip {
+    display: none;
+  }
+} 
