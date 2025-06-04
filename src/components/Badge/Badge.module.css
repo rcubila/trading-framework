@@ -1,0 +1,153 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+/* Variants */
+.primary {
+  composes: badge;
+  background: rgba(var(--color-primary-rgb), 0.1);
+  color: var(--color-primary);
+}
+
+.secondary {
+  composes: badge;
+  background: rgba(var(--color-secondary-rgb), 0.1);
+  color: var(--color-secondary);
+}
+
+.success {
+  composes: badge;
+  background: rgba(var(--color-success-rgb), 0.1);
+  color: var(--color-success);
+}
+
+.error {
+  composes: badge;
+  background: rgba(var(--color-error-rgb), 0.1);
+  color: var(--color-error);
+}
+
+.warning {
+  composes: badge;
+  background: rgba(var(--color-warning-rgb), 0.1);
+  color: var(--color-warning);
+}
+
+.info {
+  composes: badge;
+  background: rgba(var(--color-info-rgb), 0.1);
+  color: var(--color-info);
+}
+
+/* Sizes */
+.sm {
+  composes: badge;
+  padding: calc(var(--spacing-xs) / 2) var(--spacing-xs);
+  font-size: 0.625rem;
+}
+
+.lg {
+  composes: badge;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.875rem;
+}
+
+/* Outlined variant */
+.outlined {
+  composes: badge;
+  background: transparent;
+  border: 1px solid currentColor;
+}
+
+/* Solid variant */
+.solid {
+  composes: badge;
+  color: var(--color-text-primary);
+}
+
+.solid.primary {
+  background: var(--color-primary);
+}
+
+.solid.secondary {
+  background: var(--color-secondary);
+}
+
+.solid.success {
+  background: var(--color-success);
+}
+
+.solid.error {
+  background: var(--color-error);
+}
+
+.solid.warning {
+  background: var(--color-warning);
+}
+
+.solid.info {
+  background: var(--color-info);
+}
+
+/* With dot */
+.withDot {
+  composes: badge;
+  padding-left: calc(var(--spacing-sm) + 8px);
+  position: relative;
+}
+
+.dot {
+  position: absolute;
+  left: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Interactive */
+.interactive {
+  composes: badge;
+  cursor: pointer;
+}
+
+.interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.interactive:active {
+  transform: translateY(0);
+}
+
+/* With icon */
+.withIcon {
+  composes: badge;
+  gap: var(--spacing-xs);
+}
+
+.icon {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .badge {
+    font-size: 0.625rem;
+    padding: calc(var(--spacing-xs) / 2) var(--spacing-xs);
+  }
+} 
