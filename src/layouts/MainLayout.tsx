@@ -112,6 +112,7 @@ export const MainLayout = () => {
           >
             <span>&#9776;</span>
           </button>
+          <div className={styles.header__spacer} />
           <UserMenu />
         </header>
         <div className={styles.content}>
