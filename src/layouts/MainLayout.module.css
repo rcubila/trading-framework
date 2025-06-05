@@ -178,4 +178,8 @@
 .content {
   flex: 1;
   padding: 24px;
+}
+
+.header__spacer {
+  flex: 1;
 } 

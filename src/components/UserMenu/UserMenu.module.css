@@ -22,7 +22,7 @@
   font-weight: 600;
   font-size: 0.875rem;
   transition: opacity 0.2s ease;
-  margin-left: auto;
+  border: 2px solid red; /* TEMP for debug */
 }
 
 .menuButton:hover {
