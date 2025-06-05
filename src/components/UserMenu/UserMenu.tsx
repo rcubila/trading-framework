@@ -37,80 +37,82 @@ export const UserMenu = () => {
   };
 
   return (
-    <Menu as="div" className="relative">
-      <div>
-        <Menu.Button className={styles.menuButton}>
-          {avatarUrl ? (
-            <div className={styles.avatarContainer}>
-              <img 
-                src={avatarUrl} 
-                alt="Profile" 
-                className={styles.avatarImage}
-                onError={() => setAvatarUrl(null)}
-              />
-            </div>
-          ) : (
-            <span>{initials}</span>
-          )}
-        </Menu.Button>
-      </div>
-
-      <Menu.Items className={styles.menuContainer}>
-        <div className={styles.menuItemsContainer}>
-          {/* User Info with Avatar */}
-          {user?.email && (
-            <div className={styles.userInfo}>
-              {avatarUrl && (
+    <div style={{ marginLeft: 'auto' }}>
+      <Menu as="div" className="relative">
+        <div>
+          <Menu.Button className={styles.menuButton}>
+            {avatarUrl ? (
+              <div className={styles.avatarContainer}>
                 <img 
                   src={avatarUrl} 
                   alt="Profile" 
-                  className={styles.userAvatar}
+                  className={styles.avatarImage}
+                  onError={() => setAvatarUrl(null)}
                 />
-              )}
-              <div className={styles.userDetails}>
-                <span className={styles.userName}>{user.email.split('@')[0]}</span>
-                <span className={styles.userEmail}>{user.email}</span>
               </div>
-            </div>
-          )}
-
-          <Menu.Item>
-            {({ active }) => (
-              <button
-                className={`${styles.menuItem} ${active ? styles.active : ''}`}
-                onClick={() => navigate('/profile')}
-              >
-                <RiUserLine />
-                Profile
-              </button>
+            ) : (
+              <span>{initials}</span>
             )}
-          </Menu.Item>
-
-          <Menu.Item>
-            {({ active }) => (
-              <button
-                className={`${styles.menuItem} ${active ? styles.active : ''}`}
-                onClick={() => navigate('/settings')}
-              >
-                <RiSettings4Line />
-                Settings
-              </button>
-            )}
-          </Menu.Item>
-
-          <Menu.Item>
-            {({ active }) => (
-              <button
-                className={`${styles.menuItem} ${active ? styles.active : ''}`}
-                onClick={handleLogout}
-              >
-                <RiLogoutBoxLine />
-                Logout
-              </button>
-            )}
-          </Menu.Item>
+          </Menu.Button>
         </div>
-      </Menu.Items>
-    </Menu>
+
+        <Menu.Items className={styles.menuContainer}>
+          <div className={styles.menuItemsContainer}>
+            {/* User Info with Avatar */}
+            {user?.email && (
+              <div className={styles.userInfo}>
+                {avatarUrl && (
+                  <img 
+                    src={avatarUrl} 
+                    alt="Profile" 
+                    className={styles.userAvatar}
+                  />
+                )}
+                <div className={styles.userDetails}>
+                  <span className={styles.userName}>{user.email.split('@')[0]}</span>
+                  <span className={styles.userEmail}>{user.email}</span>
+                </div>
+              </div>
+            )}
+
+            <Menu.Item>
+              {({ active }) => (
+                <button
+                  className={`${styles.menuItem} ${active ? styles.active : ''}`}
+                  onClick={() => navigate('/profile')}
+                >
+                  <RiUserLine />
+                  Profile
+                </button>
+              )}
+            </Menu.Item>
+
+            <Menu.Item>
+              {({ active }) => (
+                <button
+                  className={`${styles.menuItem} ${active ? styles.active : ''}`}
+                  onClick={() => navigate('/settings')}
+                >
+                  <RiSettings4Line />
+                  Settings
+                </button>
+              )}
+            </Menu.Item>
+
+            <Menu.Item>
+              {({ active }) => (
+                <button
+                  className={`${styles.menuItem} ${active ? styles.active : ''}`}
+                  onClick={handleLogout}
+                >
+                  <RiLogoutBoxLine />
+                  Logout
+                </button>
+              )}
+            </Menu.Item>
+          </div>
+        </Menu.Items>
+      </Menu>
+    </div>
   );
 }; 
