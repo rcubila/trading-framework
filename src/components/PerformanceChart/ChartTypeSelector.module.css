@@ -1,0 +1,27 @@
+.chartControls {
+  display: flex;
+  gap: 4px;
+}
+
+.chartTypeButton {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: none;
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.chartTypeButton:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.chartTypeButtonActive {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+} 
