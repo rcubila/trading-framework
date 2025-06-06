@@ -90,6 +90,31 @@ Before performing ANY coding task or making ANY code changes, you MUST read and 
    - Animations and transitions
    - Dynamic values (with calc())
 
+## Color Management
+
+1. NEVER use hardcoded color values (e.g., `#ff0000`, `rgb(255, 0, 0)`, `rgba(255, 0, 0, 0.5)`). Instead:
+   - Use semantic color variables (e.g., `var(--color-error)`, `var(--color-success)`)
+   - Use theme color variables (e.g., `var(--color-primary)`, `var(--color-background)`)
+   - Use text color variables (e.g., `var(--color-text-primary)`, `var(--color-text-secondary)`)
+
+2. When adding new colors:
+   - Add them to the global variables file (`src/styles/variables.css`)
+   - Use semantic names that describe the color's purpose
+   - Group related colors together (e.g., primary, secondary, success, error)
+   - Include light/dark variants for each color
+
+3. Color naming conventions:
+   - Use semantic names over visual descriptions
+   - Prefix with `--color-` for all color variables
+   - Use `-light` and `-dark` suffixes for variants
+   - Use `-hover`, `-active`, `-disabled` for states
+
+4. When reviewing code:
+   - Check for any hardcoded color values
+   - Ensure colors are using the appropriate semantic variables
+   - Verify color contrast meets accessibility standards
+   - Confirm colors work in both light and dark themes
+
 ---
 
 *Update this file as new rules are added.* 
