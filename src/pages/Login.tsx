@@ -44,9 +44,7 @@ const Login = () => {
   const handleGoogleLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
-      console.log('Starting Google login...');
       await signInWithGoogle();
-      console.log('Google login initiated successfully');
     } catch (err) {
       console.error('Google login failed:', err);
     }

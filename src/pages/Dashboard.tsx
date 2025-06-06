@@ -31,7 +31,7 @@ import { TradingCalendar } from '../components/TradingCalendar';
 import type { Trade as CalendarTrade } from '../components/TradingCalendar';
 import type { Trade as DBTrade } from '../types/trade';
 import { generateTestTrades } from '../utils/testTrades';
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '../components/PageHeader/PageHeader';
 import styles from './Dashboard.module.css';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 
@@ -94,9 +94,6 @@ const Dashboard = () => {
     if (!holdingTimes.length) return '0m';
     
     const avgMinutes = holdingTimes.reduce((sum, time) => sum + time, 0) / holdingTimes.length;
-    console.log("=== HOLDING TIME CALCULATION ===");
-    console.log("Total trades with exit dates:", holdingTimes.length);
-    console.log("Average minutes:", avgMinutes);
     
     if (avgMinutes < 60) return `${Math.round(avgMinutes)}m`;
     if (avgMinutes < 1440) return `${Math.round(avgMinutes / 60)}h`;
@@ -180,12 +177,6 @@ const Dashboard = () => {
   const calculateMetrics = (trades: Trade[]) => {
     if (!trades.length) return;
 
-    console.log("CALCULATING METRICS - All Trades:", trades.map(t => ({
-      symbol: t.symbol,
-      pnl: t.pnl,
-      date: t.entry_date
-    })));
-
     // Calculate Total P&L
     const pnl = trades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0);
     setTotalPnL(pnl);
@@ -194,16 +185,9 @@ const Dashboard = () => {
     const totalTrades = trades.length;
     const winningTrades = trades.filter(trade => {
       const pnl = Number(trade.pnl);
-      console.log(`Trade ${trade.symbol} PnL:`, pnl);
       return pnl > 0;
     });
     const totalWinningTrades = winningTrades.length;
-    
-    console.log("=== WIN RATE CALCULATION ===");
-    console.log("Total Trades:", totalTrades);
-    console.log("Total Winning Trades:", totalWinningTrades);
-    console.log("Calculation:", totalWinningTrades, "/", totalTrades, "=", (totalWinningTrades / totalTrades));
-    console.log("Win Rate:", (totalWinningTrades / totalTrades) * 100, "%");
     
     const winRate = totalTrades > 0 ? (totalWinningTrades / totalTrades) * 100 : 0;
     setWinRate(winRate);
@@ -214,13 +198,6 @@ const Dashboard = () => {
       const riskReward = Number(trade.risk_reward);
       // If not available, calculate from risk and reward
       const calculatedRR = trade.risk && trade.reward ? Number(trade.reward) / Number(trade.risk) : null;
-      
-      console.log(`Trade ${trade.symbol} Risk-Reward:`, {
-        risk_reward: trade.risk_reward,
-        risk: trade.risk,
-        reward: trade.reward,
-        calculated: calculatedRR
-      });
       
       return (!isNaN(riskReward) && riskReward > 0) || (calculatedRR !== null && calculatedRR > 0);
     });
@@ -233,18 +210,6 @@ const Dashboard = () => {
           return sum + (Number(trade.reward) / Number(trade.risk));
         }, 0) / validRiskRewardTrades.length
       : 0;
-    
-    console.log("=== RISK-REWARD CALCULATION ===");
-    console.log("Total trades:", trades.length);
-    console.log("Total trades with valid RR:", validRiskRewardTrades.length);
-    console.log("Trades with valid RR:", validRiskRewardTrades.map(t => ({
-      symbol: t.symbol,
-      risk_reward: t.risk_reward,
-      risk: t.risk,
-      reward: t.reward,
-      calculated: t.risk && t.reward ? Number(t.reward) / Number(t.risk) : null
-    })));
-    console.log("Average RR:", riskReward);
     
     setAvgRiskReward(riskReward);
 
@@ -268,14 +233,6 @@ const Dashboard = () => {
       : 0;
     
     const expectancy = (winRate / 100 * avgWin) - ((1 - winRate / 100) * avgLoss);
-    
-    console.log("=== EXPECTANCY CALCULATION ===");
-    console.log("Total Trades:", trades.length);
-    console.log("Winning Trades:", winningTrades.length);
-    console.log("Average Win:", avgWin);
-    console.log("Average Loss:", avgLoss);
-    console.log("Win Rate:", winRate);
-    console.log("Expectancy:", expectancy);
     
     setExpectancy(expectancy);
 

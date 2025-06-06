@@ -26,7 +26,7 @@ import { DailyLog } from './discipline/DailyLog';
 import { ProgressInsights } from './discipline/ProgressInsights';
 import type { DailyCheckInData } from './discipline/DailyLog';
 import { PageHeader } from '../components/PageHeader/PageHeader';
-import styles from '../styles/DisciplineTracker.module.css';
+import styles from '../components/DisciplineTracker/DisciplineTracker.module.css';
 
 const ruleCategories = [
   'Entry',

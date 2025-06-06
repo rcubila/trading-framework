@@ -40,12 +40,10 @@ class MarketDataService {
   // Connect to WebSocket for real-time data
   async connectWebSocket(): Promise<void> {
     if (this.isConnecting) {
-      console.log('WebSocket connection attempt already in progress');
       return;
     }
 
     if (this.ws?.readyState === WebSocket.OPEN) {
-      console.log('WebSocket already connected');
       return;
     }
 
@@ -54,7 +52,6 @@ class MarketDataService {
     try {
       await this.closeExistingConnection();
       
-      console.log('Attempting to connect to Finnhub WebSocket...');
       this.ws = new WebSocket(`wss://ws.finnhub.io?token=${this.config.apiKey}`);
 
       this.ws.addEventListener('open', this.handleOpen);
@@ -62,7 +59,6 @@ class MarketDataService {
       this.ws.addEventListener('error', this.handleError);
       this.ws.addEventListener('close', this.handleClose);
     } catch (error) {
-      console.error('Error creating WebSocket connection:', error);
       this.handleReconnect();
     } finally {
       this.isConnecting = false;
@@ -81,14 +77,12 @@ class MarketDataService {
           this.ws.close();
         }
       } catch (error) {
-        console.error('Error closing existing connection:', error);
       }
       this.ws = null;
     }
   }
 
   private handleOpen = () => {
-    console.log('Connected to Finnhub WebSocket');
     this.reconnectAttempts = 0; // Reset reconnect attempts on successful connection
     
     // Resubscribe to all symbols
@@ -104,29 +98,24 @@ class MarketDataService {
         this.handleTradeData(data);
       }
     } catch (error) {
-      console.error('Error processing WebSocket message:', error);
     }
   };
 
   private handleError = (event: Event) => {
-    console.error('WebSocket error:', event);
     // Don't attempt to reconnect here - let the close handler handle it
   };
 
   private handleClose = (event: CloseEvent) => {
-    console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason}`);
     this.handleReconnect();
   };
 
   private handleReconnect = () => {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max reconnection attempts reached. Please check your API key and connection.');
       return;
     }
 
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1); // Exponential backoff
-    console.log(`Attempting to reconnect in ${delay/1000} seconds... (Attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
     
     setTimeout(() => {
       this.connectWebSocket();
@@ -139,7 +128,6 @@ class MarketDataService {
       this.ws.send(JSON.stringify({ type: 'subscribe', symbol }));
       this.subscriptions.add(symbol);
     } else {
-      console.log(`WebSocket not ready, adding ${symbol} to subscription queue`);
       this.subscriptions.add(symbol);
       // Attempt to connect if not already connected
       if (!this.isConnecting && (!this.ws || this.ws.readyState === WebSocket.CLOSED)) {
@@ -188,7 +176,6 @@ class MarketDataService {
       }
       throw new Error('Invalid response format');
     } catch (error) {
-      console.error(`Error fetching candles for ${symbol}:`, error);
       throw error;
     }
   }
@@ -204,7 +191,6 @@ class MarketDataService {
       });
       return response.data;
     } catch (error) {
-      console.error(`Error fetching quote for ${symbol}:`, error);
       throw error;
     }
   }
@@ -231,7 +217,6 @@ class MarketDataService {
       
       return response.data;
     } catch (error) {
-      console.error(`Error fetching indicator ${indicator} for ${symbol}:`, error);
       throw error;
     }
   }
@@ -239,7 +224,6 @@ class MarketDataService {
   private handleTradeData(data: TradeData) {
     // Process real-time trade data
     data.data.forEach(trade => {
-      console.log(`Trade: ${trade.s} @ ${trade.p} (Volume: ${trade.v})`);
     });
   }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import styles from '../styles/Journal.module.css';
+import styles from '../components/Journal/Journal.module.css';
 import {
   RiCalendarLine,
   RiBarChartLine,
@@ -20,6 +20,8 @@ import {
   RiScales3Line,
   RiBarChartGroupedLine,
   RiCalendarCheckLine,
+  RiArrowLeftLine,
+  RiArrowRightLine,
 } from 'react-icons/ri';
 import { motion } from 'framer-motion';
 import { Line, Bar } from 'react-chartjs-2';
@@ -36,7 +38,12 @@ import {
   Filler,
 } from 'chart.js';
 import { supabase } from '../lib/supabase';
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '../components/PageHeader/PageHeader';
+import { PageTitle } from '../components/PageTitle/PageTitle';
+import { PageContainer } from '../components/PageContainer/PageContainer';
+import { Button } from '../components/Button/Button';
+import { Input } from '../components/Input/Input';
+import { AddEntryModal } from '../components/AddEntryModal/AddEntryModal';
 import { AnimatedButton } from '../components/AnimatedButton';
 
 ChartJS.register(

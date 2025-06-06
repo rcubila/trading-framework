@@ -20,12 +20,9 @@ export const fixGER40Trades = async (defaultEntryPrice: number = 15800): Promise
 
     if (findError) throw findError;
     if (!trades || trades.length === 0) {
-      console.log('No GER40/DE40/DAX trades found');
       return [];
     }
 
-    console.log(`Found ${trades.length} GER40/DE40/DAX trades`);
-    
     // Filter trades that need fixing (wrong market or entry_price = 0)
     const tradesToFix = trades.filter(trade => 
       trade.market !== 'Futures' || 
@@ -35,11 +32,8 @@ export const fixGER40Trades = async (defaultEntryPrice: number = 15800): Promise
     );
 
     if (tradesToFix.length === 0) {
-      console.log('No trades need fixing');
       return [];
     }
-
-    console.log(`Found ${tradesToFix.length} trades to fix`);
 
     // Update each trade that needs fixing
     const updatedTrades = [];
@@ -62,17 +56,14 @@ export const fixGER40Trades = async (defaultEntryPrice: number = 15800): Promise
         .single();
 
       if (updateError) {
-        console.error(`Error updating trade ${trade.id}:`, updateError);
         continue;
       }
 
       updatedTrades.push(updatedTrade);
     }
 
-    console.log(`Successfully updated ${updatedTrades.length} trades`);
     return updatedTrades;
   } catch (error) {
-    console.error('Error fixing GER40 trades:', error);
     throw error;
   }
 }; 

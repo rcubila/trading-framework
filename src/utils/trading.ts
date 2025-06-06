@@ -41,11 +41,6 @@ export const formatPnL = (value: number, options: PnLFormatOptions = defaultPnLF
 
   const result = currency ? `${sign}$${formattedAbsValue}` : `${sign}${formattedAbsValue}`;
   
-  // For debugging
-  if (value < 0) {
-    console.log(`PNL Formatting: original=${value}, sign=${sign}, result=${result}`);
-  }
-  
   if (percentage) {
     return `${sign}${formattedAbsValue}%`;
   }

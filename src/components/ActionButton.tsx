@@ -1,6 +1,6 @@
 import React from 'react';
 import type { IconType } from 'react-icons';
-import styles from '../styles/ActionButton.module.css';
+import styles from './ActionButton/ActionButton.module.css';
 
 interface ActionButtonProps {
   icon: IconType;

@@ -1,22 +1,49 @@
-import React from 'react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  RiLineChartLine, 
-  RiExchangeDollarLine,
+  RiCloseLine,
+  RiEditLine,
+  RiDeleteBinLine,
+  RiArrowLeftLine,
+  RiArrowRightLine,
+  RiCalendarLine,
   RiTimeLine,
-  RiScales3Line,
+  RiMoneyDollarCircleLine,
+  RiPercentLine,
+  RiBarChartLine,
+  RiLineChartLine,
   RiPieChartLine,
-  RiFileTextLine,
-  RiBarChartGroupedLine,
+  RiSettings4Line,
+  RiInformationLine,
+  RiQuestionLine,
+  RiCheckLine,
+  RiCloseCircleLine,
   RiArrowUpLine,
   RiArrowDownLine,
-  RiArrowRightLine,
+  RiRefreshLine,
+  RiDownloadLine,
+  RiShareLine,
+  RiMoreLine,
+  RiMenuLine,
+  RiUserLine,
+  RiNotificationLine,
+  RiSearchLine,
+  RiFilterLine,
+  RiAddLine,
+  RiSubtractLine,
+  RiEqualLine,
+  RiDivideLine,
+  RiFunctionLine,
+  RiCalculatorLine,
+  RiBarChartGroupedLine,
+  RiCalendarCheckLine,
+  RiExchangeDollarLine,
+  RiScales3Line,
   RiLightbulbLine
 } from 'react-icons/ri';
 import type { Trade } from '../../types/trade';
-import { SlideOver } from './SlideOver';
-import { TradeChart } from './TradeChart';
+import { SlideOver } from '../SlideOver/SlideOver';
+import { TradeChart } from '../TradeChart/TradeChart';
 import styles from './TradeDetails.module.css';
 import { Clock, TrendingUp, TrendingDown } from 'lucide-react';
 

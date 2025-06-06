@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../styles/PageContainer.module.css';
+import styles from './PageContainer/PageContainer.module.css';
 
 interface PageContainerProps {
   children: React.ReactNode;

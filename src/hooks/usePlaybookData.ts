@@ -174,16 +174,13 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
   }, [fetchAssets]);
 
   const createAsset = async (asset: Omit<PlaybookAsset, 'id' | 'strategies' | 'performance'>) => {
-    console.log('createAsset started with:', asset);
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      console.log('Auth check result:', { user, userError });
       
       if (userError) throw userError;
       if (!user) throw new Error('No user found');
 
       // Check if asset already exists
-      console.log('Checking for existing asset:', asset.asset);
       const { data: existingAsset, error: checkError } = await supabase
         .from('strategies')
         .select('id')
@@ -191,13 +188,10 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
         .eq('is_playbook', true)
         .single();
 
-      console.log('Existing asset check result:', { existingAsset, checkError });
-
       if (checkError && checkError.code !== 'PGRST116') throw checkError;
       if (existingAsset) throw new Error('An asset with this name already exists');
 
       // Create the asset
-      console.log('Creating new asset in database');
       const { data: newAsset, error: insertError } = await supabase
         .from('strategies')
         .insert({
@@ -223,18 +217,13 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
         .select()
         .single();
 
-      console.log('Insert result:', { newAsset, insertError });
-
       if (insertError) throw insertError;
       if (!newAsset) throw new Error('Failed to create asset');
 
       // Refresh the data
-      console.log('Refreshing assets data');
       await fetchAssets();
-      console.log('Asset creation completed successfully');
       return newAsset;
     } catch (error) {
-      console.error('Error in createAsset:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to create asset';
       toast.error(errorMessage);
       throw error;
@@ -301,36 +290,29 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
 
       return updatedStrategies;
     } catch (error) {
-      console.error('Error refreshing asset data:', error);
       throw error;
     }
   };
 
   const createStrategy = async (assetId: string, strategy: Omit<PlaybookStrategy, 'id' | 'performance'>) => {
-    console.log('createStrategy started with:', { assetId, strategy });
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      console.log('Auth check result:', { user, userError });
       
       if (userError) throw userError;
       if (!user) throw new Error('No user found');
 
       // Validate strategy
       if (!strategy.title.trim()) {
-        console.log('Strategy title is empty');
         throw new Error('Strategy title is required');
       }
 
       // Check if parent asset exists
-      console.log('Checking for parent asset:', assetId);
       const { data: parentAsset, error: parentError } = await supabase
         .from('strategies')
         .select('id')
         .eq('asset_name', assetId)
         .eq('is_playbook', true)
         .single();
-
-      console.log('Parent asset check result:', { parentAsset, parentError });
 
       if (parentError) {
         if (parentError.code === 'PGRST116') {
@@ -344,7 +326,6 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
       }
 
       // Check for duplicate strategy name within the asset
-      console.log('Checking for duplicate strategy name');
       const { data: existingStrategy, error: checkError } = await supabase
         .from('strategies')
         .select('id')
@@ -353,13 +334,10 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
         .eq('name', strategy.title)
         .single();
 
-      console.log('Duplicate check result:', { existingStrategy, checkError });
-
       if (checkError && checkError.code !== 'PGRST116') throw checkError;
       if (existingStrategy) throw new Error('A strategy with this name already exists in this asset');
 
       // Create the strategy
-      console.log('Creating new strategy in database');
       const { data: newStrategy, error: insertError } = await supabase
         .from('strategies')
         .insert({
@@ -386,16 +364,12 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
         .select()
         .single();
 
-      console.log('Insert result:', { newStrategy, insertError });
-
       if (insertError) throw insertError;
       if (!newStrategy) throw new Error('Failed to create strategy');
 
       // Refresh the specific asset's data
       await refreshAssetData(assetId);
-      console.log('Strategy creation completed successfully');
     } catch (error) {
-      console.error('Error in createStrategy:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to create strategy';
       toast.error(errorMessage);
       throw error;
@@ -425,7 +399,6 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
       await refreshAssetData(assetId);
       toast.success('Strategy deleted successfully');
     } catch (error) {
-      console.error('Delete failed:', error);
       toast.error('Failed to delete strategy');
       throw error;
     }
@@ -453,8 +426,6 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
 
       toast.success('Strategy icon updated successfully');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update strategy icon';
-      toast.error(errorMessage);
       // Revert optimistic update
       await fetchAssets();
       throw error;
@@ -462,22 +433,18 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
   };
 
   const updateStrategyRules = async (strategyId: string, rules: string[]): Promise<void> => {
-    console.log('updateStrategyRules called with:', { strategyId, rules });
     try {
       // First, delete existing rules for this strategy
-      console.log('Deleting existing rules for strategy:', strategyId);
       const { error: deleteError } = await supabase
         .from('playbook_rules')
         .delete()
         .eq('strategy_id', strategyId);
 
       if (deleteError) {
-        console.error('Error deleting existing rules:', deleteError);
         throw deleteError;
       }
 
       // Then, insert new rules with order_index
-      console.log('Inserting new rules:', rules);
       const rulesToInsert = rules.map((content, index) => ({
         strategy_id: strategyId,
         content,
@@ -489,29 +456,22 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
         .insert(rulesToInsert);
 
       if (insertError) {
-        console.error('Error inserting new rules:', insertError);
         throw insertError;
       }
 
       // Update the rules array in strategies table for backward compatibility
-      console.log('Updating rules in strategies table');
       const { error: updateError } = await supabase
         .from('strategies')
         .update({ rules })
         .eq('id', strategyId);
 
       if (updateError) {
-        console.error('Error updating strategies table:', updateError);
         throw updateError;
       }
 
       // Refresh the data to ensure we have the latest state
-      console.log('Refreshing data after successful update');
       await fetchAssets();
-      
-      console.log('Rules updated successfully');
     } catch (error) {
-      console.error('Error in updateStrategyRules:', error);
       throw error;
     }
   };
@@ -560,8 +520,6 @@ export const usePlaybookData = (): UsePlaybookDataReturn => {
 
       toast.success('Strategy performance updated successfully');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update strategy performance';
-      toast.error(errorMessage);
       // Revert optimistic update
       await fetchAssets();
       throw error;

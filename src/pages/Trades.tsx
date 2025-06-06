@@ -30,11 +30,11 @@ import {
   RiDownload2Line,
 } from 'react-icons/ri';
 import { TradesList } from '../components/TradesList';
-import { TradeDetails } from '../components/TradeDetails';
+import { TradeDetails } from '../components/TradeDetails/TradeDetails';
 import type { Trade } from '../types/trade';
-import { PageTitle } from '../components/PageTitle';
-import { PageHeader } from '../components/PageHeader';
-import styles from '../styles/Trades.module.css';
+import { PageTitle } from '../components/PageTitle/PageTitle';
+import { PageHeader } from '../components/PageHeader/PageHeader';
+import styles from '../components/Trades/Trades.module.css';
 
 interface MarketConfigType {
   symbolPattern: string;

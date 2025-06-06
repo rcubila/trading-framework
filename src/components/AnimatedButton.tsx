@@ -1,6 +1,7 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import type { ReactNode, MouseEvent } from 'react';
-import styles from '../styles/AnimatedButton.module.css';
+import styles from './AnimatedButton/AnimatedButton.module.css';
 
 interface AnimatedButtonProps {
   children: ReactNode;
