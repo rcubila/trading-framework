@@ -20,8 +20,8 @@
 }
 
 .container {
-  padding: 5px;
-  color: white;
+  padding: var(--spacing-xs);
+  color: var(--color-text-primary);
   background: linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%);
   min-height: 100vh;
   backdrop-filter: blur(10px);
@@ -30,7 +30,7 @@
 .content {
   max-width: 80rem;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: var(--spacing-lg);
 }
 
 /* Header Section */
