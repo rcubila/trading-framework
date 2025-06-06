@@ -32,6 +32,7 @@ import type { Trade as CalendarTrade } from '../components/TradingCalendar';
 import type { Trade as DBTrade } from '../types/trade';
 import { generateTestTrades } from '../utils/testTrades';
 import { PageHeader } from '../components/PageHeader/PageHeader';
+import { MetricsGrid } from '../components/Metrics/MetricsGrid';
 import styles from './Dashboard.module.css';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 
@@ -855,6 +856,14 @@ const Dashboard = () => {
     };
   };
 
+  const handleTogglePercentage = () => {
+    setShowPercentage(!showPercentage);
+  };
+
+  const handleMetricHover = (metric: string | null) => {
+    setHoveredMetric(metric);
+  };
+
   if (isLoadingTrades) {
     return (
       <div className={styles.container}>
@@ -1002,7 +1011,7 @@ const Dashboard = () => {
               <h3 className={styles.metricTitle}>Total Net P/L</h3>
               <button 
                 className={styles.metricToggle}
-                onClick={() => setShowPercentage(!showPercentage)}
+                onClick={handleTogglePercentage}
               >
                 {showPercentage ? '%' : '$'}
               </button>
