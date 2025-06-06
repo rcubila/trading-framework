@@ -1,0 +1,27 @@
+:root {
+  /* Primary Colors */
+  --color-primary: #1a365d;
+  --color-primary-light: #2c5282;
+  --color-primary-dark: #0f2942;
+  
+  /* Background Colors */
+  --color-bg-primary: #1a365d;
+  --color-bg-secondary: #2c5282;
+  --color-bg-tertiary: #0f2942;
+  
+  /* Text Colors */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #e2e8f0;
+  --color-text-muted: #a0aec0;
+  
+  /* Border Colors */
+  --color-border: #2c5282;
+  --color-border-light: #4a5568;
+  
+  /* Hover/Active States */
+  --color-hover: #2c5282;
+  --color-active: #0f2942;
+  
+  /* Shadow Colors */
+  --color-shadow: rgba(0, 0, 0, 0.1);
+} 
