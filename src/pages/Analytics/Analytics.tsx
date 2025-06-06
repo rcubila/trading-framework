@@ -18,13 +18,13 @@ import {
   RiDownload2Line,
 } from 'react-icons/ri';
 import { motion } from 'framer-motion';
-import { supabase } from '../lib/supabase';
-import { PatternAnalysis } from '../components/PatternAnalysis/PatternAnalysis';
-import type { Database } from '../lib/supabase-types';
-import { PageHeader } from '../components/PageHeader/PageHeader';
-import { AnimatedButton } from '../components/AnimatedButton/AnimatedButton';
-import { AnimatedCard } from '../components/AnimatedCard/AnimatedCard';
-import { AnimatedInput } from '../components/AnimatedInput';
+import { supabase } from '../../lib/supabase';
+import { PatternAnalysis } from '../../components/PatternAnalysis/PatternAnalysis';
+import type { Database } from '../../lib/supabase-types';
+import { PageHeader } from '../../components/PageHeader/PageHeader';
+import { AnimatedButton } from '../../components/AnimatedButton/AnimatedButton';
+import { AnimatedCard } from '../../components/AnimatedCard/AnimatedCard';
+import { AnimatedInput } from '../../components/AnimatedInput';
 import styles from './Analytics.module.css';
 
 interface CalculatorInputs {

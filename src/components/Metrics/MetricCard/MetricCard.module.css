@@ -1,64 +1,64 @@
 .metricCard {
-  background: linear-gradient(145deg, var(--color-background-paper) 0%, var(--color-background) 100%);
-  padding: var(--spacing-md);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  transition: all var(--transition-fast) var(--transition-timing);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
 }
 
 .metricHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: 4px;
 }
 
 .metricTitle {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
   font-weight: normal;
 }
 
 .metricValue {
-  font-size: var(--font-size-xl);
+  font-size: 20px;
   font-weight: bold;
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 4px;
 }
 
 .metricValuePositive {
-  color: var(--color-success);
+  color: #22c55e;
 }
 
 .metricValueNegative {
-  color: var(--color-error);
+  color: #ef4444;
 }
 
 .metricValueNeutral {
-  color: var(--color-warning);
+  color: #f59e0b;
 }
 
 .metricSubtitle {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  margin-top: var(--spacing-xs);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
 }
 
 .metricToggle {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  background-color: var(--color-background-hover);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  font-size: var(--font-size-xs);
-  transition: all var(--transition-fast) var(--transition-timing);
+  font-size: 12px;
+  transition: all 0.2s ease;
 }
 
 .metricToggle:hover {
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.87);
 }
 
 .metricIcon {

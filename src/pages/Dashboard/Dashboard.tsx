@@ -26,16 +26,16 @@ import {
 } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Chart, Line, Bar, Doughnut } from 'react-chartjs-2';
-import { supabase } from '../lib/supabase';
-import { TradingCalendar } from '../components/TradingCalendar';
-import type { Trade as CalendarTrade } from '../components/TradingCalendar';
-import type { Trade as DBTrade } from '../types/trade';
-import { generateTestTrades } from '../utils/testTrades';
-import { PageHeader } from '../components/PageHeader/PageHeader';
-import { MetricsGrid } from '../components/Metrics/MetricsGrid';
+import { supabase } from '../../lib/supabase';
+import { TradingCalendar } from '../../components/TradingCalendar';
+import type { Trade as CalendarTrade } from '../../components/TradingCalendar';
+import type { Trade as DBTrade } from '../../types/trade';
+import { generateTestTrades } from '../../utils/testTrades';
+import { PageHeader } from '../../components/PageHeader/PageHeader';
+import { MetricsGrid } from '../../components/Metrics/MetricsGrid';
 import styles from './Dashboard.module.css';
-import { SkeletonLoader } from '../components/SkeletonLoader';
-import { FilterControls } from '../components/FilterControls';
+import { SkeletonLoader } from '../../components/SkeletonLoader';
+import { FilterControls } from '../../components/FilterControls';
 
 ChartJS.register(
   CategoryScale,

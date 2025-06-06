@@ -3,10 +3,10 @@ import { FiMail, FiLock, FiGithub } from 'react-icons/fi';
 import { SiBlockchaindotcom } from 'react-icons/si';
 import { FcGoogle } from 'react-icons/fc';
 import { motion } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
-import { AnimatedButton } from '../components/AnimatedButton';
+import { supabase } from '../../lib/supabaseClient';
+import { AnimatedButton } from '../../components/AnimatedButton';
 import { FaGithub } from 'react-icons/fa';
 
 const Login = () => {
