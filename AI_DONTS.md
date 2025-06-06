@@ -57,6 +57,39 @@ Before performing ANY coding task or making ANY code changes, you MUST read and 
    - Use context sparingly
    - Document component interfaces
 
+## CSS Best Practices
+
+1. NEVER use hardcoded values. Use CSS variables in `:root` for:
+   - Colors, spacing, sizes, shadows, transitions
+   - Any value that might need to change (theming, responsive design, etc.)
+
+2. Follow BEM methodology:
+   - Block: `.block`
+   - Element: `.block__element`
+   - Modifier: `.block--modifier`
+
+3. Use OOCSS principles:
+   - Separate structure from skin
+   - Separate containers from content
+   - Use composition over inheritance
+
+4. NEVER use inline styles or !important
+
+5. Use CSS modules for component styles
+
+6. Use semantic class names and keep selectors simple
+
+7. Use relative units (rem, em) over pixels
+
+8. Use CSS Grid and Flexbox for layouts
+
+9. Use CSS custom properties for:
+   - Theming and dark mode
+   - Responsive design
+   - Accessibility
+   - Animations and transitions
+   - Dynamic values (with calc())
+
 ---
 
 *Update this file as new rules are added.* 
