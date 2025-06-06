@@ -1,120 +1,181 @@
 # AI Coding Guidelines (READ BEFORE EVERY TASK)
 
-**CRITICAL INSTRUCTION:**
-You MUST start your response with "I have read and understood the AI_DONTS.md guidelines" before proceeding with ANY implementation or code changes. If you cannot find this file or read it, you MUST ask the user to provide it before proceeding.
+---
 
-**LLM INSTRUCTION:**
-Before performing ANY coding task or making ANY code changes, you MUST read and follow the rules in this file. If a rule conflicts with the user request, ask for clarification before proceeding.
+## 🧠 CRITICAL INSTRUCTION
 
-## DON'Ts
-1. **Do NOT use inline CSS styles** (e.g., `style={{ ... }}`) in React components.
-2. **Always use common/shared components** when creating new features. Do NOT duplicate UI code—reuse existing components whenever possible.
-3. **Always check for existing common components** before implementing any new feature or component. This prevents code duplication and maintains consistency.
-4. **Follow industry best practices** from leading tech companies (Google, Amazon, Microsoft, etc.) for code organization, architecture, and implementation patterns.
+**You MUST start your response with:**  
+`I have read and understood the AI_DONTS.md guidelines`  
 
-## CSS Guidelines
-1. **Follow OOCSS (Object-Oriented CSS) principles:**
-   - Separate structure from skin
-   - Separate containers from content
-   - Use reusable classes for common patterns
-   - Keep styles modular and independent
+If you do NOT find this file or cannot read it, ask the user to provide it **before writing any code**.
 
-2. **Use BEM (Block Element Modifier) methodology:**
-   - Block: Standalone component (e.g., `.button`)
-   - Element: Part of a block (e.g., `.button__icon`)
-   - Modifier: Variation of a block/element (e.g., `.button--primary`)
-   - Example: `.button__icon--large`
-
-3. **Component Structure:**
-   - Keep components small and focused
-   - Break down large components into smaller, reusable pieces
-   - Use composition over inheritance
-   - Each component should have a single responsibility
-
-4. **CSS Organization:**
-   - Group related styles together
-   - Use CSS variables for theming
-   - Keep specificity low
-   - Use meaningful class names
-   - Document complex styles with comments
-
-## Component Design
-1. **Modular Components:**
-   - Create small, focused components
-   - Each component should do one thing well
-   - Use composition to build complex UIs
-   - Keep components independent and reusable
-
-2. **Component Structure:**
-   - One component per file
-   - Separate styles into module files
-   - Use TypeScript for type safety
-   - Include proper documentation
-
-3. **Component Communication:**
-   - Use props for data flow
-   - Keep state management simple
-   - Use context sparingly
-   - Document component interfaces
-
-## CSS Best Practices
-
-1. NEVER use hardcoded values. Use CSS variables in `:root` for:
-   - Colors, spacing, sizes, shadows, transitions
-   - Any value that might need to change (theming, responsive design, etc.)
-
-2. Follow BEM methodology:
-   - Block: `.block`
-   - Element: `.block__element`
-   - Modifier: `.block--modifier`
-
-3. Use OOCSS principles:
-   - Separate structure from skin
-   - Separate containers from content
-   - Use composition over inheritance
-
-4. NEVER use inline styles or !important
-
-5. Use CSS modules for component styles
-
-6. Use semantic class names and keep selectors simple
-
-7. Use relative units (rem, em) over pixels
-
-8. Use CSS Grid and Flexbox for layouts
-
-9. Use CSS custom properties for:
-   - Theming and dark mode
-   - Responsive design
-   - Accessibility
-   - Animations and transitions
-   - Dynamic values (with calc())
-
-## Color Management
-
-1. NEVER use hardcoded color values (e.g., `#ff0000`, `rgb(255, 0, 0)`, `rgba(255, 0, 0, 0.5)`). Instead:
-   - Use semantic color variables (e.g., `var(--color-error)`, `var(--color-success)`)
-   - Use theme color variables (e.g., `var(--color-primary)`, `var(--color-background)`)
-   - Use text color variables (e.g., `var(--color-text-primary)`, `var(--color-text-secondary)`)
-
-2. When adding new colors:
-   - Add them to the global variables file (`src/styles/variables.css`)
-   - Use semantic names that describe the color's purpose
-   - Group related colors together (e.g., primary, secondary, success, error)
-   - Include light/dark variants for each color
-
-3. Color naming conventions:
-   - Use semantic names over visual descriptions
-   - Prefix with `--color-` for all color variables
-   - Use `-light` and `-dark` suffixes for variants
-   - Use `-hover`, `-active`, `-disabled` for states
-
-4. When reviewing code:
-   - Check for any hardcoded color values
-   - Ensure colors are using the appropriate semantic variables
-   - Verify color contrast meets accessibility standards
-   - Confirm colors work in both light and dark themes
+Before doing any implementation or code changes, read and follow all the rules below.  
+If a rule conflicts with a user request, **ask for clarification first**.
 
 ---
 
-*Update this file as new rules are added.* 
+## 🚫 DON’Ts
+
+1. **Do NOT use inline CSS styles** in React components (e.g., `style={{ ... }}`).
+2. **Do NOT duplicate UI components.** Always use shared/common components where possible.
+3. **Do NOT create new components without checking for existing ones.**
+4. **Do NOT violate architectural patterns.** Always follow established structure and conventions.
+5. **Do NOT use `!important` in any CSS rule.**
+6. **Do NOT hardcode colors, spacing, or sizes.** Always use design tokens (CSS variables).
+
+---
+
+## 🎨 CSS Guidelines
+
+### 1. ✅ Use OOCSS (Object-Oriented CSS) principles
+- Separate structure from skin
+- Separate containers from content
+- Reuse common utility classes
+- Write modular and independent styles
+
+### 2. ✅ Use BEM (Block Element Modifier)
+- **Block**: Standalone component (e.g., `.button`)
+- **Element**: Part of a block (e.g., `.button__icon`)
+- **Modifier**: Variant (e.g., `.button--primary`)
+- **Example**: `.card__image--rounded`
+
+### 3. ✅ CSS Structure
+- Group related styles logically
+- Use CSS Modules per component
+- Keep selectors simple and specific
+- Use semantic class names (no `.red-box`, use `.alert--error`)
+
+### 4. ✅ Global Styles
+- Place global variables (colors, spacing, etc.) in `styles/variables.css`
+- Add dark/light theme overrides using the `.dark` class or `data-theme`
+
+---
+
+## 🧩 Component Design
+
+### 1. ✅ Keep components modular and focused
+- Each component should do **one thing well**
+- Prefer composition over inheritance
+- Components must be independent and reusable
+
+### 2. ✅ Component structure
+- One component per folder
+- Include:
+  - Component file (`.tsx`)
+  - Styles (`.module.css` or `.module.scss`)
+  - Tests (if required)
+  - README or documentation (optional but encouraged)
+
+### 3. ✅ Component communication
+- Use **props** for data flow
+- Keep state management simple and local
+- Use **context only when absolutely necessary**
+- Avoid deep prop drilling — restructure instead
+
+---
+
+## 📁 Component Organization
+
+### 1. ✅ Folder Structure
+- Each component lives in its own folder
+- Place reusable components in `/components`
+- Feature-specific components go in `/features/feature-name`
+- Page-specific components stay under their page directory
+
+### 2. ✅ Subcomponents
+- Place subcomponents inside the parent folder
+  - E.g., `Card/Header.tsx` inside `Card/`
+
+### 3. ✅ Assets
+- Keep component-specific assets (images, styles) in the component folder
+
+### 4. ✅ Documentation
+- Include:
+  - Component purpose
+  - Props and types
+  - Usage examples
+  - Special behavior or edge cases
+
+---
+
+## 🎨 Color Management
+
+### 1. NEVER hardcode color values
+- ✅ Use semantic CSS variables:
+  - `var(--color-primary)`
+  - `var(--color-text-secondary)`
+  - `var(--color-background-light)`
+- ✅ Use state-based suffixes:
+  - `--hover`, `--active`, `--disabled`, etc.
+
+### 2. Theme colors
+- Store all variables in `styles/variables.css`
+- Define dark/light variants
+- Group colors by role (primary, secondary, success, error)
+
+### 3. Naming convention
+- Use semantic names (e.g., `--color-error`, not `--color-red`)
+- Prefix all custom variables with `--color-`
+- Use `--color-bg`, `--color-text`, `--color-border`, etc. for clarity
+
+---
+
+## ⚙️ CSS Best Practices
+
+- ✅ Use CSS custom properties (`var(--color-...)`)
+- ✅ Use relative units (`rem`, `em`) instead of pixels
+- ✅ Use Flexbox and Grid for layout
+- ✅ Avoid high specificity
+- ✅ Comment any complex styles or overrides
+- ✅ Favor logical properties (e.g., `margin-inline-start`) for directionality
+
+---
+
+## 🧪 Testing Guidelines
+
+- Every shared component must have test coverage
+- Prefer **unit tests** for logic and **visual tests** for UI
+- Use mocks for external data (e.g., API, auth)
+- Ensure tests cover:
+  - Rendering and variants
+  - Prop behavior
+  - Interactivity (events, toggles)
+
+---
+
+## ♿ Accessibility (a11y)
+
+- All components must follow [WCAG 2.1 AA](https://www.w3.org/TR/WCAG21/) guidelines
+- Ensure:
+  - Proper use of semantic HTML
+  - Focus states and keyboard navigation
+  - Sufficient contrast in light/dark themes
+  - `aria-*` attributes where applicable
+
+---
+
+## 🚀 Performance
+
+- Avoid unnecessary re-renders (use `React.memo` when needed)
+- Use lazy loading for non-critical components
+- Avoid large third-party libraries unless justified
+- Keep bundle size low and composable
+
+---
+
+## 📖 Documentation
+
+- If the component is complex or shared:
+  - Add a README in the component folder
+  - Include usage examples and props interface
+  - Add notes about theming or responsiveness if needed
+
+---
+
+## ⚠️ Final Rule
+
+If you're unsure whether something is allowed, **ask first** before implementing.
+
+---
+
+**Update this file as new rules are added.**
