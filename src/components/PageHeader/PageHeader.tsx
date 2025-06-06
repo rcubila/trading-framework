@@ -37,4 +37,6 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       </div>
     </div>
   );
-}; 
+};
+
+export default PageHeader; 

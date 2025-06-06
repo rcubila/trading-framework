@@ -13,8 +13,8 @@ import {
   RiHistoryLine,
   RiAlertLine,
 } from 'react-icons/ri';
-import { StrategyModal } from '../components/StrategyModal';
-import { PageHeader } from '../components/PageHeader';
+import { StrategyModal } from '../components/StrategyModal/StrategyModal';
+import { PageHeader } from '../components/PageHeader/PageHeader';
 import styles from './Strategy.module.css';
 
 interface Strategy {

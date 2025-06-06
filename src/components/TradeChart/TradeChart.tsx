@@ -1,6 +1,5 @@
-import React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import type { Trade } from '../../types/trade';
+import type { Trade } from '../types/trade';
 import styles from './TradeChart.module.css';
 
 declare global {
@@ -177,11 +176,7 @@ export const TradeChart = ({ trade, theme = 'dark' }: TradeChartProps) => {
     <div 
       className={styles.container}
       data-theme={theme}
-      ref={(el) => {
-        if (el) {
-          el.style.setProperty('--container-height', containerHeight);
-        }
-      }}
+      style={{ '--container-height': containerHeight } as React.CSSProperties}
     >
       <div 
         ref={containerRef}

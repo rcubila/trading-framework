@@ -130,7 +130,6 @@ const extractTradesFromImage = async (imageBase64: string): Promise<Trade[]> => 
 
     if (!response.ok) {
       const error = await response.json();
-      console.error('API Error:', error);
       if (error.error?.code === 'invalid_api_key') {
         throw new Error('Invalid API key. Please check your API key in the .env file.');
       } else if (error.error?.message?.includes('billing')) {
@@ -142,17 +141,13 @@ const extractTradesFromImage = async (imageBase64: string): Promise<Trade[]> => 
     }
 
     const data = await response.json();
-    console.log('Raw API Response:', data);
     const content = data.choices[0].message.content;
-    console.log('API Content:', content);
     
     try {
       // Clean the content by removing markdown code block formatting
       const cleanContent = content.replace(/```json\s*|\s*```/g, '').trim();
-      console.log('Cleaned Content:', cleanContent);
       
       const parsedContent = JSON.parse(cleanContent);
-      console.log('Parsed Content:', parsedContent);
       
       // Check if the API found any issues
       if (parsedContent.error) {
@@ -179,14 +174,12 @@ const extractTradesFromImage = async (imageBase64: string): Promise<Trade[]> => 
         status: trade.exit_date ? 'Closed' : 'Open'
       }));
     } catch (error: any) {
-      console.error('Parse Error:', error);
       if (error.message.includes('No trade information') || error.message.includes('Low confidence')) {
         throw error;
       }
       throw new Error(`Failed to parse trade data: ${error.message}. Raw content: ${content}`);
     }
   } catch (error: any) {
-    console.error('Processing Error:', error);
     if (error.message.includes('Failed to fetch')) {
       throw new Error('Network error. Please check your internet connection and try again.');
     }

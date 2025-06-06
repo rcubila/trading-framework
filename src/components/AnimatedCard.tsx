@@ -1,6 +1,7 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
-import styles from '../styles/AnimatedCard.module.css';
+import styles from './AnimatedCard/AnimatedCard.module.css';
 
 interface AnimatedCardProps {
   children: ReactNode;

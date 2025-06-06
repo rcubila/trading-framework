@@ -11,7 +11,6 @@ const Settings = () => {
 
   const handleSave = () => {
     // TODO: Implement settings save
-    console.log('Saving settings:', settings);
   };
 
   return (

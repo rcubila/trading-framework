@@ -4,13 +4,11 @@ import type { Metric } from 'web-vitals';
 export const trackPerformance = () => {
   // Track Cumulative Layout Shift (CLS)
   onCLS((metric: Metric) => {
-    console.log('Cumulative Layout Shift:', metric.value);
     // Send to analytics or store for analysis
   });
 
   // Track Largest Contentful Paint (LCP)
   onLCP((metric: Metric) => {
-    console.log('Largest Contentful Paint:', metric.value);
     // Send to analytics or store for analysis
   });
 };

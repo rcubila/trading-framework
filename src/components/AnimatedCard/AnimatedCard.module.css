@@ -9,16 +9,6 @@
   @apply hover:bg-white/10;
   @apply hover:shadow-lg hover:shadow-black/10;
   @apply active:shadow-md;
-  transform-origin: center;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card:hover {
-  transform: scale(1.02);
-}
-
-.card:active {
-  transform: scale(0.98);
 }
 
 /* Glass effect */

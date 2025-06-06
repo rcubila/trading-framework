@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '../../components/PageHeader/PageHeader';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Playbook.module.css';
 import { AnimatedButton } from '../../components/AnimatedButton';
@@ -269,19 +269,11 @@ export const PlayBook: React.FC = () => {
     description: string;
     icon: string;
   }) => {
-    console.log('handleCreatePlaybook started', { playbook });
     try {
       if (!playbook.asset.trim()) {
-        console.log('Asset name is empty');
         toast.error('Please enter an asset name');
         return;
       }
-
-      console.log('Calling createAsset with:', {
-        asset: playbook.asset.trim(),
-        description: playbook.description.trim(),
-        icon: playbook.icon,
-      });
 
       await createAsset({
         asset: playbook.asset.trim(),
@@ -289,11 +281,9 @@ export const PlayBook: React.FC = () => {
         icon: playbook.icon,
       });
       
-      console.log('createAsset completed successfully');
       setShowCreateModal(false);
       toast.success('Playbook created successfully');
     } catch (error) {
-      console.error('Error in handleCreatePlaybook:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create playbook');
     }
   };
@@ -341,7 +331,6 @@ export const PlayBook: React.FC = () => {
       setNewStrategy({ title: '', type: '', tags: '', description: '' });
       toast.success('Strategy created successfully');
     } catch (error) {
-      console.error('Error creating strategy:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create strategy');
     }
   };
@@ -364,7 +353,6 @@ export const PlayBook: React.FC = () => {
       setSelectedSetup(null);
       setShowMenu(null);
     } catch (error) {
-      console.error('Error deleting strategy:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to delete strategy');
     }
   };
@@ -970,7 +958,6 @@ export const PlayBook: React.FC = () => {
                               await handleUpdateRules(selectedSetup.id, selectedSetup.checklist);
                               setRulesDirty(false);
                             } catch (error) {
-                              console.error('Error saving rules:', error);
                               // Show error message
                               const errorMessage = document.createElement('div');
                               errorMessage.className = styles.errorMessage;

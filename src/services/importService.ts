@@ -112,9 +112,6 @@ export class ImportService {
       return isNaN(num) ? undefined : num;
     };
 
-    // Log the raw trade data for debugging
-    console.log('Raw trade data:', rawTrade);
-
     const transformed = {
       market: rawTrade.market,
       market_category: rawTrade.market_category,
@@ -143,9 +140,6 @@ export class ImportService {
       timeframe: rawTrade.timeframe || undefined,
       setup_type: rawTrade.setup_type || undefined
     };
-
-    // Log the transformed trade for debugging
-    console.log('Transformed trade:', transformed);
 
     return transformed;
   }

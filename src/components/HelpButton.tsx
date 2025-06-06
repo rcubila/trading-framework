@@ -11,7 +11,6 @@ export const HelpButton = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would typically send the message to your backend
-    console.log('Message sent:', message);
     setMessage('');
   };
 

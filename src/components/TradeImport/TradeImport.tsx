@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { parseCSV } from '../../utils/csvParser';
-import { ImportService } from '../../services/importService';
-import type { ImportResult } from '../../services/importService';
-import type { Trade } from '../../types/trade';
-import { downloadTradeTemplate } from '../../utils/tradeTemplate';
-import styles from './TradeImport.module.css';
+import { parseCSV } from '../utils/csvParser';
+import { ImportService } from '../services/importService';
+import type { ImportResult } from '../services/importService';
+import type { Trade } from '../types/trade';
+import { downloadTradeTemplate } from '../utils/tradeTemplate';
 
 export const TradeImport: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
