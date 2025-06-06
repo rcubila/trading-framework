@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase, tradesApi } from '../lib/supabase';
-import { importTradesFromCSV } from '../lib/csv-import';
-import { fixGER40Trades } from '../utils/fixTrades';
-import type { Database } from '../lib/supabase-types';
+import { supabase, tradesApi } from '../../lib/supabase';
+import { importTradesFromCSV } from '../../lib/csv-import';
+import { fixGER40Trades } from '../../utils/fixTrades';
+import type { Database } from '../../lib/supabase-types';
 import {
   RiAddLine,
   RiFilterLine,
@@ -29,12 +29,12 @@ import {
   RiRefreshLine,
   RiDownload2Line,
 } from 'react-icons/ri';
-import { TradesList } from '../components/TradesList';
-import { TradeDetails } from '../components/TradeDetails/TradeDetails';
-import type { Trade } from '../types/trade';
-import { PageTitle } from '../components/PageTitle/PageTitle';
-import { PageHeader } from '../components/PageHeader/PageHeader';
-import styles from '../components/Trades/Trades.module.css';
+import { TradesList } from '../../components/TradesList';
+import { TradeDetails } from '../../components/TradeDetails/TradeDetails';
+import type { Trade } from '../../types/trade';
+import { PageTitle } from '../../components/PageTitle/PageTitle';
+import { PageHeader } from '../../components/PageHeader/PageHeader';
+import styles from "../../components/Trades/Trades.module.css";
 
 interface MarketConfigType {
   symbolPattern: string;

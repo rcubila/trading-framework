@@ -13,15 +13,15 @@ import {
   RiHistoryLine,
   RiAlertLine,
 } from 'react-icons/ri';
-import { StrategyModal } from '../components/StrategyModal/StrategyModal';
-import { PageHeader } from '../components/PageHeader/PageHeader';
+import { StrategyModal } from "../../components/StrategyModal/StrategyModal";
+import { PageHeader } from "../../components/PageHeader/PageHeader";
 import styles from './Strategy.module.css';
 
 interface Strategy {
   id: string;
   name: string;
-  type: 'algorithmic' | 'discretionary' | 'hybrid';
-  status: 'active' | 'paused' | 'testing';
+  type: string;
+  status: string;
   performance: {
     winRate: string;
     profitFactor: string;

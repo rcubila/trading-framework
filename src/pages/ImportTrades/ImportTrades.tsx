@@ -16,10 +16,10 @@ import {
   RiDeleteBinLine,
 } from 'react-icons/ri';
 import { motion, AnimatePresence } from 'framer-motion';
-import { importTradesFromCSV } from '../lib/csv-import';
-import { processTradeImages, testOpenAIAccess } from '../lib/image-import';
-import { supabase, supabaseAdmin, profilesApi } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { importTradesFromCSV } from '../../lib/csv-import';
+import { processTradeImages, testOpenAIAccess } from '../../lib/image-import';
+import { supabase, supabaseAdmin, profilesApi } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
 import styles from './ImportTrades.module.css';
 
 interface FileWithPreview extends File {

@@ -15,18 +15,17 @@ import {
   RiArrowDownLine,
   RiInformationLine,
 } from 'react-icons/ri';
-import type { TradingRule, DisciplineEntry, DisciplineStats } from '../types/discipline';
-import { supabase } from '../lib/supabaseClient';
-import { AddRuleModal } from '../components/AddRuleModal/AddRuleModal';
-import { AddEntryModal } from '../components/AddEntryModal/AddEntryModal';
-import { AddGoalModal } from '../components/AddGoalModal/AddGoalModal';
-import type { DailyEntry, Goal } from '../types/discipline';
-import { useDiscipline } from '../context/DisciplineContext';
-import { DailyLog } from './discipline/DailyLog';
-import { ProgressInsights } from './discipline/ProgressInsights';
-import type { DailyCheckInData } from './discipline/DailyLog';
-import { PageHeader } from '../components/PageHeader/PageHeader';
-import styles from '../components/DisciplineTracker/DisciplineTracker.module.css';
+import type { TradingRule, DisciplineEntry, DisciplineStats, DailyEntry, Goal } from '../../types/discipline';
+import { supabase } from '../../lib/supabaseClient';
+import { AddRuleModal } from '../../components/AddRuleModal/AddRuleModal';
+import { AddEntryModal } from '../../components/AddEntryModal/AddEntryModal';
+import { AddGoalModal } from '../../components/AddGoalModal/AddGoalModal';
+import { useDiscipline } from '../../context/DisciplineContext';
+import { PageHeader } from '../../components/PageHeader/PageHeader';
+import styles from './DisciplineTracker.module.css';
+import { DailyLog } from '../discipline/DailyLog';
+import { ProgressInsights } from '../discipline/ProgressInsights';
+import type { DailyCheckInData } from '../discipline/DailyLog';
 
 const ruleCategories = [
   'Entry',
