@@ -903,7 +903,11 @@ const Dashboard = () => {
           subtitle={
             <span>
               <Clock />
-              February 12, 2024
+              {new Date().toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+              })}
             </span>
           }
           actions={
