@@ -81,24 +81,6 @@
   color: white;
 }
 
-.filterSelectWide {
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  min-width: 200px;
-}
-
-.filterInput {
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  width: 200px;
-}
-
 .actionButtonGradient {
   padding: 8px 16px;
   border-radius: 8px;
@@ -152,17 +134,6 @@
 
 .actionButtonBlue:hover {
   background: #2563eb;
-}
-
-.filterOptionGroup {
-  background: rgba(31, 41, 55, 0.95);
-  color: white;
-}
-
-.filterOption {
-  padding: 8px 12px;
-  background: rgba(31, 41, 55, 0.95);
-  color: rgba(255, 255, 255, 0.8);
 }
 
 .header {
