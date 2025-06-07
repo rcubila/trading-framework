@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { Database } from '../lib/supabase-types';
+import type { Trade } from '../types/trade';
 
 /**
  * Generates test trades with both winning and losing P&L values
@@ -115,4 +116,58 @@ export const generateTestTrades = async () => {
     console.error('Error generating test trades:', error);
     throw error;
   }
+};
+
+/**
+ * Generates test trades for the dashboard without saving to database
+ */
+export const generateDashboardTestTrades = (count: number = 50): Trade[] => {
+  const trades: Trade[] = [];
+  const symbols = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN', 'META', 'NVDA', 'AMD'];
+  const strategies = ['Swing Trading', 'Day Trading', 'Scalping', 'Position Trading'];
+  const markets = ['Stocks', 'Crypto', 'Forex', 'Futures'];
+  const types: ('Long' | 'Short')[] = ['Long', 'Short'];
+
+  let currentBalance = 100000; // Starting balance
+
+  for (let i = 0; i < count; i++) {
+    const isWin = Math.random() > 0.4; // 60% win rate
+    const pnl = isWin 
+      ? Math.random() * 1000 + 100 // Win between $100 and $1100
+      : -(Math.random() * 800 + 50); // Loss between $50 and $850
+
+    currentBalance += pnl;
+
+    const entryDate = new Date();
+    entryDate.setDate(entryDate.getDate() - (count - i)); // Spread trades over the last 'count' days
+
+    const exitDate = new Date(entryDate);
+    exitDate.setHours(exitDate.getHours() + Math.floor(Math.random() * 24)); // Random exit time within 24 hours
+
+    trades.push({
+      id: `test-${i}`,
+      market: markets[Math.floor(Math.random() * markets.length)],
+      market_category: 'Equities',
+      symbol: symbols[Math.floor(Math.random() * symbols.length)],
+      type: types[Math.floor(Math.random() * types.length)],
+      status: 'Closed',
+      entry_price: Math.random() * 1000 + 100,
+      exit_price: Math.random() * 1000 + 100,
+      quantity: Math.floor(Math.random() * 100) + 1,
+      entry_date: entryDate.toISOString(),
+      exit_date: exitDate.toISOString(),
+      pnl,
+      pnl_percentage: (pnl / currentBalance) * 100,
+      risk: Math.abs(pnl) * 0.5,
+      reward: Math.abs(pnl),
+      risk_reward: 2,
+      strategy: strategies[Math.floor(Math.random() * strategies.length)],
+      tags: ['test'],
+      notes: isWin ? 'Successful trade' : 'Unsuccessful trade',
+      created_at: entryDate.toISOString(),
+      updated_at: exitDate.toISOString()
+    });
+  }
+
+  return trades;
 }; 
