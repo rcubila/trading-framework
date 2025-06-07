@@ -1,70 +1,52 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import styles from './Dashboard.module.css';
+import type { NormalizedTrade } from './index';
 
 interface RecentTradesSectionProps {
-  recentTrades: any[];
-  hoveredMetric: string | null;
-  setHoveredMetric: (id: string | null) => void;
+  recentTrades: NormalizedTrade[];
 }
 
-export const RecentTradesSection: React.FC<RecentTradesSectionProps> = ({ recentTrades, hoveredMetric, setHoveredMetric }) => (
-  <div className={styles.chartSection}>
-    <div className={styles.chartHeader}>
-      <div>
-        <h3 className={styles.chartTitle}>Recent Trades</h3>
-        <p className={styles.chartSubtitle}>Last 24 hours</p>
+const RecentTradesSection: React.FC<RecentTradesSectionProps> = ({ recentTrades }) => {
+  return (
+    <div className={styles.chartSection}>
+      <div className={styles.chartHeader}>
+        <div>
+          <h3 className={styles.chartTitle}>Recent Trades</h3>
+          <p className={styles.chartSubtitle}>Latest trading activity</p>
+        </div>
       </div>
-      <button className={styles.chartTypeButton}>
-        {/* Filter icon can be added here if needed */}
-        Filter
-      </button>
-    </div>
-    <div className={styles.recentTradesList}>
-      {recentTrades.map((trade, index) => (
-        <motion.div
-          key={trade.id}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: index * 0.1 }}
-          className={`${styles.tradeItem} ${hoveredMetric === trade.id ? styles.tradeItemHovered : ''}`}
-          onMouseEnter={() => setHoveredMetric(trade.id)}
-          onMouseLeave={() => setHoveredMetric(null)}
-        >
-          <div className={styles.tradeInfo}>
-            <div className={`${styles.tradeIcon} ${trade.type === 'Long' ? styles.tradeIconLong : styles.tradeIconShort}`}>
-              {trade.type === 'Long' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-            </div>
-            <div>
-              <div className={styles.tradeHeader}>
-                <span className={styles.tradeSymbol}>{trade.symbol}</span>
-                <span className={styles.tradeDate}>
-                  <Clock size={10} />
-                  {new Date(trade.entry_date).toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                  })}
-                </span>
+      <div className={styles.recentTradesList}>
+        {recentTrades.map((trade) => (
+          <motion.div
+            key={trade.id}
+            className={styles.tradeItem}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className={styles.tradeInfo}>
+              <div className={styles.tradeSymbol}>
+                {trade.symbol}
               </div>
-              <div className={styles.tradePrice}>
-                ${trade.entry_price} → ${trade.exit_price || 'Open'}
+              <div className={styles.tradeDetails}>
+                <span className={styles.tradeType}>{trade.type}</span>
+                <span className={styles.tradeMarket}>{trade.market}</span>
               </div>
             </div>
-          </div>
-          <div className={styles.tradePnl}>
-            <div className={`${styles.tradePnlValue} ${(trade.pnl || 0) >= 0 ? styles.tradePnlValuePositive : styles.tradePnlValueNegative}`}>
-              ${Math.abs(trade.pnl || 0)}
+            <div className={styles.tradeResult}>
+              <div className={`${styles.tradePnl} ${trade.pnl >= 0 ? styles.profit : styles.loss}`}>
+                {trade.pnl >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                ${Math.abs(trade.pnl).toFixed(2)}
+              </div>
+              <div className={styles.tradeStrategy}>{trade.strategy}</div>
             </div>
-            <div className={styles.tradeQuantity}>
-              {trade.quantity} shares
-            </div>
-          </div>
-        </motion.div>
-      ))}
+          </motion.div>
+        ))}
+      </div>
     </div>
-  </div>
-); 
+  );
+};
+
+export default RecentTradesSection; 

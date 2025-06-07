@@ -1,28 +1,29 @@
 .pageHeader {
-  margin-bottom: 16px;
-  padding: 16px;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-lg);
   background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
-  border-radius: 8px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .headerContent {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: center;
+  gap: var(--spacing-md);
 }
 
 .headerLeft {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--spacing-xs);
 }
 
 .pageTitle {
-  font-size: 20px;
+  font-size: 1.5rem;
   font-weight: 600;
-  color: white;
+  color: var(--color-text-primary);
   margin: 0;
   background: linear-gradient(to right, #60a5fa, #a78bfa);
   -webkit-background-clip: text;
@@ -30,45 +31,46 @@
 }
 
 .pageSubtitle {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--spacing-xs);
 }
 
 .pageSubtitle span {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--spacing-xs);
 }
 
 .pageSubtitle svg {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
   flex-shrink: 0;
+  color: var(--color-text-secondary);
 }
 
 .headerActions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--spacing-sm);
   flex-wrap: wrap;
 }
 
 .filterGroup {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-xs);
 }
 
 .actionButtonIcon {
-  padding: 8px;
+  padding: var(--spacing-sm);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -78,39 +80,39 @@
 
 .actionButtonIcon:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: white;
+  color: var(--color-text-primary);
 }
 
 .actionButtonGradient {
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-md);
   border-radius: 8px;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
   border: none;
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
   transition: all 0.2s ease;
 }
 
 .actionButtonGradient:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+  background: linear-gradient(to right, #2563eb, #7c3aed);
 }
 
 .actionButtonGray {
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-md);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
+  color: var(--color-text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
   transition: all 0.2s ease;
 }
 
@@ -119,21 +121,43 @@
 }
 
 .actionButtonBlue {
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-md);
   border-radius: 8px;
-  background: #3b82f6;
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
   border: none;
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
   transition: all 0.2s ease;
 }
 
 .actionButtonBlue:hover {
-  background: #2563eb;
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pageHeader {
+    padding: var(--spacing-md);
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .pageTitle {
+    font-size: 1.25rem;
+  }
 }
 
 .header {
@@ -143,13 +167,13 @@
 .title {
   font-size: 2rem;
   font-weight: 600;
-  color: white;
+  color: var(--text);
   margin: 0;
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
   margin: 0;
 } 

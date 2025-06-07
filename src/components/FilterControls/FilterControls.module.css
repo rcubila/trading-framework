@@ -1,85 +1,51 @@
 .filterControls {
-  margin-bottom: 16px;
+  background: rgba(15, 23, 42, 0.4);
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .filterControlsInner {
   display: flex;
-  gap: 8px;
+  gap: 16px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .filterGroup {
-  flex: 1;
-  min-width: 150px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .filterSelect {
-  width: 100%;
   padding: 8px 12px;
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filterSelect:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.filterSelect:focus {
-  outline: none;
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .filterSelectWide {
-  width: 100%;
-  padding: 8px 12px;
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filterSelectWide:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.filterSelectWide:focus {
-  outline: none;
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+  composes: filterSelect;
+  min-width: 200px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  padding-right: 32px;
 }
 
 .filterInput {
-  width: 100%;
   padding: 8px 12px;
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;
-  transition: all 0.2s ease;
-}
-
-.filterInput:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.filterInput:focus {
-  outline: none;
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
-}
-
-.filterInput::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  width: 150px;
 }
 
 .filterOptionGroup {
@@ -92,4 +58,50 @@
   padding-left: 16px;
   background-color: rgba(31, 41, 55, 0.95);
   color: rgba(255, 255, 255, 0.8);
+}
+
+.refreshButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  border: none;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.refreshButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.refreshButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .filterControlsInner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterGroup {
+    width: 100%;
+  }
+
+  .filterSelect,
+  .filterSelectWide,
+  .filterInput {
+    width: 100%;
+  }
+
+  .refreshButton {
+    width: 100%;
+    margin-left: 0;
+  }
 } 

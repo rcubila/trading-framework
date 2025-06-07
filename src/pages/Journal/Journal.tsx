@@ -372,13 +372,27 @@ export const Journal = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Trading Journal</h1>
-        <Button onClick={() => setShowAddEntry(true)}>
-          <RiAddLine className="mr-2" />
-          Add Entry
-        </Button>
-      </div>
+      <PageHeader
+        title="Trading Journal"
+        subtitle={
+          <span>
+            <RiCalendarLine />
+            {new Date().toLocaleDateString('en-US', {
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric'
+            })}
+          </span>
+        }
+        actions={
+          <>
+            <Button onClick={() => setShowAddEntry(true)}>
+              <RiAddLine className="mr-2" />
+              Add Entry
+            </Button>
+          </>
+        }
+      />
 
       <div className={styles.controls}>
         <div className={styles.viewControls}>

@@ -20,17 +20,19 @@
 }
 
 .container {
-  padding: 0 0.25rem;
+  padding: var(--spacing-xs);
   color: var(--color-text-primary);
   background: linear-gradient(160deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 27, 75, 0.3) 100%);
   min-height: 100vh;
-  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
 }
 
 .content {
   max-width: 80rem;
   margin: 0 auto;
-  padding: 0.25rem;
+  padding: var(--spacing-lg);
+  width: 100%;
 }
 
 /* Header Section */
@@ -38,7 +40,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .headerLeft {
@@ -123,488 +129,485 @@
 /* Metrics Grid */
 .metricsGrid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-@media (max-width: 1200px) {
-  .metricsGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 700px) {
-  .metricsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
 .metricCard {
   background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
-  padding: 8px 6px;
+  padding: var(--spacing-sm);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   min-width: 0;
-  text-align: center;
 }
 
 .metricHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 0.5rem;
 }
 
 .metricTitle {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: normal;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 .metricValue {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
 }
 
 .metricValuePositive {
-  color: #22c55e;
+  color: var(--success);
 }
 
 .metricValueNegative {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .metricValueNeutral {
-  color: #f59e0b;
+  color: var(--warning);
 }
 
 .metricSubtitle {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
 }
 
 .metricToggle {
-  padding: 2px 6px;
-  border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
   cursor: pointer;
-  font-size: 11px;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
-/* Main Content Grid */
+.metricToggle:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+/* Main Grid Layout */
 .mainGrid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 }
 
 .mainColumn {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-lg);
 }
 
 /* Chart Section */
 .chartSection {
   background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 16px;
+  padding: var(--spacing-lg);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .chartHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 1.5rem;
 }
 
 .chartTitle {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 2px;
-  background: linear-gradient(to right, #60a5fa, #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
 }
 
 .chartSubtitle {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0.25rem 0 0;
 }
 
 .chartControls {
   display: flex;
-  gap: 4px;
+  gap: 0.5rem;
 }
 
 .chartTypeButton {
-  padding: 6px 8px;
-  border-radius: 6px;
+  background: none;
   border: none;
-  background-color: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
   cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
 }
 
 .chartTypeButton:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background: var(--hover);
+  color: var(--text);
 }
 
-.chartTypeButtonActive {
-  background-color: rgba(59, 130, 246, 0.15);
-  color: #fff;
+.chartTypeButton.active {
+  background: var(--primary);
+  color: white;
 }
 
 .chartContainer {
   height: 300px;
+  position: relative;
 }
 
-/* Recent Trades Section */
-.recentTradesSection {
-  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.recentTradesHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.recentTradesTitle {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: white;
-}
-
+/* Recent Trades List */
 .recentTradesList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 1rem;
 }
 
 .tradeItem {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 0.5rem;
+  padding: 1rem;
+  background: var(--card-background);
+  border-radius: 8px;
+  border: 1px solid var(--border);
   transition: all 0.2s ease;
 }
 
 .tradeItem:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  border-color: var(--primary);
 }
 
-.tradeIcon {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
+.tradeInfo {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.tradeIconLong {
+.tradeSymbol {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.tradeDetails {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.tradeType {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.tradeType[data-type="long"] {
   background-color: rgba(34, 197, 94, 0.1);
   color: #22c55e;
 }
 
-.tradeIconShort {
+.tradeType[data-type="short"] {
   background-color: rgba(239, 68, 68, 0.1);
   color: #ef4444;
 }
 
-.tradeInfo {
-  flex: 1;
+.tradeMarket {
+  color: var(--text-secondary);
 }
 
-.tradePnlValue {
+.tradeResult {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.tradePnl {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   font-weight: 600;
-  margin-bottom: 2px;
-  font-size: 13px;
+  font-size: 1rem;
 }
 
-.tradePnlValuePositive {
+.profit {
   color: #22c55e;
 }
 
-.tradePnlValueNegative {
+.loss {
   color: #ef4444;
 }
 
-.tradeQuantity {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
+.tradeStrategy {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
 }
 
-/* Discipline Compliance Chart */
-.disciplineChart {
-  width: 100px;
-  height: 100px;
-  transform: rotate(-90deg);
+/* Strategy Breakdown */
+.strategyBreakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
-.disciplineCircle {
-  transition: stroke-dashoffset 0.5s ease;
-}
-
-.disciplineCircleBackground {
-  stroke: rgba(255, 255, 255, 0.1);
-  stroke-width: 6;
-  fill: none;
-}
-
-.disciplineCircleProgress {
-  stroke-width: 6;
-  fill: none;
-}
-
-.disciplineCircleProgressHigh {
-  stroke: #22c55e;
-}
-
-.disciplineCircleProgressLow {
-  stroke: #f59e0b;
-}
-
-/* Loading State */
-.loadingContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-/* Action Buttons */
-.generateTestButton {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background-color: #4B5563;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.refreshButton {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background-color: #3B82F6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.downloadButton {
-  padding: 10px;
+.strategyGroup {
+  background: var(--card-background);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #94a3b8;
-  cursor: pointer;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.strategyGroupTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: var(--text);
+}
+
+.strategyList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.strategyItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.strategyInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.strategyName {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.strategyStats {
   display: flex;
   align-items: center;
-  transition: all 0.2s ease;
+  gap: 1rem;
+  font-size: 0.875rem;
 }
 
-.downloadButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-.newTradeButton {
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 12px;
-  border: none;
+.strategyPnl {
   display: flex;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+  gap: 0.25rem;
+  font-weight: 600;
 }
 
-.newTradeButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(37, 99, 235, 0.3);
+.strategyWinRate {
+  color: var(--text-secondary);
 }
 
-/* Emotion vs P/L Correlation */
-.emotionValue {
-  color: #22c55e;
+.strategyProgress {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
 }
 
-.emotionValueHigh {
-  color: #ef4444;
+.strategyProgressBar {
+  height: 100%;
+  transition: width 0.3s ease;
 }
 
-.heatmapCellEmpty {
-  background-color: rgba(30, 41, 59, 0.4);
-}
-
-/* Chart Styles */
-.chartLegend {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-}
-
-.chartTooltip {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  padding: var(--spacing-md);
-  border-radius: 6px;
-}
-
-.chartTooltipTitle {
-  color: var(--color-text-primary);
-}
-
-.chartTooltipBody {
-  color: var(--color-text-secondary);
-}
-
-.chartGrid {
-  color: var(--color-grid);
-  border-color: var(--color-grid);
-}
-
-.chartTicks {
-  color: var(--color-text-muted);
-}
-
-/* Discipline Chart Styles */
-.disciplineChart {
-  width: 100px;
-  height: 100px;
-  transform: rotate(-90deg);
-}
-
-.disciplineCircleBackground {
-  fill: none;
-  stroke: var(--color-border);
-  stroke-width: 4;
-}
-
-.disciplineCircle {
-  fill: none;
-  stroke-width: 4;
-  transition: stroke-dashoffset 0.3s ease;
-}
-
-.disciplineCircleProgress {
-  stroke: var(--color-text-primary);
-}
-
-.disciplineCircleProgressHigh {
-  stroke: #22c55e;
-}
-
-.disciplineCircleProgressLow {
-  stroke: #ef4444;
-}
-
-.disciplineValue {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.disciplineValueText {
-  position: absolute;
-  transform: rotate(90deg);
-  font-size: var(--font-size-lg);
-  font-weight: bold;
+/* Goal Progress */
+.goalProgress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
 }
 
 .goalProgressSection {
-  margin: 24px 0 32px 0;
-  padding: 24px;
   background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  padding: var(--spacing-lg);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.sectionTitle {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: white;
+  margin-bottom: var(--spacing-lg);
 }
 
 .goalCardsGrid {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
 }
 
 .goalCard {
-  flex: 1 1 220px;
-  min-width: 200px;
-  background: linear-gradient(145deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.6) 100%);
+  background: rgba(15, 23, 42, 0.4);
+  padding: var(--spacing-md);
   border-radius: 12px;
-  padding: 20px 24px 16px 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  border: 1px solid rgba(255,255,255,0.07);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .goalCardTitle {
-  font-size: 14px;
-  color: rgba(255,255,255,0.7);
-  margin-bottom: 8px;
-  font-weight: 500;
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
 }
 
 .goalCardValue {
-  font-size: 20px;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 12px;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
 }
 
 .goalProgressBarBg {
   width: 100%;
-  height: 10px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .goalProgressBarFill {
   height: 100%;
   background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
-  border-radius: 6px;
-  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.goalStats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.goalCurrent {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.goalRemaining {
+  color: var(--text-secondary);
+}
+
+/* Calendar */
+.calendarContainer {
+  height: 300px;
+  position: relative;
+}
+
+/* Skeleton Loaders */
+.skeletonChart {
+  height: 300px;
+  background: var(--background);
+  border-radius: 8px;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* New Trade Button */
+.newTradeButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.newTradeButton:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+/* Section Wrappers */
+.metricsSection {
+  margin-bottom: var(--spacing-lg);
+}
+
+.calendarSection {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 16px;
+  padding: var(--spacing-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.recentTradesSection {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+  border-radius: 16px;
+  padding: var(--spacing-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  height: 100%;
+}
+
+.strategySection {
+  margin-top: var(--spacing-lg);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .mainColumn {
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: var(--spacing-md);
+  }
+
+  .metricsSection,
+  .goalProgressSection,
+  .strategySection {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .chartSection,
+  .calendarSection,
+  .recentTradesSection {
+    padding: var(--spacing-md);
+  }
+
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .strategyBreakdown {
+    grid-template-columns: 1fr;
+  }
+
+  .goalCardsGrid {
+    grid-template-columns: 1fr;
+  }
 } 
