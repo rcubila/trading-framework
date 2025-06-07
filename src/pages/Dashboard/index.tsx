@@ -38,6 +38,7 @@ import { SkeletonLoader } from '../../components/SkeletonLoader';
 import { FilterControls } from '../../components/FilterControls/FilterControls';
 import { RiDeleteBin2Line } from 'react-icons/ri';
 import { MetricsSection } from './MetricsSection';
+import { PerformanceOverviewChart } from './PerformanceOverviewChart';
 
 ChartJS.register(
   CategoryScale,
@@ -1150,33 +1151,12 @@ const Dashboard = () => {
           {/* Left Column - Chart */}
           <div className={styles.mainColumn}>
             {/* Performance Chart */}
-            <div className={styles.chartSection}>
-              <div className={styles.chartHeader}>
-                <div>
-                  <h3 className={styles.chartTitle}>
-                    Performance Overview
-                  </h3>
-                  <p className={styles.chartSubtitle}>
-                    Account growth over time
-                  </p>
-                </div>
-                <div className={styles.chartControls}>
-                  {chartTypes.map((type) => (
-                    <button
-                      key={type.id}
-                      className={`${styles.chartTypeButton} ${selectedChartType === type.id ? styles.chartTypeButtonActive : ''}`}
-                      onClick={() => setSelectedChartType(type.id)}
-                    >
-                      <type.icon />
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className={styles.chartContainer}>
-                {renderChart()}
-              </div>
-            </div>
+            <PerformanceOverviewChart
+              chartTypes={chartTypes}
+              selectedChartType={selectedChartType}
+              setSelectedChartType={setSelectedChartType}
+              renderChart={renderChart}
+            />
 
             {/* Trading Calendar */}
             <TradingCalendar trades={calendarTrades} />
