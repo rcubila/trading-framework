@@ -1027,6 +1027,14 @@ export const Trades = () => {
             >
               <RiDownloadLine /> Export
             </button>
+            <button
+              className={`${styles.button} ${styles.buttonDanger}`}
+              onClick={() => setShowDeleteAllConfirm(true)}
+              disabled={isDeletingAll}
+            >
+              <RiDeleteBin2Line className={isDeletingAll ? 'animate-spin' : ''} />
+              {isDeletingAll ? 'Deleting...' : 'Delete All Trades'}
+            </button>
           </div>
         }
       />
