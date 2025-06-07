@@ -37,6 +37,7 @@ import styles from './Dashboard.module.css';
 import { SkeletonLoader } from '../../components/SkeletonLoader';
 import { FilterControls } from '../../components/FilterControls/FilterControls';
 import { RiDeleteBin2Line } from 'react-icons/ri';
+import { MetricsSection } from './MetricsSection';
 
 ChartJS.register(
   CategoryScale,
@@ -1129,24 +1130,20 @@ const Dashboard = () => {
         />
 
         {/* Key Metrics Row */}
-        <div className={styles.metricsSection}>
-          <MetricsGrid
-            metrics={{
-              totalPnL,
-              winRate,
-              avgRiskReward,
-              avgHoldingTime,
-              maxDrawdown,
-              bestDayOfWeek,
-              bestDayWinRate,
-              expectancy
-            }}
-            showPercentage={showPercentage}
-            onTogglePercentage={handleTogglePercentage}
-            hoveredMetric={hoveredMetric}
-            onMetricHover={handleMetricHover}
-          />
-        </div>
+        <MetricsSection
+          totalPnL={totalPnL}
+          showPercentage={showPercentage}
+          initialBalance={initialBalance}
+          onTogglePercentage={handleTogglePercentage}
+          winRate={winRate}
+          avgRiskReward={avgRiskReward}
+          expectancy={expectancy}
+          avgHoldingTime={avgHoldingTime}
+          maxDrawdown={maxDrawdown}
+          bestDayOfWeek={bestDayOfWeek}
+          bestDayWinRate={bestDayWinRate}
+          allTradesCount={allTrades.length}
+        />
 
         {/* Main Content Grid */}
         <div className={styles.mainGrid}>
