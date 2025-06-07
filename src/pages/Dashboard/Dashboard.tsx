@@ -180,7 +180,7 @@ const Dashboard = () => {
     if (!trades.length) return;
 
     // Calculate Total P&L
-    const pnl = trades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0);
+    const pnl = trades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0);add
     setTotalPnL(pnl);
 
     // Calculate Win Rate with detailed logging
