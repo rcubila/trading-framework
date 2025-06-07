@@ -601,25 +601,24 @@ const Dashboard = () => {
       x: {
         type: 'category',
         grid: {
-          color: 'var(--color-grid)',
-          borderColor: 'var(--color-grid)'
+          color: 'rgba(255,255,255,0.07)',
         },
         ticks: {
-          color: 'var(--color-text-muted)',
+          color: 'rgba(255, 255, 255, 0.6)',
           maxRotation: 45,
           minRotation: 45
         }
       },
       y: {
         type: 'linear',
+        position: 'left',
         grid: {
-          color: 'var(--color-grid)',
-          borderColor: 'var(--color-grid)'
+          color: 'rgba(255,255,255,0.07)',
         },
         ticks: {
-          color: 'var(--color-text-muted)',
+          color: 'rgba(255, 255, 255, 0.6)',
           callback: function(value: number | string) {
-            return `$${Number(value).toFixed(0)}`;
+            return `${Number(value).toFixed(1)}%`;
           }
         }
       }
@@ -801,8 +800,7 @@ const Dashboard = () => {
       x: {
         type: 'category',
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
-          borderColor: 'rgba(255, 255, 255, 0.1)'
+          color: 'rgba(255,255,255,0.07)',
         },
         ticks: {
           color: 'rgba(255, 255, 255, 0.6)',
@@ -814,8 +812,7 @@ const Dashboard = () => {
         type: 'linear',
         position: 'left',
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
-          borderColor: 'rgba(255, 255, 255, 0.1)'
+          color: 'rgba(255,255,255,0.07)',
         },
         ticks: {
           color: 'rgba(255, 255, 255, 0.6)',

@@ -95,7 +95,8 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
       x: {
         type: 'category',
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)'
+          color: 'rgba(255, 255, 255, 0.07)',
+          lineWidth: 1
         },
         ticks: {
           color: 'var(--color-text-muted)',
@@ -106,7 +107,8 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
       y: {
         type: 'linear',
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)'
+          color: 'rgba(255, 255, 255, 0.07)',
+          lineWidth: 1
         },
         ticks: {
           color: 'var(--color-text-muted)',
