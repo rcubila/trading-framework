@@ -197,7 +197,7 @@
 /* Main Grid Layout */
 .mainGrid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr;
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
 }
