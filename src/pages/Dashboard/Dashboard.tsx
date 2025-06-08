@@ -27,8 +27,6 @@ import {
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Chart, Line, Bar, Doughnut } from 'react-chartjs-2';
 import { supabase } from '../../lib/supabase';
-import { TradingCalendar } from '../../components/TradingCalendar';
-import type { Trade as CalendarTrade } from '../../components/TradingCalendar';
 import type { Trade as DBTrade } from '../../types/trade';
 import { generateTestTrades } from '../../utils/testTrades';
 import { PageHeader } from '../../components/PageHeader/PageHeader';
@@ -84,69 +82,6 @@ interface SupabaseStrategy {
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const calculateAverageHoldingTime = (trades: Trade[]) => {
-    const holdingTimes = trades
-      .filter(t => t.exit_date && t.entry_date)
-      .map(t => {
-        const entry = new Date(t.entry_date);
-        const exit = new Date(t.exit_date!);
-        return (exit.getTime() - entry.getTime()) / (1000 * 60); // in minutes
-      });
-
-    if (!holdingTimes.length) return '0m';
-    
-    const avgMinutes = holdingTimes.reduce((sum, time) => sum + time, 0) / holdingTimes.length;
-    
-    if (avgMinutes < 60) return `${Math.round(avgMinutes)}m`;
-    if (avgMinutes < 1440) return `${Math.round(avgMinutes / 60)}h`;
-    return `${Math.round(avgMinutes / 1440)}d`;
-  };
-
-  const calculateMaxDrawdown = (trades: Trade[]) => {
-    let peak = 0;
-    let maxDrawdown = 0;
-    let runningPnL = 0;
-
-    trades.forEach(trade => {
-      runningPnL += (trade.pnl || 0);
-      if (runningPnL > peak) {
-        peak = runningPnL;
-      }
-      const drawdown = peak - runningPnL;
-      if (drawdown > maxDrawdown) {
-        maxDrawdown = drawdown;
-      }
-    });
-
-    return peak === 0 ? 0 : (maxDrawdown / peak) * 100;
-  };
-
-  const calculateBestTradingDay = (trades: Trade[]) => {
-    const dayStats = new Map<string, { wins: number; total: number }>();
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    
-    trades.forEach(trade => {
-      const day = days[new Date(trade.entry_date).getDay()];
-      const stats = dayStats.get(day) || { wins: 0, total: 0 };
-      stats.total++;
-      if ((trade.pnl || 0) > 0) stats.wins++;
-      dayStats.set(day, stats);
-    });
-
-    let bestDay = days[0];
-    let bestWinRate = 0;
-
-    dayStats.forEach((stats, day) => {
-      const winRate = (stats.wins / stats.total) * 100;
-      if (winRate > bestWinRate) {
-        bestWinRate = winRate;
-        bestDay = day;
-      }
-    });
-
-    return { bestDayOfWeek: bestDay, bestDayWinRate: bestWinRate };
-  };
-
   const [showPercentage, setShowPercentage] = useState(false);
   const [initialBalance] = useState(100000); // This should be fetched from user settings
   const [totalPnL, setTotalPnL] = useState(0);
@@ -154,21 +89,12 @@ const Dashboard = () => {
   const [avgRiskReward, setAvgRiskReward] = useState(0);
   const [profitFactor, setProfitFactor] = useState(0);
   const [avgPnlPerDay, setAvgPnlPerDay] = useState(0);
-  const [avgHoldingTime, setAvgHoldingTime] = useState('0m');
-  const [maxDrawdown, setMaxDrawdown] = useState(0);
-  const [bestDayOfWeek, setBestDayOfWeek] = useState('');
-  const [bestDayWinRate, setBestDayWinRate] = useState(0);
-  const [expectancy, setExpectancy] = useState(0);
-  const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
-  const [allTrades, setAllTrades] = useState<Trade[]>([]); // Add state for all trades
+  const [allTrades, setAllTrades] = useState<Trade[]>([]);
   const [selectedRange, setSelectedRange] = useState('1M');
   const [hoveredMetric, setHoveredMetric] = useState<string | null>(null);
   const [selectedChartType, setSelectedChartType] = useState('line');
-  const [showMetricDetails, setShowMetricDetails] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [calendarTrades, setCalendarTrades] = useState<CalendarTrade[]>([]);
   const [isLoadingTrades, setIsLoadingTrades] = useState(true);
-  const [strategies, setStrategies] = useState<{ id: string; name: string; asset: string }[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState('ALL');
   const [groupedStrategies, setGroupedStrategies] = useState<Record<string, Strategy[]>>({});
 
@@ -222,26 +148,6 @@ const Dashboard = () => {
     )).size;
     const avgPnlPerDay = tradingDays > 0 ? pnl / tradingDays : 0;
     setAvgPnlPerDay(avgPnlPerDay);
-
-    // Calculate Expectancy
-    const losingTrades = trades.filter(trade => (Number(trade.pnl) || 0) <= 0);
-    
-    const avgWin = winningTrades.length > 0 
-      ? winningTrades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0) / winningTrades.length 
-      : 0;
-    
-    const avgLoss = losingTrades.length > 0 
-      ? Math.abs(losingTrades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0)) / losingTrades.length 
-      : 0;
-    
-    const expectancy = (winRate / 100 * avgWin) - ((1 - winRate / 100) * avgLoss);
-    
-    setExpectancy(expectancy);
-
-    // Calculate Best Trading Day
-    const dayStats = calculateBestTradingDay(trades);
-    setBestDayOfWeek(dayStats.bestDayOfWeek);
-    setBestDayWinRate(dayStats.bestDayWinRate);
   };
 
   const handleRefresh = () => {
@@ -265,25 +171,6 @@ const Dashboard = () => {
         : trades.filter(trade => trade.strategy_id === selectedStrategy);
 
       setAllTrades(filteredTrades);
-      setRecentTrades(filteredTrades.slice(0, 5));
-      
-      // Update calendar trades
-      const calendarTradesData: CalendarTrade[] = filteredTrades.map(trade => {
-        const date = new Date(trade.entry_date);
-        const localDate = date.toLocaleDateString('en-CA');
-        return {
-          id: trade.id,
-          date: localDate,
-          symbol: trade.symbol,
-          type: trade.type,
-          result: (trade.pnl || 0) > 0 ? 'Win' : 'Loss',
-          profit: trade.pnl || 0,
-          volume: trade.quantity,
-          entry: trade.entry_price,
-          exit: trade.exit_price || trade.entry_price
-        };
-      });
-      setCalendarTrades(calendarTradesData);
     } catch (error) {
       console.error('Error fetching trades:', error);
     } finally {
@@ -340,54 +227,6 @@ const Dashboard = () => {
         pointHoverRadius: 0
       },
     ],
-  };
-
-  // Profit distribution data using allTrades
-  const profitDistributionData = {
-    labels: allTrades.reduce((acc: string[], trade: Trade) => {
-      const pnl = trade.pnl || 0;
-      const bucket = Math.floor(pnl / 100) * 100;
-      if (!acc.includes(`$${bucket}`)) {
-        acc.push(`$${bucket}`);
-      }
-      return acc.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
-    }, []),
-    datasets: [{
-      label: 'Number of Trades',
-      data: allTrades.reduce((acc: { bucket: string; count: number }[], trade: Trade) => {
-        const pnl = trade.pnl || 0;
-        const bucket = Math.floor(pnl / 100) * 100;
-        const index = acc.findIndex(item => item.bucket === `$${bucket}`);
-        if (index === -1) {
-          acc.push({ bucket: `$${bucket}`, count: 1 });
-        } else {
-          acc[index].count++;
-        }
-        return acc;
-      }, [])
-        .sort((a, b) => parseInt(a.bucket.slice(1)) - parseInt(b.bucket.slice(1)))
-        .map(item => item.count),
-      backgroundColor: allTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
-      borderColor: allTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444'),
-      borderWidth: 2,
-    }]
-  };
-
-  // R-Multiple data using allTrades
-  const rMultipleData = {
-    labels: allTrades.map((trade: Trade) => {
-      const rr = trade.risk_reward || 0;
-      if (rr <= -3) return '≤-3R';
-      if (rr >= 3) return '≥3R';
-      return `${rr.toFixed(1)}R`;
-    }),
-    datasets: [{
-      label: 'R-Multiple Distribution',
-      data: allTrades.map((trade: Trade) => trade.risk_reward || 0),
-      backgroundColor: allTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
-      borderColor: allTrades.map((trade: Trade) => (trade.pnl || 0) >= 0 ? '#22c55e' : '#ef4444'),
-      borderWidth: 2,
-    }]
   };
 
   const chartOptions = {
@@ -452,294 +291,6 @@ const Dashboard = () => {
     }
   } as const;
 
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        position: 'bottom' as const,
-        labels: {
-          color: 'rgba(255, 255, 255, 0.6)',
-          padding: 20,
-          font: {
-            size: 12,
-          },
-          boxWidth: 12,
-          boxHeight: 12,
-        },
-      },
-      tooltip: {
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        padding: 12,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        displayColors: true,
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      },
-    },
-    cutout: '75%',
-  };
-
-  // Strategy performance data using allTrades
-  const strategyPerformanceData = {
-    labels: allTrades.reduce((acc: string[], trade: Trade) => {
-      const strategy = trade.strategy || 'Unknown';
-      if (!acc.includes(strategy)) {
-        acc.push(strategy);
-      }
-      return acc;
-    }, []),
-    datasets: [
-      {
-        type: 'bar' as const,
-        label: 'Win Rate %',
-        data: allTrades.reduce((acc: { strategy: string; wins: number; total: number }[], trade: Trade) => {
-          const strategy = trade.strategy || 'Unknown';
-          const index = acc.findIndex(item => item.strategy === strategy);
-          if (index === -1) {
-            acc.push({ 
-              strategy, 
-              wins: (trade.pnl || 0) > 0 ? 1 : 0, 
-              total: 1 
-            });
-          } else {
-            acc[index].wins += (trade.pnl || 0) > 0 ? 1 : 0;
-            acc[index].total += 1;
-          }
-          return acc;
-        }, []).map(item => (item.wins / item.total) * 100),
-        backgroundColor: 'rgba(59, 130, 246, 0.8)',
-        borderColor: '#3b82f6',
-        borderWidth: 2,
-        yAxisID: 'y',
-      },
-      {
-        type: 'line' as const,
-        label: 'Total P&L',
-        data: allTrades.reduce((acc: { strategy: string; pnl: number }[], trade: Trade) => {
-          const strategy = trade.strategy || 'Unknown';
-          const index = acc.findIndex(item => item.strategy === strategy);
-          if (index === -1) {
-            acc.push({ strategy, pnl: trade.pnl || 0 });
-          } else {
-            acc[index].pnl += trade.pnl || 0;
-          }
-          return acc;
-        }, []).map(item => item.pnl),
-        borderColor: '#f59e0b',
-        borderWidth: 2,
-        pointBackgroundColor: '#f59e0b',
-        yAxisID: 'y1',
-      }
-    ]
-  };
-
-  // Market performance data using allTrades
-  const marketPerformanceData = {
-    labels: allTrades.reduce((acc: string[], trade: Trade) => {
-      const market = trade.market || 'Unknown';
-      if (!acc.includes(market)) {
-        acc.push(market);
-      }
-      return acc;
-    }, []),
-    datasets: [
-      {
-        type: 'bar' as const,
-        label: 'Number of Trades',
-        data: allTrades.reduce((acc: { market: string; count: number }[], trade: Trade) => {
-          const market = trade.market || 'Unknown';
-          const index = acc.findIndex(item => item.market === market);
-          if (index === -1) {
-            acc.push({ market, count: 1 });
-          } else {
-            acc[index].count++;
-          }
-          return acc;
-        }, []).map(item => item.count),
-        backgroundColor: 'rgba(59, 130, 246, 0.8)',
-        borderColor: '#3b82f6',
-        borderWidth: 2,
-      },
-      {
-        type: 'line' as const,
-        label: 'Average P&L',
-        data: allTrades.reduce((acc: { market: string; pnl: number; count: number }[], trade: Trade) => {
-          const market = trade.market || 'Unknown';
-          const index = acc.findIndex(item => item.market === market);
-          if (index === -1) {
-            acc.push({ market, pnl: trade.pnl || 0, count: 1 });
-          } else {
-            acc[index].pnl += trade.pnl || 0;
-            acc[index].count++;
-          }
-          return acc;
-        }, []).map(item => item.pnl / item.count),
-        borderColor: '#f59e0b',
-        borderWidth: 2,
-        pointBackgroundColor: '#f59e0b',
-        yAxisID: 'y1',
-      }
-    ]
-  };
-
-  const strategyChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top' as const,
-        labels: {
-          color: 'rgba(255, 255, 255, 0.8)',
-          font: {
-            size: 12
-          }
-        }
-      },
-      tooltip: {
-        mode: 'index' as const,
-        intersect: false,
-        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-        titleColor: 'rgba(255, 255, 255, 0.9)',
-        bodyColor: 'rgba(255, 255, 255, 0.7)',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        padding: 12,
-        boxPadding: 6,
-        usePointStyle: true,
-        callbacks: {
-          label: function(context: any) {
-            const value = context.raw;
-            const datasetLabel = context.dataset.label;
-            if (datasetLabel === 'Win Rate %') {
-              return ` ${value.toFixed(1)}%`;
-            }
-            return ` ${value >= 0 ? '+' : ''}$${value.toFixed(2)}`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        type: 'category',
-        grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
-          borderColor: 'rgba(255, 255, 255, 0.1)'
-        },
-        ticks: {
-          color: 'rgba(255, 255, 255, 0.6)',
-          maxRotation: 45,
-          minRotation: 45
-        }
-      },
-      y: {
-        type: 'linear',
-        position: 'left',
-        grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
-          borderColor: 'rgba(255, 255, 255, 0.1)'
-        },
-        ticks: {
-          color: 'rgba(255, 255, 255, 0.6)',
-          callback: function(value: number | string) {
-            return `${Number(value).toFixed(1)}%`;
-          }
-        }
-      },
-      y1: {
-        type: 'linear',
-        position: 'right',
-        grid: {
-          drawOnChartArea: false
-        },
-        ticks: {
-          color: 'rgba(255, 255, 255, 0.6)',
-          callback: function(value: number | string) {
-            return `$${Number(value).toFixed(0)}`;
-          }
-        }
-      }
-    }
-  } as const;
-
-  const generateHeatmapData = () => {
-    const hours = Array.from({ length: 24 }, (_, i) => i);
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const data = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => ({ count: 0, pnl: 0 })));
-
-    allTrades.forEach((trade: Trade) => {
-      const entryDate = new Date(trade.entry_date);
-      const day = entryDate.getDay();
-      const hour = entryDate.getHours();
-      data[day][hour].count++;
-      data[day][hour].pnl += trade.pnl || 0;
-    });
-
-    return {
-      hours,
-      days,
-      data: data.map(row => row.map(cell => ({
-        ...cell,
-        avgPnl: cell.count > 0 ? cell.pnl / cell.count : 0
-      })))
-    };
-  };
-
-  const heatmapData = generateHeatmapData();
-
-  const calculateDisciplineMetrics = () => {
-    const metrics = {
-      disciplineRate: 0,
-      emotionCorrelation: 0,
-      checklistAdherence: 0,
-    };
-
-    if (!allTrades.length) return metrics;
-
-    // Calculate Discipline Compliance Rate
-    const compliantTrades = allTrades.filter(trade => 
-      trade.followed_plan && 
-      trade.had_setup && 
-      trade.respected_stops
-    ).length;
-    metrics.disciplineRate = (compliantTrades / allTrades.length) * 100;
-
-    // Calculate Emotion vs P/L Correlation
-    const emotionScores = allTrades.map(trade => trade.emotion_score || 0);
-    const pnlValues = allTrades.map(trade => trade.pnl || 0);
-    
-    if (emotionScores.length > 1) {
-      const emotionMean = emotionScores.reduce((a, b) => a + b) / emotionScores.length;
-      const pnlMean = pnlValues.reduce((a, b) => a + b) / pnlValues.length;
-      
-      const emotionDeviation = emotionScores.map(score => score - emotionMean);
-      const pnlDeviation = pnlValues.map(pnl => pnl - pnlMean);
-      
-      const covariance = emotionDeviation.reduce((sum, deviation, i) => 
-        sum + (deviation * pnlDeviation[i]), 0) / emotionScores.length;
-      
-      const emotionStdDev = Math.sqrt(emotionDeviation.reduce((sum, dev) => 
-        sum + (dev * dev), 0) / emotionScores.length);
-      const pnlStdDev = Math.sqrt(pnlDeviation.reduce((sum, dev) => 
-        sum + (dev * dev), 0) / pnlValues.length);
-      
-      metrics.emotionCorrelation = covariance / (emotionStdDev * pnlStdDev);
-    }
-
-    // Calculate Checklist/Plan Adherence
-    const checklistItems = allTrades.reduce((sum, trade) => 
-      sum + (trade.checklist_completed || 0), 0);
-    metrics.checklistAdherence = (checklistItems / (allTrades.length * 10)) * 100;
-
-    return metrics;
-  };
-
-  const disciplineMetrics = calculateDisciplineMetrics();
-
   // Add this function to fetch strategies
   const fetchStrategies = async () => {
     try {
@@ -776,7 +327,7 @@ const Dashboard = () => {
 
   const renderSkeletonMetrics = () => (
     <div className={styles.metricsGrid}>
-      {Array(8).fill(null).map((_, index) => (
+      {Array(5).fill(null).map((_, index) => (
         <div key={index} className={styles.metricCard}>
           <SkeletonLoader type="text" width="120px" height="16px" className={styles.metricTitle} />
           <SkeletonLoader type="text" width="80px" height="24px" className={styles.metricValue} />
@@ -804,59 +355,6 @@ const Dashboard = () => {
     </div>
   );
 
-  const renderSkeletonRecentTrades = () => (
-    <div className={styles.chartSection}>
-      <div className={styles.chartHeader}>
-        <div>
-          <SkeletonLoader type="text" width="140px" height="20px" className={styles.chartTitle} />
-          <SkeletonLoader type="text" width="100px" height="16px" className={styles.chartSubtitle} />
-        </div>
-        <SkeletonLoader type="button" width="32px" height="32px" />
-      </div>
-      <div className={styles.recentTradesList}>
-        {Array(4).fill(null).map((_, index) => (
-          <div key={index} className={styles.tradeItem}>
-            <div className={styles.tradeInfo}>
-              <SkeletonLoader type="avatar" width="32px" height="32px" rounded />
-              <div>
-                <SkeletonLoader type="text" width="120px" height="16px" />
-                <SkeletonLoader type="text" width="80px" height="14px" />
-              </div>
-            </div>
-            <div>
-              <SkeletonLoader type="text" width="60px" height="16px" />
-              <SkeletonLoader type="text" width="40px" height="14px" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderSkeletonStrategyBreakdown = () => (
-    <div className={styles.strategyBreakdown}>
-      <div className={styles.strategyGrid}>
-        {Array(2).fill(null).map((_, index) => (
-          <div key={index} className={styles.strategyCard}>
-            <SkeletonLoader type="text" width="200px" height="24px" className={styles.strategyCardTitle} />
-            <div className={styles.strategyChartContainer}>
-              <SkeletonLoader type="chart" height="200px" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const calculateCircleDash = (rate: number) => {
-    const radius = 45;
-    const circumference = 2 * Math.PI * radius;
-    return {
-      strokeDasharray: circumference,
-      strokeDashoffset: circumference * (1 - rate / 100)
-    };
-  };
-
   const handleTogglePercentage = () => {
     setShowPercentage(!showPercentage);
   };
@@ -882,15 +380,8 @@ const Dashboard = () => {
           <div className={styles.mainGrid}>
             <div className={styles.mainColumn}>
               {renderSkeletonChart()}
-              <div className={styles.chartSection}>
-                <SkeletonLoader type="chart" height="200px" />
-              </div>
-            </div>
-            <div className={styles.mainColumn}>
-              {renderSkeletonRecentTrades()}
             </div>
           </div>
-          {renderSkeletonStrategyBreakdown()}
         </div>
       </div>
     );
@@ -970,44 +461,34 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Main Content Grid */}
-        <div className={styles.mainGrid}>
-          {/* Left Column - Chart */}
-          <div className={styles.mainColumn}>
-            {/* Performance Chart */}
-            <div className={styles.chartSection}>
-              <div className={styles.chartHeader}>
-                <div>
-                  <h3 className={styles.chartTitle}>
-                    Performance Overview
-                  </h3>
-                  <p className={styles.chartSubtitle}>
-                    Account growth over time
-                  </p>
-                </div>
-                <div className={styles.chartControls}>
-                  {chartTypes.map((type) => (
-                    <button
-                      key={type.id}
-                      className={`${styles.chartTypeButton} ${selectedChartType === type.id ? styles.chartTypeButtonActive : ''}`}
-                      onClick={() => setSelectedChartType(type.id)}
-                    >
-                      <type.icon />
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className={styles.chartContainer}>
-                {renderChart()}
-              </div>
+        {/* Performance Chart */}
+        <div className={styles.chartSection}>
+          <div className={styles.chartHeader}>
+            <div>
+              <h3 className={styles.chartTitle}>
+                Performance Overview
+              </h3>
+              <p className={styles.chartSubtitle}>
+                Account growth over time
+              </p>
             </div>
-
-            {/* Trading Calendar */}
-            <TradingCalendar trades={calendarTrades} />
+            <div className={styles.chartControls}>
+              {chartTypes.map((type) => (
+                <button
+                  key={type.id}
+                  className={`${styles.chartTypeButton} ${selectedChartType === type.id ? styles.chartTypeButtonActive : ''}`}
+                  onClick={() => setSelectedChartType(type.id)}
+                >
+                  <type.icon />
+                  {type.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={styles.chartContainer}>
+            {renderChart()}
           </div>
         </div>
-
       </div>
     </div>
   );
