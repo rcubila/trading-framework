@@ -224,6 +224,54 @@ If a rule conflicts with a user request, **ask for clarification first**.
 
 ---
 
+## 🔍 Verification Requirements
+
+### 1. ✅ Multiple Verification Steps
+- ALWAYS verify changes at least 3 times before considering them complete
+- Check for:
+  - Inline styles
+  - Hardcoded values
+  - Type mismatches
+  - Unused imports
+  - Linter errors
+  - Console errors
+  - Visual inconsistencies
+
+### 2. ✅ Verification Process
+- First check: Initial implementation
+- Second check: After fixing reported issues
+- Third check: Final verification before completion
+- Document any remaining issues or limitations
+
+### 3. ✅ What to Verify
+- Code quality and consistency
+- Style adherence
+- Type safety
+- Performance impact
+- Accessibility compliance
+- Browser compatibility
+- Responsive design
+- Theme support
+
+### 4. ✅ Verification Checklist
+- [ ] No inline styles present
+- [ ] All colors use CSS variables
+- [ ] All types are properly defined
+- [ ] No console errors
+- [ ] No linter warnings
+- [ ] All imports are used
+- [ ] Code follows project patterns
+- [ ] Changes match requirements exactly
+
+### 5. ✅ Documentation
+- Document any assumptions made
+- Note any limitations or edge cases
+- List any dependencies added
+- Explain any complex logic
+- Reference any design decisions
+
+---
+
 ## ⚠️ Final Rule
 
 If you're unsure whether something is allowed, **ask first** before implementing.

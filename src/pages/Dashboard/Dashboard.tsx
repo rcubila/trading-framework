@@ -22,10 +22,11 @@ import {
   Filter,
   Search,
   ChevronDown,
-  Table
+  Table,
+  RefreshCw
 } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { Chart, Line, Bar, Doughnut } from 'react-chartjs-2';
+import { Chart, Line, Bar, Doughnut, Scatter } from 'react-chartjs-2';
 import { supabase } from '../../lib/supabase';
 import type { Trade as DBTrade } from '../../types/trade';
 import { generateTestTrades } from '../../utils/testTrades';
@@ -207,89 +208,173 @@ const Dashboard = () => {
 
   // Performance data using allTrades
   const performanceData = {
-    labels: allTrades.map((trade: Trade) => new Date(trade.entry_date).toLocaleDateString()),
     datasets: [
       {
-        label: 'Account Balance',
-        data: allTrades.reduce((acc: number[], trade: Trade, index: number) => {
-          const balance = index === 0 
-            ? initialBalance + (trade.pnl || 0)
-            : acc[index - 1] + (trade.pnl || 0);
-          acc.push(balance);
-          return acc;
-        }, []),
-        borderColor: 'var(--color-primary)',
-        backgroundColor: 'var(--color-primary-alpha)',
+        label: 'Cumulative P&L',
+        data: allTrades.map((trade: Trade, index: number) => ({
+          x: new Date(trade.entry_date).getTime(),
+          y: allTrades.slice(0, index + 1).reduce((sum, t) => sum + (t.pnl || 0), initialBalance)
+        })),
+        borderColor: styles.chartLine,
+        backgroundColor: styles.chartLine,
         fill: true,
-        tension: 0.4,
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 0
+        tension: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-line-tension')),
+        borderWidth: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-line-width')),
+        pointRadius: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-point-radius')),
+        pointHoverRadius: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-point-hover-radius')),
+        yAxisID: 'y'
       },
-    ],
+      {
+        label: 'Daily P&L',
+        data: allTrades.map((trade: Trade) => ({
+          x: new Date(trade.entry_date).getTime(),
+          y: trade.pnl || 0
+        })),
+        borderColor: styles.chartBar,
+        backgroundColor: styles.chartBar,
+        yAxisID: 'y1',
+        order: 1
+      }
+    ]
   };
 
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false,
+    interaction: {
+      mode: 'index' as const,
+      intersect: false,
+    },
     plugins: {
-      legend: {
+      title: {
         display: true,
-        position: 'top' as const,
-        labels: {
-          color: 'var(--color-text-primary)',
-          font: {
-            size: 12
-          }
+        text: 'Trading Performance',
+        font: {
+          size: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-font-size')),
+          family: getComputedStyle(document.documentElement).getPropertyValue('--chart-font-family')
+        },
+        padding: {
+          top: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-padding')),
+          bottom: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-padding'))
         }
       },
       tooltip: {
-        mode: 'index' as const,
-        intersect: false,
-        backgroundColor: 'var(--color-background)',
-        titleColor: 'var(--color-text-primary)',
-        bodyColor: 'var(--color-text-secondary)',
-        borderColor: 'var(--color-border)',
-        borderWidth: 1,
-        padding: 12,
-        boxPadding: 6,
-        usePointStyle: true,
+        backgroundColor: styles.chartTooltip,
+        titleColor: styles.chartText,
+        bodyColor: styles.chartText,
+        borderColor: styles.chartBorder,
+        borderWidth: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-border-width')),
+        padding: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-box-padding')),
+        displayColors: true,
         callbacks: {
           label: function(context: any) {
-            const value = context.raw;
-            return ` ${value >= 0 ? '+' : ''}$${value.toFixed(2)}`;
+            let label = context.dataset.label || '';
+            if (label) {
+              label += ': ';
+            }
+            if (context.parsed.y !== null) {
+              label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+            }
+            return label;
           }
+        }
+      },
+      legend: {
+        position: 'top' as const,
+        labels: {
+          color: styles.chartText,
+          font: {
+            size: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-font-size')),
+            family: getComputedStyle(document.documentElement).getPropertyValue('--chart-font-family')
+          },
+          padding: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-padding'))
         }
       }
     },
     scales: {
       x: {
-        type: 'category',
-        grid: {
-          color: 'var(--color-grid)',
-          borderColor: 'var(--color-grid)'
+        type: 'time' as const,
+        time: {
+          unit: 'day' as const,
+          displayFormats: {
+            day: 'MMM d'
+          }
+        },
+        title: {
+          display: true,
+          text: 'Date',
+          color: styles.chartText,
+          font: {
+            size: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-font-size')),
+            family: getComputedStyle(document.documentElement).getPropertyValue('--chart-font-family')
+          }
         },
         ticks: {
-          color: 'var(--color-text-muted)',
-          maxRotation: 45,
-          minRotation: 45
+          color: styles.chartText,
+          font: {
+            size: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-font-size')),
+            family: getComputedStyle(document.documentElement).getPropertyValue('--chart-font-family')
+          }
+        },
+        grid: {
+          color: styles.chartGrid
         }
       },
       y: {
-        type: 'linear',
-        grid: {
-          color: 'var(--color-grid)',
-          borderColor: 'var(--color-grid)'
+        type: 'linear' as const,
+        display: true,
+        position: 'left' as const,
+        title: {
+          display: true,
+          text: 'Cumulative P&L',
+          color: styles.chartText,
+          font: {
+            size: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-font-size')),
+            family: getComputedStyle(document.documentElement).getPropertyValue('--chart-font-family')
+          }
         },
         ticks: {
-          color: 'var(--color-text-muted)',
-          callback: function(value: number | string) {
-            return `$${Number(value).toFixed(0)}`;
+          color: styles.chartText,
+          font: {
+            size: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-font-size')),
+            family: getComputedStyle(document.documentElement).getPropertyValue('--chart-font-family')
+          },
+          callback: function(value: any) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
           }
+        },
+        grid: {
+          color: styles.chartGrid
+        }
+      },
+      y1: {
+        type: 'linear' as const,
+        display: true,
+        position: 'right' as const,
+        title: {
+          display: true,
+          text: 'Daily P&L',
+          color: styles.chartText,
+          font: {
+            size: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-font-size')),
+            family: getComputedStyle(document.documentElement).getPropertyValue('--chart-font-family')
+          }
+        },
+        ticks: {
+          color: styles.chartText,
+          font: {
+            size: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chart-font-size')),
+            family: getComputedStyle(document.documentElement).getPropertyValue('--chart-font-family')
+          },
+          callback: function(value: any) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+          }
+        },
+        grid: {
+          drawOnChartArea: false
         }
       }
     }
-  } as const;
+  };
 
   // Add this function to fetch strategies
   const fetchStrategies = async () => {
@@ -390,48 +475,30 @@ const Dashboard = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <PageHeader 
-          title="Dashboard"
-          subtitle={
-            <span>
-              <Clock />
-              {new Date().toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-              })}
-            </span>
-          }
-          actions={
-            <>
-              <button
-                onClick={handleGenerateTestTrades}
-                className={styles.generateTestButton}
-              >
-                <Plus />
-                Generate Test Trades
-              </button>
-              <button
+        <div className={styles.header}>
+          <div className={styles.header__left}>
+            <h1 className={styles.header__title}>Performance Overview</h1>
+            <p className={styles.header__subtitle}>Track your trading performance and analyze key metrics</p>
+          </div>
+          <div className={styles.header__right}>
+            <div className={styles.header__actions}>
+              <button 
+                className={`${styles.actionButton} ${styles.actionButtonIcon}`}
                 onClick={handleRefresh}
-                className={styles.refreshButton}
+                disabled={isRefreshing}
               >
-                <Upload className={isRefreshing ? 'animate-spin' : ''} />
-                Refresh
-              </button>
-              <button
-                className={styles.downloadButton}
-              >
-                <Download />
+                <RefreshCw className={isRefreshing ? styles.spinning : ''} size={20} />
               </button>
               <button 
-                className={styles.newTradeButton}
+                className={`${styles.actionButton} ${styles.actionButtonGradient}`}
+                onClick={() => navigate('/trades/new')}
               >
-                <Clock />
+                <Plus size={20} />
                 New Trade
               </button>
-            </>
-          }
-        />
+            </div>
+          </div>
+        </div>
 
         {/* Filters Section */}
         <FilterControls 
@@ -465,12 +532,8 @@ const Dashboard = () => {
         <div className={styles.chartSection}>
           <div className={styles.chartHeader}>
             <div>
-              <h3 className={styles.chartTitle}>
-                Performance Overview
-              </h3>
-              <p className={styles.chartSubtitle}>
-                Account growth over time
-              </p>
+              <h2 className={styles.chartTitle}>Performance Overview</h2>
+              <p className={styles.chartSubtitle}>Account growth over time</p>
             </div>
             <div className={styles.chartControls}>
               {chartTypes.map((type) => (
@@ -486,7 +549,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className={styles.chartContainer}>
-            {renderChart()}
+            <Scatter data={performanceData} options={chartOptions} />
           </div>
         </div>
       </div>
