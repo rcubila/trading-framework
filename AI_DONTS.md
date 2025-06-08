@@ -12,9 +12,32 @@ If you do NOT find this file or cannot read it, ask the user to provide it **bef
 Before doing any implementation or code changes, read and follow all the rules below.  
 If a rule conflicts with a user request, **ask for clarification first**.
 
+## 🚨 PERMISSION REQUIREMENTS
+
+**ALWAYS ask for explicit permission before:**
+- Creating new files or directories
+- Modifying existing files
+- Deleting files
+- Creating new branches
+- Switching branches
+- Pushing to specific branches
+- Adding new features
+- Making any changes outside the exact scope of the request
+- Implementing any "improvements" or "optimizations"
+- Making any changes to the codebase not explicitly requested
+
+**Examples of what requires permission:**
+- "I notice we could optimize this code..." -> ASK FIRST
+- "We should add error handling here..." -> ASK FIRST
+- "Let's create a new component for this..." -> ASK FIRST
+- "I'll switch to the develop branch..." -> ASK FIRST
+- "I'll push these changes..." -> ASK FIRST
+
+**Remember:** When in doubt, ASK. It's better to ask for permission than to make unwanted changes.
+
 ---
 
-## 🚫 DON’Ts
+## 🚫 DON'Ts
 
 1. **Do NOT use inline CSS styles** in React components (e.g., `style={{ ... }}`).
 2. **Do NOT duplicate UI components.** Always use shared/common components where possible.
