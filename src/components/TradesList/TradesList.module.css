@@ -175,6 +175,61 @@
   100% { opacity: 0.6; }
 }
 
+/* Trade type indicators */
+.trades-list__type--long {
+  color: var(--color-success);
+}
+
+.trades-list__type--short {
+  color: var(--color-error);
+}
+
+/* Dropdown menu */
+.trades-list__dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--spacing-sm);
+  min-width: 8rem;
+  background: var(--color-background-paper);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: var(--z-index-dropdown);
+  padding: var(--spacing-sm);
+}
+
+/* Action buttons */
+.trades-list__button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast) var(--transition-timing);
+}
+
+.trades-list__button:hover {
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
+}
+
+.trades-list__button--delete {
+  color: var(--color-error);
+}
+
+.trades-list__button--delete:hover {
+  background: var(--color-error-alpha);
+  color: var(--color-error);
+}
+
 .trades-list__title {
   font-size: var(--font-size-xl);
   font-weight: 600;
