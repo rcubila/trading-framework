@@ -27,8 +27,8 @@ interface TradeMenuProps {
 interface TradeContentProps {
   trade: Trade;
   onDeleteClick?: (trade: Trade) => void;
-  isSelected: boolean;
-  onSelect: (trade: Trade) => void;
+  selectedTrades: Set<string>;
+  onSelectTrade: (trade: Trade) => void;
 }
 
 interface RowProps {
@@ -84,43 +84,66 @@ TradeMenu.displayName = 'TradeMenu';
 const TradeContent = memo(({ 
   trade, 
   onDeleteClick,
-  isSelected,
-  onSelect
-}: TradeContentProps) => {
+  selectedTrades,
+  onSelectTrade
+}: { 
+  trade: Trade; 
+  onDeleteClick?: (trade: Trade) => void;
+  selectedTrades: Set<string>;
+  onSelectTrade: (trade: Trade) => void;
+}) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuButtonRef = useRef<HTMLDivElement>(null);
+  const isSelected = selectedTrades.has(trade.id);
+  const isLong = trade.type === 'Long';
+  const pnl = trade.pnl ? formatPnL(trade.pnl) : '0.00';
+  const pnlClass = trade.pnl && trade.pnl >= 0 ? styles['trades-list__pnl--profit'] : styles['trades-list__pnl--loss'];
 
   return (
-    <div 
-      className={`${styles.tradesList__row} ${isSelected ? styles['tradesList__row--selected'] : ''}`}
-      onClick={() => onSelect(trade)}
-    >
-      <div className={styles.tradesList__content}>
-        <div className={styles.tradesList__info}>
-          <span className={styles.tradesList__symbol}>{trade.symbol}</span>
-          <span className={styles.tradesList__date}>{new Date(trade.entry_date).toLocaleDateString()}</span>
+    <div className={styles['trades-list__content']}>
+      <div className={styles['trades-list__left']}>
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={() => onSelectTrade(trade)}
+          className={styles['trades-list__checkbox']}
+          onClick={(e) => e.stopPropagation()}
+        />
+        <div className={styles['trades-list__info']}>
+          <div className={styles['trades-list__symbol']}>{trade.symbol}</div>
+          <div className={styles['trades-list__date']}>{new Date(trade.entry_date).toLocaleDateString()}</div>
         </div>
       </div>
-
-      <div className={styles.tradesList__menu}>
-        <div 
-          ref={menuButtonRef}
-          className={styles.tradesList__menuTrigger}
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowMenu(!showMenu);
-          }}
-        >
-          <RiMoreLine />
+      <div className={styles['trades-list__right']}>
+        <div className={styles['trades-list__details']}>
+          <div className={styles['trades-list__type']}>
+            {isLong ? <RiArrowUpLine className={styles['trades-list__type--long']} /> : <RiArrowDownLine className={styles['trades-list__type--short']} />}
+            {trade.type}
+          </div>
+          <div className={`${styles['trades-list__pnl']} ${pnlClass}`}>
+            {pnl}
+          </div>
         </div>
-        {showMenu && (
-          <TradeMenu 
-            trade={trade} 
-            onDeleteClick={onDeleteClick} 
-            onClose={() => setShowMenu(false)}
-            position={{ top: '100%', right: 0 }}
-          />
-        )}
+        <div className={styles['trades-list__menu']}>
+          <div 
+            ref={menuButtonRef}
+            className={styles['trades-list__menu-trigger']}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMenu(!showMenu);
+            }}
+          >
+            <RiMoreLine />
+          </div>
+          {showMenu && (
+            <TradeMenu 
+              trade={trade} 
+              onDeleteClick={onDeleteClick} 
+              onClose={() => setShowMenu(false)}
+              position={{ top: '100%', right: 0 }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -152,8 +175,8 @@ const Row = memo(({ index, style, data }: RowProps) => {
       <TradeContent 
         trade={trade} 
         onDeleteClick={data.onDeleteClick} 
-        isSelected={data.selectedTrades.has(trade.id)}
-        onSelect={data.onSelectTrade}
+        selectedTrades={data.selectedTrades}
+        onSelectTrade={data.onSelectTrade}
       />
     </div>
   );
