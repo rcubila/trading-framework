@@ -50,6 +50,8 @@ const TradeMenu = memo(({ trade, onDeleteClick, onClose, position }: TradeMenuPr
   <div 
     className={styles.tradesList__dropdown}
     style={{ top: position.top, right: position.right }}
+    role="menu"
+    aria-label="Trade actions"
   >
     <button
       onClick={(e) => {
@@ -58,9 +60,10 @@ const TradeMenu = memo(({ trade, onDeleteClick, onClose, position }: TradeMenuPr
         onClose();
       }}
       className={styles.tradesList__button}
+      role="menuitem"
     >
-      <RiFileCopyLine size={16} />
-      Copy Data
+      <RiFileCopyLine size={16} aria-hidden="true" />
+      <span>Copy Data</span>
     </button>
     
     <button
@@ -72,9 +75,10 @@ const TradeMenu = memo(({ trade, onDeleteClick, onClose, position }: TradeMenuPr
         onClose();
       }}
       className={`${styles.tradesList__button} ${styles['tradesList__button--delete']}`}
+      role="menuitem"
     >
-      <RiDeleteBinLine size={16} />
-      Delete Trade
+      <RiDeleteBinLine size={16} aria-hidden="true" />
+      <span>Delete Trade</span>
     </button>
   </div>
 ));
@@ -93,14 +97,27 @@ const TradeContent = memo(({
   onSelectTrade: (trade: Trade) => void;
 }) => {
   const [showMenu, setShowMenu] = useState(false);
-  const menuButtonRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const isSelected = selectedTrades.has(trade.id);
   const isLong = trade.type === 'Long';
   const pnl = trade.pnl ? formatPnL(trade.pnl) : '0.00';
   const pnlClass = trade.pnl && trade.pnl >= 0 ? styles['trades-list__pnl--profit'] : styles['trades-list__pnl--loss'];
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setShowMenu(!showMenu);
+    } else if (e.key === 'Escape' && showMenu) {
+      setShowMenu(false);
+    }
+  };
+
   return (
-    <div className={styles['trades-list__content']}>
+    <div 
+      className={styles['trades-list__content']}
+      role="row"
+      aria-selected={isSelected}
+    >
       <div className={styles['trades-list__left']}>
         <input
           type="checkbox"
@@ -108,6 +125,7 @@ const TradeContent = memo(({
           onChange={() => onSelectTrade(trade)}
           className={styles['trades-list__checkbox']}
           onClick={(e) => e.stopPropagation()}
+          aria-label={`Select trade ${trade.symbol}`}
         />
         <div className={styles['trades-list__info']}>
           <div className={styles['trades-list__symbol']}>{trade.symbol}</div>
@@ -117,24 +135,32 @@ const TradeContent = memo(({
       <div className={styles['trades-list__right']}>
         <div className={styles['trades-list__details']}>
           <div className={styles['trades-list__type']}>
-            {isLong ? <RiArrowUpLine className={styles['trades-list__type--long']} /> : <RiArrowDownLine className={styles['trades-list__type--short']} />}
-            {trade.type}
+            {isLong ? (
+              <RiArrowUpLine className={styles['trades-list__type--long']} aria-hidden="true" />
+            ) : (
+              <RiArrowDownLine className={styles['trades-list__type--short']} aria-hidden="true" />
+            )}
+            <span>{trade.type}</span>
           </div>
           <div className={`${styles['trades-list__pnl']} ${pnlClass}`}>
             {pnl}
           </div>
         </div>
         <div className={styles['trades-list__menu']}>
-          <div 
+          <button 
             ref={menuButtonRef}
             className={styles['trades-list__menu-trigger']}
             onClick={(e) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
+            onKeyDown={handleKeyDown}
+            aria-expanded={showMenu}
+            aria-haspopup="true"
+            aria-label="Trade actions"
           >
-            <RiMoreLine />
-          </div>
+            <RiMoreLine aria-hidden="true" />
+          </button>
           {showMenu && (
             <TradeMenu 
               trade={trade} 
@@ -192,17 +218,18 @@ const PageSizeSelector = memo(({
   pageSize: number; 
   onPageSizeChange: (size: number) => void;
 }) => (
-  <div className={styles.pageSizeSelector}>
+  <div className={styles.pageSizeSelector} role="group" aria-label="Page size options">
     <span className={styles.headerText}>Show:</span>
     <select
       value={pageSize}
       onChange={(e) => onPageSizeChange(Number(e.target.value))}
       className={styles.pageSizeSelect}
+      aria-label="Select number of trades to display"
     >
-      <option value={10}>10 trades</option>
-      <option value={20}>20 trades</option>
-      <option value={50}>50 trades</option>
-      <option value={100}>100 trades</option>
+      <option value={10}>10</option>
+      <option value={25}>25</option>
+      <option value={50}>50</option>
+      <option value={100}>100</option>
     </select>
   </div>
 ));
@@ -320,7 +347,11 @@ export const TradesList = ({
   }
 
   return (
-    <div className={styles.tradesListContainer}>
+    <div 
+      className={styles.tradesListContainer}
+      role="region"
+      aria-label="Trades list"
+    >
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <input
@@ -328,6 +359,7 @@ export const TradesList = ({
             checked={trades.length > 0 && selectedTrades.size === trades.length}
             onChange={() => onSelectAll(trades)}
             className={styles.checkbox}
+            aria-label="Select all trades"
           />
           <span className={styles.headerText}>Select All</span>
         </div>
@@ -336,47 +368,53 @@ export const TradesList = ({
 
       <div className={styles.content}>
         {error ? (
-          <div className={styles.errorMessage}>
+          <div className={styles.errorMessage} role="alert">
             {error}
           </div>
         ) : (
           <>
-            <div className={styles.tableHeader}>
-              <div></div>
-              <div>Symbol</div>
-              <div>Date</div>
-              <div>Type</div>
-              <div>Entry</div>
-              <div>Exit</div>
-              <div>P&L</div>
-              <div>Status</div>
-              <div></div>
-            </div>
-            <List
-              height={listHeight}
-              itemCount={trades.length + (loading ? pageSize : 0)}
-              itemSize={ITEM_SIZE}
-              width="100%"
-              itemData={{ 
-                trades, 
-                onTradeClick, 
-                onDeleteClick,
-                selectedTrades,
-                onSelectTrade,
-                isLoading: loading
-              }}
-              className={styles.listContainer}
-              onScroll={({ scrollOffset, scrollUpdateWasRequested }) => {
-                if (!scrollUpdateWasRequested && !loading && hasMore) {
-                  const maxOffset = (trades.length - LOADING_BUFFER) * ITEM_SIZE;
-                  if (scrollOffset >= maxOffset) {
-                    handleLoadMore();
-                  }
-                }
-              }}
+            <div 
+              className={styles.tableHeader}
+              role="rowgroup"
+              aria-label="Trades table header"
             >
-              {Row}
-            </List>
+              <div role="columnheader" aria-label="Selection"></div>
+              <div role="columnheader">Symbol</div>
+              <div role="columnheader">Date</div>
+              <div role="columnheader">Type</div>
+              <div role="columnheader">Entry</div>
+              <div role="columnheader">Exit</div>
+              <div role="columnheader">P&L</div>
+              <div role="columnheader">Status</div>
+              <div role="columnheader" aria-label="Actions"></div>
+            </div>
+            <div role="list" aria-label="Trades">
+              <List
+                height={listHeight}
+                itemCount={trades.length + (loading ? pageSize : 0)}
+                itemSize={ITEM_SIZE}
+                width="100%"
+                itemData={{ 
+                  trades, 
+                  onTradeClick, 
+                  onDeleteClick,
+                  selectedTrades,
+                  onSelectTrade,
+                  isLoading: loading
+                }}
+                className={styles.listContainer}
+                onScroll={({ scrollOffset, scrollUpdateWasRequested }) => {
+                  if (!scrollUpdateWasRequested && !loading && hasMore) {
+                    const maxOffset = (trades.length - LOADING_BUFFER) * ITEM_SIZE;
+                    if (scrollOffset >= maxOffset) {
+                      handleLoadMore();
+                    }
+                  }
+                }}
+              >
+                {Row}
+              </List>
+            </div>
           </>
         )}
       </div>

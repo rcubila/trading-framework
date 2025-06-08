@@ -230,6 +230,7 @@
   color: var(--color-error);
 }
 
+/* Title and container */
 .trades-list__title {
   font-size: var(--font-size-xl);
   font-weight: 600;
@@ -240,6 +241,7 @@
   overflow-x: hidden;
 }
 
+/* Trade info section */
 .trades-list__info {
   display: flex;
   flex-direction: column;
