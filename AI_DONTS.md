@@ -33,6 +33,12 @@ If a rule conflicts with a user request, **ask for clarification first**.
 - "I'll switch to the develop branch..." -> ASK FIRST
 - "I'll push these changes..." -> ASK FIRST
 
+**Git Guidelines:**
+- Always use `git add .` to stage all changes
+- Never stage individual files unless specifically requested
+- Always commit with a descriptive message
+- Always push to the correct branch
+
 **Remember:** When in doubt, ASK. It's better to ask for permission than to make unwanted changes.
 
 ---

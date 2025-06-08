@@ -218,8 +218,8 @@ const Dashboard = () => {
           acc.push(balance);
           return acc;
         }, []),
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: 'var(--color-primary)',
+        backgroundColor: 'var(--color-primary-alpha)',
         fill: true,
         tension: 0.4,
         borderWidth: 2,
@@ -368,7 +368,7 @@ const Dashboard = () => {
       <div className={styles.container}>
         <div className={styles.content}>
           <PageHeader 
-            title="Trading Dashboard"
+            title="Dashboard"
             subtitle={
               <span>
                 <Clock />
@@ -391,7 +391,7 @@ const Dashboard = () => {
     <div className={styles.container}>
       <div className={styles.content}>
         <PageHeader 
-          title="Trading Dashboard"
+          title="Dashboard"
           subtitle={
             <span>
               <Clock />
