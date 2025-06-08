@@ -18,11 +18,8 @@ export interface MetricsGridProps {
     totalPnL: number;
     winRate: number;
     avgRiskReward: number;
-    avgHoldingTime: string;
-    maxDrawdown: number;
-    bestDayOfWeek: string;
-    bestDayWinRate: number;
-    expectancy: number;
+    profitFactor: number;
+    avgPnlPerDay: number;
   };
   showPercentage: boolean;
   onTogglePercentage: () => void;

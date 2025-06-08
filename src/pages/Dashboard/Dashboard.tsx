@@ -152,6 +152,8 @@ const Dashboard = () => {
   const [totalPnL, setTotalPnL] = useState(0);
   const [winRate, setWinRate] = useState(0);
   const [avgRiskReward, setAvgRiskReward] = useState(0);
+  const [profitFactor, setProfitFactor] = useState(0);
+  const [avgPnlPerDay, setAvgPnlPerDay] = useState(0);
   const [avgHoldingTime, setAvgHoldingTime] = useState('0m');
   const [maxDrawdown, setMaxDrawdown] = useState(0);
   const [bestDayOfWeek, setBestDayOfWeek] = useState('');
@@ -180,27 +182,20 @@ const Dashboard = () => {
     if (!trades.length) return;
 
     // Calculate Total P&L
-    const pnl = trades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0);add
+    const pnl = trades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0);
     setTotalPnL(pnl);
 
-    // Calculate Win Rate with detailed logging
+    // Calculate Win Rate
     const totalTrades = trades.length;
-    const winningTrades = trades.filter(trade => {
-      const pnl = Number(trade.pnl);
-      return pnl > 0;
-    });
+    const winningTrades = trades.filter(trade => (Number(trade.pnl) || 0) > 0);
     const totalWinningTrades = winningTrades.length;
-    
     const winRate = totalTrades > 0 ? (totalWinningTrades / totalTrades) * 100 : 0;
     setWinRate(winRate);
 
     // Calculate Risk-Reward Ratio
     const validRiskRewardTrades = trades.filter(trade => {
-      // First try to use risk_reward if available
       const riskReward = Number(trade.risk_reward);
-      // If not available, calculate from risk and reward
       const calculatedRR = trade.risk && trade.reward ? Number(trade.reward) / Number(trade.risk) : null;
-      
       return (!isNaN(riskReward) && riskReward > 0) || (calculatedRR !== null && calculatedRR > 0);
     });
     
@@ -208,20 +203,25 @@ const Dashboard = () => {
       ? validRiskRewardTrades.reduce((sum, trade) => {
           const rr = Number(trade.risk_reward);
           if (!isNaN(rr) && rr > 0) return sum + rr;
-          // If risk_reward is not available, calculate from risk and reward
           return sum + (Number(trade.reward) / Number(trade.risk));
         }, 0) / validRiskRewardTrades.length
       : 0;
-    
     setAvgRiskReward(riskReward);
 
-    // Calculate Average Holding Time
-    const holdTime = calculateAverageHoldingTime(trades);
-    setAvgHoldingTime(holdTime);
+    // Calculate Profit Factor
+    const grossProfit = winningTrades.reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0);
+    const grossLoss = Math.abs(trades
+      .filter(trade => (Number(trade.pnl) || 0) < 0)
+      .reduce((sum, trade) => sum + (Number(trade.pnl) || 0), 0));
+    const profitFactor = grossLoss === 0 ? grossProfit : grossProfit / grossLoss;
+    setProfitFactor(profitFactor);
 
-    // Calculate Max Drawdown
-    const drawdown = calculateMaxDrawdown(trades);
-    setMaxDrawdown(drawdown);
+    // Calculate Average P&L per Day
+    const tradingDays = new Set(trades.map(trade => 
+      new Date(trade.entry_date).toISOString().split('T')[0]
+    )).size;
+    const avgPnlPerDay = tradingDays > 0 ? pnl / tradingDays : 0;
+    setAvgPnlPerDay(avgPnlPerDay);
 
     // Calculate Expectancy
     const losingTrades = trades.filter(trade => (Number(trade.pnl) || 0) <= 0);
@@ -950,84 +950,24 @@ const Dashboard = () => {
         />
 
         {/* Key Metrics Row */}
-        <div className={styles.metricsGrid}>
-          {/* Total Net P/L */}
-          <div className={styles.metricCard}>
-            <div className={styles.metricHeader}>
-              <h3 className={styles.metricTitle}>Total Net P/L</h3>
-              <button 
-                className={styles.metricToggle}
-                onClick={handleTogglePercentage}
-              >
-                {showPercentage ? '%' : '$'}
-              </button>
-            </div>
-            <div className={`${styles.metricValue} ${totalPnL >= 0 ? styles.metricValuePositive : styles.metricValueNegative}`}>
-              {showPercentage 
-                ? `${((totalPnL / initialBalance) * 100).toFixed(2)}%`
-                : `$${totalPnL.toFixed(2)}`
-              }
-            </div>
-          </div>
-
-          {/* Win Rate */}
-          <div className={styles.metricCard}>
-            <h3 className={styles.metricTitle}>Win Rate</h3>
-            <div className={`${styles.metricValue} ${winRate >= 50 ? styles.metricValuePositive : styles.metricValueNegative}`}>
-              {winRate.toFixed(1)}%
-            </div>
-          </div>
-
-          {/* Risk-Reward Ratio */}
-          <div className={styles.metricCard}>
-            <h3 className={styles.metricTitle}>Avg Risk-Reward</h3>
-            <div className={`${styles.metricValue} ${avgRiskReward >= 2 ? styles.metricValuePositive : styles.metricValueNeutral}`}>
-              {avgRiskReward.toFixed(2)}R
-            </div>
-          </div>
-
-          {/* Expectancy */}
-          <div className={styles.metricCard}>
-            <h3 className={styles.metricTitle}>Expectancy</h3>
-            <div className={`${styles.metricValue} ${expectancy >= 0 ? styles.metricValuePositive : styles.metricValueNegative}`}>
-              ${expectancy.toFixed(2)}
-            </div>
-          </div>
-
-          {/* Average Holding Time */}
-          <div className={styles.metricCard}>
-            <h3 className={styles.metricTitle}>Avg Holding Time</h3>
-            <div className={styles.metricValue}>
-              {avgHoldingTime}
-            </div>
-          </div>
-
-          {/* Max Drawdown */}
-          <div className={styles.metricCard}>
-            <h3 className={styles.metricTitle}>Max Drawdown</h3>
-            <div className={`${styles.metricValue} ${maxDrawdown <= 20 ? styles.metricValuePositive : styles.metricValueNegative}`}>
-              {maxDrawdown.toFixed(1)}%
-            </div>
-          </div>
-
-          {/* Best Trading Day */}
-          <div className={styles.metricCard}>
-            <h3 className={styles.metricTitle}>Best Trading Day</h3>
-            <div className={styles.metricValue}>
-              {bestDayOfWeek}
-            </div>
-            <div className={styles.metricSubtitle}>
-              {bestDayWinRate.toFixed(1)}% win rate
-            </div>
-          </div>
-
-          {/* Number of Trades */}
-          <div className={styles.metricCard}>
-            <h3 className={styles.metricTitle}>Number of Trades</h3>
-            <div className={styles.metricValue}>
-              {allTrades.length}
-            </div>
-          </div>
+        <div className={styles.metricsSection}>
+          {isLoadingTrades ? (
+            renderSkeletonMetrics()
+          ) : (
+            <MetricsGrid
+              metrics={{
+                totalPnL,
+                winRate,
+                avgRiskReward,
+                profitFactor,
+                avgPnlPerDay
+              }}
+              showPercentage={showPercentage}
+              onTogglePercentage={handleTogglePercentage}
+              hoveredMetric={hoveredMetric}
+              onMetricHover={handleMetricHover}
+            />
+          )}
         </div>
 
         {/* Main Content Grid */}

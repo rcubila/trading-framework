@@ -3,9 +3,8 @@ import {
   DollarSign, 
   Percent, 
   TrendingUp, 
-  AlertTriangle, 
-  Calendar, 
-  BarChart2 
+  BarChart2,
+  Calendar
 } from 'lucide-react';
 import type { MetricsGridProps } from '../types';
 import { MetricCard } from '../MetricCard/MetricCard';
@@ -23,14 +22,12 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
   onMetricHover
 }) => {
   const {
-    totalPnL,
-    winRate,
-    avgRiskReward,
-    maxDrawdown,
-    bestDayOfWeek,
-    bestDayWinRate,
-    expectancy
-  } = metrics;
+    totalPnL = 0,
+    winRate = 0,
+    avgRiskReward = 0,
+    profitFactor = 0,
+    avgPnlPerDay = 0
+  } = metrics || {};
 
   return (
     <div className={styles.metricsGrid}>
@@ -48,7 +45,7 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
       />
 
       <MetricCard
-        title="Win rate"
+        title="Win Rate"
         value={`${winRate.toFixed(1)}%`}
         icon={<Percent size={14} />}
         isPositive={winRate > 50}
@@ -59,47 +56,36 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
       />
 
       <MetricCard
-        title="R:R"
-        value={avgRiskReward.toFixed(2)}
+        title="Risk-Reward"
+        value={`${avgRiskReward.toFixed(2)}R`}
         icon={<TrendingUp size={14} />}
-        isPositive={avgRiskReward > 1}
-        isNegative={avgRiskReward < 1}
+        isPositive={avgRiskReward > 2}
+        isNeutral={avgRiskReward <= 2}
         onHover={() => onMetricHover('riskReward')}
         onLeave={() => onMetricHover(null)}
         isHovered={hoveredMetric === 'riskReward'}
       />
 
       <MetricCard
-        title="DD"
-        value={`${maxDrawdown.toFixed(1)}%`}
-        icon={<AlertTriangle size={14} />}
-        isNegative={true}
-        onHover={() => onMetricHover('drawdown')}
-        onLeave={() => onMetricHover(null)}
-        isHovered={hoveredMetric === 'drawdown'}
-      />
-
-      <MetricCard
-        title="Best"
-        value={bestDayOfWeek}
-        subtitle={`${bestDayWinRate.toFixed(1)}%`}
-        icon={<Calendar size={14} />}
-        isPositive={bestDayWinRate > 50}
-        isNegative={bestDayWinRate < 50}
-        onHover={() => onMetricHover('bestDay')}
-        onLeave={() => onMetricHover(null)}
-        isHovered={hoveredMetric === 'bestDay'}
-      />
-
-      <MetricCard
-        title="Exp"
-        value={`$${expectancy.toFixed(2)}`}
+        title="Profit Factor"
+        value={profitFactor.toFixed(2)}
         icon={<BarChart2 size={14} />}
-        isPositive={expectancy > 0}
-        isNegative={expectancy < 0}
-        onHover={() => onMetricHover('expectancy')}
+        isPositive={profitFactor > 1.5}
+        isNeutral={profitFactor <= 1.5}
+        onHover={() => onMetricHover('profitFactor')}
         onLeave={() => onMetricHover(null)}
-        isHovered={hoveredMetric === 'expectancy'}
+        isHovered={hoveredMetric === 'profitFactor'}
+      />
+
+      <MetricCard
+        title="Avg. P&L/Day"
+        value={`$${avgPnlPerDay.toFixed(2)}`}
+        icon={<Calendar size={14} />}
+        isPositive={avgPnlPerDay > 0}
+        isNegative={avgPnlPerDay < 0}
+        onHover={() => onMetricHover('avgPnlPerDay')}
+        onLeave={() => onMetricHover(null)}
+        isHovered={hoveredMetric === 'avgPnlPerDay'}
       />
     </div>
   );

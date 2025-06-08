@@ -10,33 +10,24 @@ interface Strategy {
 }
 
 interface FilterControlsProps {
-  selectedRange: DateRange;
-  onRangeChange: (range: DateRange) => void;
+  selectedRange?: DateRange;
+  onRangeChange?: (range: DateRange) => void;
   selectedStrategy: string;
   onStrategyChange: (strategy: string) => void;
-  strategies: Strategy[];
-  onRefresh: () => void;
-  isRefreshing: boolean;
+  groupedStrategies?: Record<string, Strategy[]>;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export const FilterControls: React.FC<FilterControlsProps> = ({
-  selectedRange,
-  onRangeChange,
+  selectedRange = '1M',
+  onRangeChange = () => {},
   selectedStrategy,
   onStrategyChange,
-  strategies,
-  onRefresh,
-  isRefreshing
+  groupedStrategies = {},
+  onRefresh = () => {},
+  isRefreshing = false
 }) => {
-  // Group strategies by asset
-  const groupedStrategies = strategies.reduce((acc, strategy) => {
-    if (!acc[strategy.asset]) {
-      acc[strategy.asset] = [];
-    }
-    acc[strategy.asset].push(strategy);
-    return acc;
-  }, {} as Record<string, Strategy[]>);
-
   return (
     <div className={styles.filterControls}>
       <div className={styles.filterControlsInner}>
@@ -65,7 +56,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
             onChange={(e) => onStrategyChange(e.target.value)}
           >
             <option value="ALL">All Strategies</option>
-            {Object.entries(groupedStrategies).map(([asset, strategies]) => (
+            {Object.entries(groupedStrategies || {}).map(([asset, strategies]) => (
               <optgroup 
                 key={asset} 
                 label={asset}
