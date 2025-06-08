@@ -100,24 +100,47 @@ If a rule conflicts with a user request, **ask for clarification first**.
 ## 📁 Component Organization
 
 ### 1. ✅ Folder Structure
-- Each component lives in its own folder
+- Each component MUST live in its own folder
+- Follow this structure for EVERY new component:
+  ```
+  ComponentName/
+  ├── ComponentName.tsx
+  ├── ComponentName.module.css
+  ├── index.ts
+  └── README.md (optional but encouraged)
+  ```
 - Place reusable components in `/components`
 - Feature-specific components go in `/features/feature-name`
 - Page-specific components stay under their page directory
 
-### 2. ✅ Subcomponents
-- Place subcomponents inside the parent folder
-  - E.g., `Card/Header.tsx` inside `Card/`
+### 2. ✅ Component Naming and Organization
+- Use PascalCase for component folders and files
+- Keep component files and their styles together
+- Export components through an index.ts file
+- Include a README.md for complex components
+- Never place component files directly in a directory without their own folder
 
-### 3. ✅ Assets
+### 3. ✅ File Organization
 - Keep component-specific assets (images, styles) in the component folder
+- Use CSS Modules for component-specific styles
+- Keep related files together (component, styles, tests, etc.)
+- Maintain consistent file naming across the project
 
 ### 4. ✅ Documentation
-- Include:
+- Include in README.md:
   - Component purpose
   - Props and types
   - Usage examples
   - Special behavior or edge cases
+  - Dependencies and requirements
+
+### 5. ✅ Best Practices
+- Never create loose component files
+- Always create a new folder for new components
+- Keep component files and their styles together
+- Use index.ts for clean exports
+- Follow the established folder structure
+- Maintain consistent naming conventions
 
 ---
 
