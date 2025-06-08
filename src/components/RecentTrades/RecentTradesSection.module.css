@@ -1,0 +1,98 @@
+.container {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.tradesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tradeItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.tradeInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.symbol {
+  font-weight: 600;
+  color: #fff;
+}
+
+.type {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.date {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+}
+
+.tradeMetrics {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pnl {
+  font-weight: 600;
+}
+
+.positive {
+  color: #4caf50;
+}
+
+.negative {
+  color: #f44336;
+}
+
+.riskReward {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonItem {
+  height: 48px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+} 

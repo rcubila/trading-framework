@@ -8,7 +8,6 @@
 
 .sidebar {
   width: 16rem;
-  min-width: 4rem;
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(10px);
   display: flex;
@@ -27,7 +26,6 @@
   top: 0;
   transform: translateX(-100%);
   width: 16rem;
-  min-width: 4rem;
   height: 100vh;
   z-index: 100;
   background: rgba(15, 23, 42, 0.95);

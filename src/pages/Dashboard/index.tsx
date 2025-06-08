@@ -35,7 +35,6 @@ import { MetricsGrid } from '../../components/Metrics/MetricsGrid/MetricsGrid';
 import styles from './Dashboard.module.css';
 import { SkeletonLoader } from '../../components/SkeletonLoader/SkeletonLoader';
 import { FilterControls } from '../../components/FilterControls/FilterControls';
-import { GoalProgressSection } from './GoalProgressSection';
 import RecentTradesSection from './RecentTradesSection';
 import TradingCalendarSection from './TradingCalendarSection';
 import type { Trade as DBTrade } from '../../types/trade';
@@ -524,17 +523,6 @@ const Dashboard = () => {
               onMetricHover={handleMetricHover}
             />
           )}
-        </div>
-
-        {/* Goal Progress Section */}
-        <div className={styles.goalProgressSection}>
-          <GoalProgressSection
-            totalPnL={totalPnL}
-            winRate={winRate}
-            avgRiskReward={avgRiskReward}
-            maxDrawdown={maxDrawdown}
-            isLoading={isLoadingTrades}
-          />
         </div>
 
         {/* Main Content Grid */}

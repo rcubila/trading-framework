@@ -8,11 +8,12 @@ import {
   RiBarChartLine,
   RiPaintBrushLine,
   RiBookLine,
+  RiTestTubeLine,
 } from 'react-icons/ri';
 import { motion } from 'framer-motion';
 import { UserMenu } from '../components/UserMenu';
 import { HelpButton } from '../components/HelpButton';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './MainLayout.module.css';
 
 const navigation = [
@@ -24,12 +25,26 @@ const navigation = [
   { name: 'Discipline Tracker', icon: RiMedalLine, path: '/discipline', color: '#fb923c' },
   { name: 'Import Trades', icon: RiDownloadLine, path: '/import', color: '#38bdf8' },
   { name: 'UI Recommendations', icon: RiPaintBrushLine, path: '/ui-recommendations', color: '#f87171' },
+  { name: 'TestDash', icon: RiTestTubeLine, path: '/testdash', color: '#818cf8' },
 ];
 
 export const MainLayout = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   return (
     <div className={styles.container}>

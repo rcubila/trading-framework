@@ -2,7 +2,6 @@ import React from 'react';
 import { 
   DollarSign, 
   Percent, 
-  Clock, 
   TrendingUp, 
   AlertTriangle, 
   Calendar, 
@@ -27,7 +26,6 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
     totalPnL,
     winRate,
     avgRiskReward,
-    avgHoldingTime,
     maxDrawdown,
     bestDayOfWeek,
     bestDayWinRate,
@@ -37,9 +35,9 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
   return (
     <div className={styles.metricsGrid}>
       <MetricCard
-        title="Total P&L"
+        title="P&L"
         value={showPercentage ? `${((totalPnL / 100000) * 100).toFixed(2)}%` : `$${totalPnL.toLocaleString()}`}
-        icon={<DollarSign size={20} />}
+        icon={<DollarSign size={14} />}
         isPositive={totalPnL > 0}
         isNegative={totalPnL < 0}
         showPercentage={showPercentage}
@@ -50,9 +48,9 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
       />
 
       <MetricCard
-        title="Win Rate"
+        title="Win rate"
         value={`${winRate.toFixed(1)}%`}
-        icon={<Percent size={20} />}
+        icon={<Percent size={14} />}
         isPositive={winRate > 50}
         isNegative={winRate < 50}
         onHover={() => onMetricHover('winRate')}
@@ -61,9 +59,9 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
       />
 
       <MetricCard
-        title="Avg Risk/Reward"
+        title="R:R"
         value={avgRiskReward.toFixed(2)}
-        icon={<TrendingUp size={20} />}
+        icon={<TrendingUp size={14} />}
         isPositive={avgRiskReward > 1}
         isNegative={avgRiskReward < 1}
         onHover={() => onMetricHover('riskReward')}
@@ -72,18 +70,9 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
       />
 
       <MetricCard
-        title="Avg Holding Time"
-        value={avgHoldingTime}
-        icon={<Clock size={20} />}
-        onHover={() => onMetricHover('holdingTime')}
-        onLeave={() => onMetricHover(null)}
-        isHovered={hoveredMetric === 'holdingTime'}
-      />
-
-      <MetricCard
-        title="Max Drawdown"
+        title="DD"
         value={`${maxDrawdown.toFixed(1)}%`}
-        icon={<AlertTriangle size={20} />}
+        icon={<AlertTriangle size={14} />}
         isNegative={true}
         onHover={() => onMetricHover('drawdown')}
         onLeave={() => onMetricHover(null)}
@@ -91,10 +80,10 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
       />
 
       <MetricCard
-        title="Best Trading Day"
+        title="Best"
         value={bestDayOfWeek}
-        subtitle={`${bestDayWinRate.toFixed(1)}% win rate`}
-        icon={<Calendar size={20} />}
+        subtitle={`${bestDayWinRate.toFixed(1)}%`}
+        icon={<Calendar size={14} />}
         isPositive={bestDayWinRate > 50}
         isNegative={bestDayWinRate < 50}
         onHover={() => onMetricHover('bestDay')}
@@ -103,9 +92,9 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
       />
 
       <MetricCard
-        title="Expectancy"
+        title="Exp"
         value={`$${expectancy.toFixed(2)}`}
-        icon={<BarChart2 size={20} />}
+        icon={<BarChart2 size={14} />}
         isPositive={expectancy > 0}
         isNegative={expectancy < 0}
         onHover={() => onMetricHover('expectancy')}

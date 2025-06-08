@@ -18,6 +18,7 @@ import { AuthCallback } from './components/AuthCallback';
 import { useEffect } from 'react';
 import { trackPerformance } from './utils/performance';
 import PlayBook from './pages/PlayBook/index';
+import TestDash from './pages/TestDash/index';
 
 export const App = () => {
   useEffect(() => {
@@ -50,6 +51,7 @@ export const App = () => {
               <Route path="settings" element={<Settings />} />
               <Route path="ui-recommendations" element={<UIRecommendationsPage />} />
               <Route path="playbook" element={<PlayBook />} />
+              <Route path="testdash" element={<TestDash />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

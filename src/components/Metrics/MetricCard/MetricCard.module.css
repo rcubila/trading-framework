@@ -1,7 +1,7 @@
 .metricCard {
   background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
-  padding: 16px;
-  border-radius: 12px;
+  padding: 8px;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
 }
@@ -10,21 +10,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .metricTitle {
-  font-size: 12px;
+  font-size: 10px;
   color: rgba(255, 255, 255, 0.6);
   font-weight: normal;
 }
 
 .metricValue {
-  font-size: 20px;
+  font-size: 14px;
   font-weight: bold;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .metricValuePositive {
@@ -40,19 +40,19 @@
 }
 
 .metricSubtitle {
-  font-size: 12px;
+  font-size: 10px;
   color: rgba(255, 255, 255, 0.6);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .metricToggle {
-  padding: 4px 8px;
+  padding: 2px 4px;
   border-radius: 4px;
   background-color: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 10px;
   transition: all 0.2s ease;
 }
 
@@ -65,4 +65,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 14px;
+  height: 14px;
 } 

@@ -20,11 +20,11 @@ interface TradingCalendarSectionProps {
 
 const TradingCalendarSection: React.FC<TradingCalendarSectionProps> = ({ calendarTrades }) => {
   return (
-    <div className={styles.chartSection}>
-      <div className={styles.chartHeader}>
+    <div className={styles.calendarSection}>
+      <div className={styles.calendarHeader}>
         <div>
-          <h3 className={styles.chartTitle}>Trading Calendar</h3>
-          <p className={styles.chartSubtitle}>Daily trading activity</p>
+          <h3 className={styles.calendarTitle}>Trading Calendar</h3>
+          <p className={styles.calendarSubtitle}>Daily trading activity</p>
         </div>
       </div>
       <div className={styles.calendarContainer}>
