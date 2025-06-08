@@ -29,7 +29,7 @@ import { Chart, Line, Bar, Doughnut } from 'react-chartjs-2';
 import { supabase } from '../../lib/supabase';
 import { TradingCalendar, type Trade as CalendarTrade } from '../../components/TradingCalendar/TradingCalendar';
 import type { DateRange } from '../../types';
-import { generateTestTrades } from '../../utils/testTrades';
+import { generateDashboardTestTrades } from '../../utils/testTrades';
 import { PageHeader } from '../../components/PageHeader/PageHeader';
 import { MetricsGrid } from '../../components/Metrics/MetricsGrid/MetricsGrid';
 import styles from './Dashboard.module.css';
@@ -37,7 +37,9 @@ import { SkeletonLoader } from '../../components/SkeletonLoader/SkeletonLoader';
 import { FilterControls } from '../../components/FilterControls/FilterControls';
 import RecentTradesSection from './RecentTradesSection';
 import TradingCalendarSection from './TradingCalendarSection';
-import type { Trade as DBTrade } from '../../types/trade';
+import type { Trade } from '../../types/trade';
+import { tradesApi } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
 
 ChartJS.register(
   CategoryScale,
@@ -58,35 +60,27 @@ const chartTypes = [
   { id: 'bar', icon: BarChart2, label: 'Bar' }
 ];
 
-export interface NormalizedTrade extends Omit<DBTrade, 'pnl' | 'risk_reward'> {
-  pnl: number;
-  risk_reward: number;
-  entry_date: string;
-  followed_plan?: boolean;
-  had_setup?: boolean;
-  respected_stops?: boolean;
-  emotion_score?: number;
-  checklist_completed?: number;
-  strategy?: string;
-  market: string;
-}
-
 interface Strategy {
   id: string;
   name: string;
   asset: string;
 }
 
-interface SupabaseStrategy {
-  id: string;
-  name: string;
-  asset_name: string;
+interface Metrics {
+  totalPnL: number;
+  winRate: number;
+  avgRiskReward: number;
+  avgHoldingTime: number;
+  maxDrawdown: number;
+  bestTradingDay: number;
+  expectancy: number;
 }
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const calculateAverageHoldingTime = (trades: NormalizedTrade[]) => {
+  const calculateAverageHoldingTime = (trades: Trade[]) => {
     const holdingTimes = trades
       .filter(t => t.exit_date && t.entry_date)
       .map(t => {
@@ -104,7 +98,7 @@ const Dashboard = () => {
     return `${Math.round(avgMinutes / 1440)}d`;
   };
 
-  const calculateMaxDrawdown = (trades: NormalizedTrade[]) => {
+  const calculateMaxDrawdown = (trades: Trade[]) => {
     let peak = 0;
     let maxDrawdown = 0;
     let runningPnL = 0;
@@ -123,7 +117,7 @@ const Dashboard = () => {
     return peak === 0 ? 0 : (maxDrawdown / peak) * 100;
   };
 
-  const calculateBestTradingDay = (trades: NormalizedTrade[]) => {
+  const calculateBestTradingDay = (trades: Trade[]) => {
     const dayStats = new Map<string, { wins: number; total: number }>();
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     
@@ -159,19 +153,28 @@ const Dashboard = () => {
   const [bestDayOfWeek, setBestDayOfWeek] = useState('');
   const [bestDayWinRate, setBestDayWinRate] = useState(0);
   const [expectancy, setExpectancy] = useState(0);
-  const [trades, setTrades] = useState<NormalizedTrade[]>([]);
-  const [recentTrades, setRecentTrades] = useState<NormalizedTrade[]>([]);
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
   const [calendarTrades, setCalendarTrades] = useState<CalendarTrade[]>([]);
-  const [allTrades, setAllTrades] = useState<NormalizedTrade[]>([]); // Add state for all trades
+  const [allTrades, setAllTrades] = useState<Trade[]>([]); // Add state for all trades
   const [selectedRange, setSelectedRange] = useState<DateRange>('1M');
   const [hoveredMetric, setHoveredMetric] = useState<string | null>(null);
   const [selectedChartType, setSelectedChartType] = useState('line');
   const [showMetricDetails, setShowMetricDetails] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingTrades, setIsLoadingTrades] = useState(true);
-  const [strategies, setStrategies] = useState<{ id: string; name: string; asset: string }[]>([]);
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<string>('all');
   const [groupedStrategies, setGroupedStrategies] = useState<Record<string, Strategy[]>>({});
+  const [metrics, setMetrics] = useState<Metrics>({
+    totalPnL: 0,
+    winRate: 0,
+    avgRiskReward: 0,
+    avgHoldingTime: 0,
+    maxDrawdown: 0,
+    bestTradingDay: 0,
+    expectancy: 0
+  });
 
   useEffect(() => {
     if (allTrades.length > 0) {
@@ -179,74 +182,68 @@ const Dashboard = () => {
     }
   }, [allTrades]);
 
-  const calculateMetrics = (trades: NormalizedTrade[]) => {
+  const calculateMetrics = (trades: Trade[]) => {
     if (!trades.length) return;
 
-    // Calculate total P&L
     const totalPnL = trades.reduce((sum, trade) => sum + (trade.pnl || 0), 0);
-    setTotalPnL(totalPnL);
-
-    // Calculate win rate
     const winningTrades = trades.filter(trade => (trade.pnl || 0) > 0);
     const winRate = (winningTrades.length / trades.length) * 100;
-    setWinRate(winRate);
-
-    // Calculate average risk/reward
     const avgRiskReward = trades.reduce((sum, trade) => sum + (trade.risk_reward || 0), 0) / trades.length;
-    setAvgRiskReward(avgRiskReward);
-
+    
     // Calculate average holding time
-    const avgHoldingTime = trades.reduce((sum, trade) => {
-      const entry = new Date(trade.entry_date);
-      const exit = trade.exit_date ? new Date(trade.exit_date) : new Date();
-      return sum + (exit.getTime() - entry.getTime()) / (1000 * 60 * 60); // Convert to hours
-    }, 0) / trades.length;
-    setAvgHoldingTime(avgHoldingTime.toFixed(1) + 'h');
+    const holdingTimes = trades
+      .filter(trade => trade.entry_date && trade.exit_date)
+      .map(trade => {
+        const entry = new Date(trade.entry_date!);
+        const exit = new Date(trade.exit_date!);
+        return exit.getTime() - entry.getTime();
+      });
+    const avgHoldingTime = holdingTimes.length 
+      ? holdingTimes.reduce((sum, time) => sum + time, 0) / holdingTimes.length 
+      : 0;
 
     // Calculate max drawdown
     let maxDrawdown = 0;
     let peak = 0;
-    let currentDrawdown = 0;
+    let currentBalance = 0;
     trades.forEach(trade => {
-      const pnl = trade.pnl || 0;
-      peak = Math.max(peak, pnl);
-      currentDrawdown = (peak - pnl) / peak * 100;
-      maxDrawdown = Math.max(maxDrawdown, currentDrawdown);
+      currentBalance += trade.pnl || 0;
+      if (currentBalance > peak) peak = currentBalance;
+      const drawdown = peak > 0 ? (peak - currentBalance) / peak * 100 : 0;
+      if (drawdown > maxDrawdown) maxDrawdown = drawdown;
     });
-    setMaxDrawdown(maxDrawdown);
 
-    // Calculate best day of week
-    const dayStats = trades.reduce((stats, trade) => {
-      const day = new Date(trade.entry_date).toLocaleDateString('en-US', { weekday: 'long' });
-      if (!stats[day]) {
-        stats[day] = { wins: 0, total: 0 };
-      }
-      if ((trade.pnl || 0) > 0) {
-        stats[day].wins++;
-      }
-      stats[day].total++;
-      return stats;
-    }, {} as Record<string, { wins: number; total: number }>);
-
-    let bestDay = '';
-    let bestWinRate = 0;
-    Object.entries(dayStats).forEach(([day, stats]) => {
-      const winRate = (stats.wins / stats.total) * 100;
-      if (winRate > bestWinRate) {
-        bestDay = day;
-        bestWinRate = winRate;
-      }
-    });
-    setBestDayOfWeek(bestDay);
-    setBestDayWinRate(bestWinRate);
+    // Calculate best trading day
+    const dailyPnL = trades
+      .filter(trade => trade.exit_date)
+      .reduce((acc, trade) => {
+        const date = new Date(trade.exit_date!).toISOString().split('T')[0];
+        acc[date] = (acc[date] || 0) + (trade.pnl || 0);
+        return acc;
+      }, {} as Record<string, number>);
+    const bestTradingDay = Object.values(dailyPnL).length 
+      ? Math.max(...Object.values(dailyPnL))
+      : 0;
 
     // Calculate expectancy
-    const expectancy = trades.reduce((sum, trade) => {
-      const pnl = trade.pnl || 0;
-      const risk = trade.risk || 0;
-      return sum + (pnl / (risk || 1));
-    }, 0) / trades.length;
-    setExpectancy(expectancy);
+    const avgWin = winningTrades.length 
+      ? winningTrades.reduce((sum, trade) => sum + (trade.pnl || 0), 0) / winningTrades.length 
+      : 0;
+    const losingTrades = trades.filter(trade => (trade.pnl || 0) <= 0);
+    const avgLoss = losingTrades.length 
+      ? losingTrades.reduce((sum, trade) => sum + Math.abs(trade.pnl || 0), 0) / losingTrades.length 
+      : 0;
+    const expectancy = (winRate / 100 * avgWin) - ((1 - winRate / 100) * avgLoss);
+
+    setMetrics({
+      totalPnL,
+      winRate,
+      avgRiskReward,
+      avgHoldingTime,
+      maxDrawdown,
+      bestTradingDay,
+      expectancy
+    });
   };
 
   const handleRefresh = () => {
@@ -255,30 +252,41 @@ const Dashboard = () => {
   };
 
   const fetchData = async () => {
-    setIsLoadingTrades(true);
     try {
-      const { data: trades, error } = await supabase
+      setIsLoadingTrades(true);
+      console.log('Fetching trades...');
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('No user found, skipping data fetch');
+        return;
+      }
+
+      // Fetch trades from Supabase
+      const { data: tradesData, error } = await supabase
         .from('trades')
         .select('*')
+        .eq('user_id', user.id)
         .order('entry_date', { ascending: false });
 
       if (error) throw error;
 
-      if (trades) {
-        const formattedTrades = trades.map(trade => ({
-          ...trade,
-          pnl: Number(trade.pnl) || 0,
-          risk_reward: Number(trade.risk_reward) || 0,
-          entry_date: trade.entry_date || new Date().toISOString(),
-          market: trade.market || 'Unknown'
-        })) as NormalizedTrade[];
+      // If no trades found, generate test data
+      const formattedTrades = tradesData?.length 
+        ? tradesData as Trade[]
+        : generateDashboardTestTrades(50);
 
-        setAllTrades(formattedTrades);
-        setRecentTrades(formattedTrades.slice(0, 5));
-        setCalendarTrades(transformTradesForCalendar(formattedTrades));
-      }
+      console.log('Fetched trades:', formattedTrades);
+      setAllTrades(formattedTrades);
+      setRecentTrades(formattedTrades.slice(0, 5));
+      setCalendarTrades(transformTradesForCalendar(formattedTrades));
+      
+      // Calculate metrics with the formatted trades
+      calculateMetrics(formattedTrades);
     } catch (error) {
       console.error('Error fetching trades:', error);
+      alert('Error loading trades. Please try again.');
     } finally {
       setIsLoadingTrades(false);
     }
@@ -322,55 +330,179 @@ const Dashboard = () => {
     }
   };
 
+  const getFilteredTrades = () => {
+    let filtered = [...allTrades];
+
+    // Filter by strategy
+    if (selectedStrategy !== 'all') {
+      filtered = filtered.filter(trade => trade.strategy === selectedStrategy);
+    }
+
+    // Filter by date range
+    const now = new Date();
+    const rangeStart = new Date();
+
+    switch (selectedRange) {
+      case '1D':
+        rangeStart.setDate(now.getDate() - 1);
+        break;
+      case '1W':
+        rangeStart.setDate(now.getDate() - 7);
+        break;
+      case '1M':
+        rangeStart.setMonth(now.getMonth() - 1);
+        break;
+      case '3M':
+        rangeStart.setMonth(now.getMonth() - 3);
+        break;
+      case '6M':
+        rangeStart.setMonth(now.getMonth() - 6);
+        break;
+      case '1Y':
+        rangeStart.setFullYear(now.getFullYear() - 1);
+        break;
+      case 'ALL':
+        // No date filtering needed
+        break;
+    }
+
+    if (selectedRange !== 'ALL') {
+      filtered = filtered.filter(trade => {
+        const tradeDate = new Date(trade.entry_date);
+        return tradeDate >= rangeStart && tradeDate <= now;
+      });
+    }
+
+    // Sort by date ascending for the chart
+    return filtered.sort((a, b) => 
+      new Date(a.entry_date).getTime() - new Date(b.entry_date).getTime()
+    );
+  };
+
   const renderChart = () => {
+    if (isLoadingTrades) {
+      return renderSkeletonChart();
+    }
+
+    if (!allTrades.length) {
+      return (
+        <div className={styles.chartContainer}>
+          <div className={styles.noDataMessage}>
+            No trade data available. Add some trades to see your performance chart.
+          </div>
+        </div>
+      );
+    }
+
+    const filteredTrades = getFilteredTrades();
+    console.log('Filtered trades for chart:', filteredTrades);
+
+    if (!filteredTrades.length) {
+      return (
+        <div className={styles.chartContainer}>
+          <div className={styles.noDataMessage}>
+            No trades found for the selected filters.
+          </div>
+        </div>
+      );
+    }
+
     const chartData = {
-      labels: allTrades.map(t => new Date(t.entry_date).toLocaleDateString()),
+      labels: filteredTrades.map(trade => new Date(trade.entry_date).toLocaleDateString()),
       datasets: [
         {
           label: 'Account Balance',
-          data: allTrades.reduce((acc, trade) => {
+          data: filteredTrades.reduce((acc, trade) => {
             const lastValue = acc.length > 0 ? acc[acc.length - 1] : initialBalance;
             acc.push(lastValue + (trade.pnl || 0));
             return acc;
           }, [] as number[]),
-          borderColor: 'var(--primary)',
-          backgroundColor: 'var(--primary-light)',
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
           fill: true,
-          tension: 0.4
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2,
         }
       ]
     };
 
     const chartOptions = {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: {
           display: false
         },
         tooltip: {
           mode: 'index' as const,
-          intersect: false
+          intersect: false,
+          backgroundColor: 'rgba(15, 23, 42, 0.9)',
+          titleColor: 'rgba(255, 255, 255, 0.9)',
+          bodyColor: 'rgba(255, 255, 255, 0.7)',
+          borderColor: 'rgba(255, 255, 255, 0.1)',
+          borderWidth: 1,
+          padding: 12,
+          displayColors: false,
+          callbacks: {
+            label: function(context: any) {
+              return `Balance: $${context.parsed.y.toLocaleString()}`;
+            }
+          }
         }
       },
       scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'var(--border)'
-          }
-        },
         x: {
           grid: {
             display: false
+          },
+          ticks: {
+            color: 'rgba(255, 255, 255, 0.5)',
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 8
+          }
+        },
+        y: {
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          ticks: {
+            color: 'rgba(255, 255, 255, 0.5)',
+            callback: function(value: any) {
+              return '$' + value.toLocaleString();
+            }
           }
         }
+      },
+      interaction: {
+        mode: 'nearest' as const,
+        axis: 'x' as const,
+        intersect: false
       }
     };
 
     return selectedChartType === 'line' ? (
       <Line data={chartData} options={chartOptions} />
     ) : (
-      <Bar data={chartData} options={chartOptions} />
+      <Bar 
+        data={chartData} 
+        options={{
+          ...chartOptions,
+          plugins: {
+            ...chartOptions.plugins,
+            tooltip: {
+              ...chartOptions.plugins.tooltip,
+              callbacks: {
+                label: function(context: any) {
+                  return `Balance: $${context.parsed.y.toLocaleString()}`;
+                }
+              }
+            }
+          }
+        }} 
+      />
     );
   };
 
@@ -440,15 +572,64 @@ const Dashboard = () => {
 
   const handleRangeChange = (range: DateRange) => {
     setSelectedRange(range);
-    // ... rest of the function ...
+    filterTrades(range, selectedStrategy);
   };
 
   const handleStrategyChange = (strategy: string) => {
     setSelectedStrategy(strategy);
-    // ... rest of the function ...
+    filterTrades(selectedRange, strategy);
   };
 
-  const transformTradesForCalendar = (trades: NormalizedTrade[]): CalendarTrade[] => {
+  const filterTrades = (range: DateRange, strategy: string) => {
+    let filtered = [...allTrades];
+
+    // Filter by date range
+    const now = new Date();
+    const rangeStart = new Date();
+
+    switch (range) {
+      case '1D':
+        rangeStart.setDate(now.getDate() - 1);
+        break;
+      case '1W':
+        rangeStart.setDate(now.getDate() - 7);
+        break;
+      case '1M':
+        rangeStart.setMonth(now.getMonth() - 1);
+        break;
+      case '3M':
+        rangeStart.setMonth(now.getMonth() - 3);
+        break;
+      case '6M':
+        rangeStart.setMonth(now.getMonth() - 6);
+        break;
+      case '1Y':
+        rangeStart.setFullYear(now.getFullYear() - 1);
+        break;
+      case 'ALL':
+        // No date filtering needed
+        break;
+    }
+
+    if (range !== 'ALL') {
+      filtered = filtered.filter(trade => {
+        const tradeDate = new Date(trade.entry_date);
+        return tradeDate >= rangeStart && tradeDate <= now;
+      });
+    }
+
+    // Filter by strategy
+    if (strategy !== 'all') {
+      filtered = filtered.filter(trade => trade.strategy === strategy);
+    }
+
+    setTrades(filtered);
+    setRecentTrades(filtered.slice(0, 5));
+    setCalendarTrades(transformTradesForCalendar(filtered));
+    calculateMetrics(filtered);
+  };
+
+  const transformTradesForCalendar = (trades: Trade[]): CalendarTrade[] => {
     return trades.map(trade => ({
       id: trade.id,
       date: trade.entry_date.split('T')[0],

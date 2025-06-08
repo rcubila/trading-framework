@@ -1,80 +1,75 @@
-import React from 'react';
-import type { Metrics } from '../../types/metrics';
+import { Card } from '../../../components/Card';
+import { formatCurrency, formatPercentage, formatTime } from '../../../utils/formatters';
+import styles from './MetricsSection.module.css';
+
+interface Metrics {
+  totalPnL: number;
+  winRate: number;
+  avgRiskReward: number;
+  avgHoldingTime: number;
+  maxDrawdown: number;
+  bestTradingDay: number;
+  expectancy: number;
+}
 
 interface MetricsSectionProps {
   metrics: Metrics;
   loading: boolean;
 }
 
-const MetricsSection: React.FC<MetricsSectionProps> = ({ metrics, loading }) => {
+export function MetricsSection({ metrics, loading }: MetricsSectionProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-7 gap-1 mb-4">
+      <div className={styles.metricsGrid}>
         {[...Array(7)].map((_, i) => (
-          <div key={i} className="h-14 bg-white/5 rounded animate-pulse" />
+          <Card key={i} className={styles.metricCard}>
+            <div className={styles.skeleton} />
+          </Card>
         ))}
       </div>
     );
   }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
-  const formatPercentage = (value: number) => {
-    return `${value.toFixed(1)}%`;
-  };
-
-  const formatTime = (ms: number) => {
-    const minutes = Math.floor(ms / (1000 * 60));
-    if (minutes < 60) return `${minutes}m`;
-    if (minutes < 1440) return `${Math.floor(minutes / 60)}h`;
-    return `${Math.floor(minutes / 1440)}d`;
-  };
-
   return (
-    <div className="grid grid-cols-7 gap-1 mb-4">
-      <div className="bg-white/5 border border-white/10 rounded p-2">
-        <h3 className="text-[10px] text-white/60">Total P&L</h3>
-        <p className="text-xs font-semibold text-white">{formatCurrency(metrics.totalPnL)}</p>
-      </div>
+    <div className={styles.metricsGrid}>
+      <Card className={styles.metricCard}>
+        <h3>Total P&L</h3>
+        <p className={metrics.totalPnL >= 0 ? styles.positive : styles.negative}>
+          {formatCurrency(metrics.totalPnL)}
+        </p>
+      </Card>
 
-      <div className="bg-white/5 border border-white/10 rounded p-2">
-        <h3 className="text-[10px] text-white/60">Win Rate</h3>
-        <p className="text-xs font-semibold text-white">{formatPercentage(metrics.winRate)}</p>
-      </div>
+      <Card className={styles.metricCard}>
+        <h3>Win Rate</h3>
+        <p>{formatPercentage(metrics.winRate)}</p>
+      </Card>
 
-      <div className="bg-white/5 border border-white/10 rounded p-2">
-        <h3 className="text-[10px] text-white/60">R:R</h3>
-        <p className="text-xs font-semibold text-white">{metrics.avgRiskReward.toFixed(2)}</p>
-      </div>
+      <Card className={styles.metricCard}>
+        <h3>Avg Risk/Reward</h3>
+        <p>{metrics.avgRiskReward.toFixed(2)}</p>
+      </Card>
 
-      <div className="bg-white/5 border border-white/10 rounded p-2">
-        <h3 className="text-[10px] text-white/60">Time</h3>
-        <p className="text-xs font-semibold text-white">{formatTime(metrics.avgHoldingTime)}</p>
-      </div>
+      <Card className={styles.metricCard}>
+        <h3>Avg Holding Time</h3>
+        <p>{formatTime(metrics.avgHoldingTime)}</p>
+      </Card>
 
-      <div className="bg-white/5 border border-white/10 rounded p-2">
-        <h3 className="text-[10px] text-white/60">DD</h3>
-        <p className="text-xs font-semibold text-white">{formatPercentage(metrics.maxDrawdown)}</p>
-      </div>
+      <Card className={styles.metricCard}>
+        <h3>Max Drawdown</h3>
+        <p className={styles.negative}>{formatPercentage(metrics.maxDrawdown)}</p>
+      </Card>
 
-      <div className="bg-white/5 border border-white/10 rounded p-2">
-        <h3 className="text-[10px] text-white/60">Best</h3>
-        <p className="text-xs font-semibold text-white">{formatCurrency(metrics.bestTradingDay)}</p>
-      </div>
+      <Card className={styles.metricCard}>
+        <h3>Best Trading Day</h3>
+        <p className={styles.positive}>{formatCurrency(metrics.bestTradingDay)}</p>
+      </Card>
 
-      <div className="bg-white/5 border border-white/10 rounded p-2">
-        <h3 className="text-[10px] text-white/60">Exp</h3>
-        <p className="text-xs font-semibold text-white">{formatCurrency(metrics.expectancy)}</p>
-      </div>
+      <Card className={styles.metricCard}>
+        <h3>Expectancy</h3>
+        <p className={metrics.expectancy >= 0 ? styles.positive : styles.negative}>
+          {formatCurrency(metrics.expectancy)}
+        </p>
+      </Card>
     </div>
   );
-};
-
-export default MetricsSection; 
+}

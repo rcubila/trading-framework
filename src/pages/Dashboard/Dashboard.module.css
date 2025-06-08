@@ -262,8 +262,27 @@
 }
 
 .chartContainer {
-  height: 300px;
   position: relative;
+  height: 400px;
+  width: 100%;
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: 12px;
+  padding: var(--spacing-md);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.noDataMessage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  padding: var(--spacing-lg);
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Recent Trades List */
