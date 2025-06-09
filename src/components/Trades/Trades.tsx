@@ -24,6 +24,8 @@ const Trades: React.FC = () => {
     takeProfit: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [tradeToDelete, setTradeToDelete] = useState<string | null>(null);
 
   const handleAddTrade = () => {
     setIsModalOpen(true);
@@ -96,7 +98,16 @@ const Trades: React.FC = () => {
   };
 
   const handleDeleteTrade = (id: string) => {
-    setTrades(trades.filter(trade => trade.id !== id));
+    setTradeToDelete(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    if (tradeToDelete) {
+      setTrades(trades.filter(trade => trade.id !== tradeToDelete));
+      setShowDeleteConfirm(false);
+      setTradeToDelete(null);
+    }
   };
 
   const calculateProgress = () => {
@@ -106,167 +117,180 @@ const Trades: React.FC = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h2>Trades</h2>
-        <div className={styles.actions}>
-          <button className={styles.button} onClick={handleAddTrade}>
-            <FiPlus className={styles.buttonIcon} />
+    <div className={styles.trades}>
+      <div className={styles.trades__header}>
+        <h2 className={styles.trades__title}>Trades</h2>
+        <div className={styles.trades__actions}>
+          <button className={styles.trades__button} onClick={handleAddTrade}>
+            <FiPlus className={styles.trades__button-icon} />
             Add Trade
           </button>
         </div>
       </div>
 
-      <div className={styles.progressBar}>
+      <div className={styles.trades__progress}>
         <div
-          className={styles.progressFill}
+          className={styles.trades__progress-fill}
           style={{ width: `${calculateProgress()}%` }}
         />
       </div>
 
       {trades.map(trade => (
-        <div key={trade.id} className={styles.tradeCard}>
-          <div className={styles.tradeHeader}>
-            <h3>{trade.symbol}</h3>
+        <div key={trade.id} className={styles.trades__card}>
+          <div className={styles.trades__card-header}>
+            <h3 className={styles.trades__card-title}>{trade.symbol}</h3>
             <button
-              className={styles.button}
+              className={styles.trades__button}
               onClick={() => handleDeleteTrade(trade.id)}
             >
-              <FiTrash2 className={styles.buttonIcon} />
+              <FiTrash2 className={styles.trades__button-icon} />
             </button>
           </div>
-          <div className={styles.tradeDetails}>
-            <div>
-              <span>Entry:</span> ${trade.entry}
+          <div className={styles.trades__card-details}>
+            <div className={styles.trades__card-detail}>
+              <span className={styles.trades__card-detail-label}>Entry:</span> ${trade.entry}
             </div>
-            <div>
-              <span>Stop Loss:</span> ${trade.stopLoss}
+            <div className={styles.trades__card-detail}>
+              <span className={styles.trades__card-detail-label}>Stop Loss:</span> ${trade.stopLoss}
             </div>
-            <div>
-              <span>Take Profit:</span> ${trade.takeProfit}
+            <div className={styles.trades__card-detail}>
+              <span className={styles.trades__card-detail-label}>Take Profit:</span> ${trade.takeProfit}
             </div>
-            <div>
-              <span>Risk/Reward:</span> {trade.risk.toFixed(2)}/{trade.reward.toFixed(2)}
+            <div className={styles.trades__card-detail}>
+              <span className={styles.trades__card-detail-label}>Risk/Reward:</span> {trade.risk.toFixed(2)}/{trade.reward.toFixed(2)}
             </div>
           </div>
         </div>
       ))}
 
+      {showDeleteConfirm && (
+        <div className={styles.trades__modal}>
+          <div className={styles.trades__modal-content}>
+            <h3 className={styles.trades__modal-title}>Delete Trade</h3>
+            <p className={styles.trades__modal-text}>
+              Are you sure you want to delete this trade? This action cannot be undone.
+            </p>
+            <div className={styles.trades__modal-actions}>
+              <button
+                className={`${styles.trades__button} ${styles.trades__button--secondary}`}
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className={`${styles.trades__button} ${styles.trades__button--danger}`}
+                onClick={confirmDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>Add New Trade</h3>
-              <button className={styles.closeButton} onClick={handleCloseModal}>
-                <FiX />
+        <div className={styles.trades__modal}>
+          <div className={styles.trades__modal-content}>
+            <div className={styles.trades__modal-header}>
+              <h3 className={styles.trades__modal-title}>Add New Trade</h3>
+              <button 
+                className={styles.trades__button} 
+                onClick={handleCloseModal}
+                aria-label="Close modal"
+              >
+                <FiX className={styles.trades__button-icon} />
               </button>
             </div>
 
-            <div className={styles.stepIndicator}>
-              <div className={styles.step}>
-                <div className={`${styles.stepNumber} ${currentStep === 1 ? styles.stepActive : ''}`}>
-                  1
-                </div>
-                <span className={styles.stepLabel}>Trade Details</span>
-              </div>
-              <div className={styles.stepLine} />
-              <div className={styles.step}>
-                <div className={`${styles.stepNumber} ${currentStep === 2 ? styles.stepActive : ''}`}>
-                  2
-                </div>
-                <span className={styles.stepLabel}>Risk Management</span>
-              </div>
-            </div>
-
-            <form className={styles.form}>
+            <div className={styles.trades__modal-body}>
               {currentStep === 1 ? (
-                <>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Symbol</label>
+                <div className={styles.trades__form-group}>
+                  <label className={styles.trades__form-label}>
+                    Symbol
                     <input
                       type="text"
-                      className={styles.input}
                       value={formData.symbol}
-                      onChange={e => setFormData({ ...formData, symbol: e.target.value })}
-                      placeholder="e.g., BTC/USD"
+                      onChange={(e) => setFormData({ ...formData, symbol: e.target.value })}
+                      className={errors.symbol ? styles.trades__form-input--error : styles.trades__form-input}
+                      placeholder="Enter symbol"
                     />
-                    {errors.symbol && <div className={styles.error}>{errors.symbol}</div>}
-                  </div>
+                    {errors.symbol && (
+                      <span className={styles.trades__form-error}>{errors.symbol}</span>
+                    )}
+                  </label>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Entry Price</label>
+                  <label className={styles.trades__form-label}>
+                    Entry Price
                     <input
                       type="number"
-                      className={styles.input}
                       value={formData.entry}
-                      onChange={e => setFormData({ ...formData, entry: e.target.value })}
-                      placeholder="0.00"
-                      step="0.01"
+                      onChange={(e) => setFormData({ ...formData, entry: e.target.value })}
+                      className={errors.entry ? styles.trades__form-input--error : styles.trades__form-input}
+                      placeholder="Enter entry price"
                     />
-                    {errors.entry && <div className={styles.error}>{errors.entry}</div>}
-                  </div>
+                    {errors.entry && (
+                      <span className={styles.trades__form-error}>{errors.entry}</span>
+                    )}
+                  </label>
+                </div>
+              ) : (
+                <div className={styles.trades__form-group}>
+                  <label className={styles.trades__form-label}>
+                    Stop Loss
+                    <input
+                      type="number"
+                      value={formData.stopLoss}
+                      onChange={(e) => setFormData({ ...formData, stopLoss: e.target.value })}
+                      className={errors.stopLoss ? styles.trades__form-input--error : styles.trades__form-input}
+                      placeholder="Enter stop loss"
+                    />
+                    {errors.stopLoss && (
+                      <span className={styles.trades__form-error}>{errors.stopLoss}</span>
+                    )}
+                  </label>
 
-                  <button
-                    type="button"
-                    className={styles.submitButton}
-                    onClick={handleNextStep}
-                  >
-                    Next Step
-                  </button>
-                </>
+                  <label className={styles.trades__form-label}>
+                    Take Profit
+                    <input
+                      type="number"
+                      value={formData.takeProfit}
+                      onChange={(e) => setFormData({ ...formData, takeProfit: e.target.value })}
+                      className={errors.takeProfit ? styles.trades__form-input--error : styles.trades__form-input}
+                      placeholder="Enter take profit"
+                    />
+                    {errors.takeProfit && (
+                      <span className={styles.trades__form-error}>{errors.takeProfit}</span>
+                    )}
+                  </label>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.trades__modal-actions}>
+              {currentStep === 1 ? (
+                <button
+                  className={`${styles.trades__button} ${styles.trades__button--primary}`}
+                  onClick={handleNextStep}
+                >
+                  Next
+                </button>
               ) : (
                 <>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Stop Loss</label>
-                    <input
-                      type="number"
-                      className={styles.input}
-                      value={formData.stopLoss}
-                      onChange={e => setFormData({ ...formData, stopLoss: e.target.value })}
-                      placeholder="0.00"
-                      step="0.01"
-                    />
-                    {errors.stopLoss && <div className={styles.error}>{errors.stopLoss}</div>}
-                    <div className={styles.helpText}>
-                      Enter the price at which you'll exit if the trade moves against you
-                    </div>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Take Profit</label>
-                    <input
-                      type="number"
-                      className={styles.input}
-                      value={formData.takeProfit}
-                      onChange={e => setFormData({ ...formData, takeProfit: e.target.value })}
-                      placeholder="0.00"
-                      step="0.01"
-                    />
-                    {errors.takeProfit && <div className={styles.error}>{errors.takeProfit}</div>}
-                    <div className={styles.helpText}>
-                      Enter the price at which you'll take your profits
-                    </div>
-                  </div>
-
-                  <div className={styles.testButtons}>
-                    <button
-                      type="button"
-                      className={styles.testButton}
-                      onClick={() => setCurrentStep(1)}
-                    >
-                      Back
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.submitButton}
-                      onClick={handleSubmit}
-                    >
-                      Add Trade
-                    </button>
-                  </div>
+                  <button
+                    className={`${styles.trades__button} ${styles.trades__button--secondary}`}
+                    onClick={() => setCurrentStep(1)}
+                  >
+                    Back
+                  </button>
+                  <button
+                    className={`${styles.trades__button} ${styles.trades__button--primary}`}
+                    onClick={handleSubmit}
+                  >
+                    Add Trade
+                  </button>
                 </>
               )}
-            </form>
+            </div>
           </div>
         </div>
       )}
