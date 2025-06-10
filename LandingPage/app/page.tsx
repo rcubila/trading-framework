@@ -27,6 +27,10 @@ export default function TradingFrameworkLanding() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
 
+  const handleSignIn = () => {
+    window.location.href = 'http://localhost:5173'
+  }
+
   const testimonials = [
     {
       name: "Sarah Chen",
@@ -87,7 +91,11 @@ export default function TradingFrameworkLanding() {
             <a href="#testimonials" className="text-gray-300 hover:text-white transition-colors">
               Reviews
             </a>
-            <Button variant="ghost" className="text-gray-300 hover:text-white">
+            <Button 
+              variant="ghost" 
+              className="text-gray-300 hover:text-white"
+              onClick={handleSignIn}
+            >
               Sign In
             </Button>
             <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
@@ -96,7 +104,12 @@ export default function TradingFrameworkLanding() {
           </div>
 
           {/* Mobile Menu Button */}
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden" 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </Button>
         </div>
@@ -117,7 +130,11 @@ export default function TradingFrameworkLanding() {
               <a href="#testimonials" className="block text-gray-300 hover:text-white transition-colors">
                 Reviews
               </a>
-              <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-gray-300 hover:text-white"
+                onClick={handleSignIn}
+              >
                 Sign In
               </Button>
               <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
