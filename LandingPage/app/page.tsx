@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { config } from "@/lib/config"
 import {
   BarChart3,
   Target,
@@ -28,7 +29,10 @@ export default function TradingFrameworkLanding() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
 
   const handleSignIn = () => {
-    window.location.href = 'http://localhost:5173'
+    // Store the current URL to return after authentication
+    const returnUrl = window.location.href
+    // Redirect to the auth URL with the return URL as a parameter
+    window.location.href = `${config.authRedirectUrl}?returnUrl=${encodeURIComponent(returnUrl)}`
   }
 
   const testimonials = [
